@@ -6,11 +6,10 @@
 
 module CPU(
     
-    input clk, r
+    input clk, r,
+    inout reg [15:0] bus
     
     );
-
-    reg [15:0] bus = 0;
 
     reg [7:0] flags = 0;
 

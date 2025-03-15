@@ -1,5 +1,6 @@
 `timescale 1ns/1ns
 `include "src/cpu/cpu.sv"
+`include "src/ram.sv"
 
 module ComputerTB;
 
@@ -8,7 +9,10 @@ module ComputerTB;
     reg clk = 0;
     reg r = 0;
 
-    CPU cpu_a(clk, r);
+    wire [15:0] bus;
+
+    CPU cpu_a(clk, r, bus);
+    RAM16B24A ram(clk, r, 0, 0, 0, bus);
 
     initial begin
 
