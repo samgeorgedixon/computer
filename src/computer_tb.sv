@@ -19,13 +19,15 @@ module ComputerTB;
         $display("Computer Test Running...");
         welcome_cpp();
         
-        #5 r = 1;
-        #20 r = 0;
+        r = 1;
+        
+        #1000
+        r = 0;
 
     end
 
-    always #10 clk = ~clk;
+    always #500 clk = ~clk; // Cycle of 1 Micro Second
 
-    initial #10000 $finish;
+    initial #100000 $finish; // One Second
 
 endmodule
