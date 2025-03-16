@@ -6,28 +6,30 @@ module RegistersUnit(
     input [3:0] rsbo, rsto,
     input [3:0] rsbi, rsti,
 
-    input awe, aoe, output [15:0] ao,
+    input awe, aoe,
 
-    input bwe, boe, output [15:0] bo,
+    input bwe, boe,
 
-    input cwe, coe, output [15:0] co,
+    input cwe, coe,
 
-    input dwe, doe, output [15:0] do_,
+    input dwe, doe,
 
-    input ewe, eoe, output [15:0] eo,
+    input ewe, eoe,
 
     input cswe, csoe,
     input dswe,
     input sswe,
     input eswe,
 
-    input [2:0] sso, output [15:0] so,
+    input [2:0] sso,
 
-    input mwe, output [15:0] mo,
-    input iwe, ioe, output [15:0] io,
+    input mwe,
+    input iwe, ioe,
 
-    input spwe, spoe, output [15:0] spo,
-    input sbwe, sboe, output [15:0] sbo
+    input spwe, spoe,
+    input sbwe, sboe,
+
+    output [15:0] ao, bo, co, do_, eo, mo, io, spo, sbo, so
 
     );
 
