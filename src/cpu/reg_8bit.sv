@@ -3,7 +3,7 @@ module Reg8(
     input clk, r,
     input we, oe,
     input [7:0] a,
-    output [7:0] oc, reg [7:0] o = 0
+    output [7:0] oc, reg [7:0] o
 
     );
 

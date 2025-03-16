@@ -17,7 +17,7 @@ module ComputerTB;
         welcome_cpp();
 
     end
-
-    initial #100000 $finish; // One Second
+    
+    initial #100000000 $finish; // One Second
 
 endmodule

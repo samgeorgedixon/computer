@@ -48,7 +48,7 @@ module ControlUnit(
     output SSO0,
     output SSO1,
     output SSO2,
-    output SSO ,
+    output SSO,
     output RSBI,
     output RSBO,
     output RSTI,
@@ -59,8 +59,9 @@ module ControlUnit(
     reg[3:0] microCodeIndex = 0;
     reg [63:0] microCodeROM [0:(2**12)-1];
 
-    wire[11:0] addr;
-    wire[63:0] microCode;
+    /* verilator lint_off UNOPTFLAT */
+    wire [11:0] addr;
+    /* verilator lint_on UNOPTFLAT */
 
     assign AI = microCodeROM[addr][0];
     assign AO = microCodeROM[addr][1];
@@ -106,16 +107,14 @@ module ControlUnit(
     assign SSO1 = microCodeROM[addr][41];
     assign SSO2 = microCodeROM[addr][42];
     assign SSO = microCodeROM[addr][43];
-    assign RSBI = microCodeROM[addr][45];
-    assign RSBO = microCodeROM[addr][46];
-    assign RSTI = microCodeROM[addr][47];
-    assign RSTO = microCodeROM[addr][49];
+    assign RSBI = microCodeROM[addr][44];
+    assign RSBO = microCodeROM[addr][45];
+    assign RSTI = microCodeROM[addr][46];
+    assign RSTO = microCodeROM[addr][47];
 
     assign addr[3:0] = microCodeIndex;
     assign addr[9:4] = instr[15:10];
     assign addr[11:10] = flags[1:0];
-
-    assign microCode = microCodeROM[addr];
 
     assign rsbi = RSBI ? instr[3:0] : 4'bz;
     assign rsbo = RSBO ? instr[3:0] : 4'bz;
@@ -125,9 +124,9 @@ module ControlUnit(
     reg [2:0] segmentIndex;
     assign segmentIndex = instr[9:8] + 1;
 
-    assign SSO0 = SO ? segmentIndex[0] : 1'bz;
-    assign SSO1 = SO ? segmentIndex[1] : 1'bz;
-    assign SSO2 = SO ? segmentIndex[2] : 1'bz;
+    assign SSO0 = SSO ? segmentIndex[0] : 1'bz;
+    assign SSO1 = SSO ? segmentIndex[1] : 1'bz;
+    assign SSO2 = SSO ? segmentIndex[2] : 1'bz;
 
     import "DPI-C" function int LoadROMFile(input string filePath);
     import "DPI-C" function byte GetROMFileByte(input int index);
@@ -140,7 +139,7 @@ module ControlUnit(
         if (size != 0) begin
 
             int j = 0;
-            for (int i = 0; i < 2**12; i = i + 8) begin
+            for (int i = 0; i < size; i = i + 8) begin
                 
                 microCodeROM[j][63:56] = GetROMFileByte(i + 0);
                 microCodeROM[j][55:48] = GetROMFileByte(i + 1);
@@ -155,6 +154,11 @@ module ControlUnit(
                 
             end
 
+            //$display("Memory Array:");
+            //for (int i = 0; i < 100; i = i + 1) begin
+            //    $display("memory_array[%0d] = %b", i, microCodeROM[i]);
+            //end
+
         end
         CloseROMFile();
         
@@ -162,7 +166,7 @@ module ControlUnit(
 
     always @(posedge ~clk or posedge clk) begin
 
-        if (~clk) begin
+        if (~clk && !r) begin
 
             microCodeIndex <= microCodeIndex + 1;
     

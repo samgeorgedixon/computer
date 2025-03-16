@@ -18,7 +18,7 @@ module RAM16B24A(
         if (r) begin
             integer i;
             for (i = 0; i < 2**24; i = i + 1) begin
-                memory[i] = 16'b1;
+                memory[i] = 16'b0;
             end
         end else if (we) begin
             memory[addr] <= data;

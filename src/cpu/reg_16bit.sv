@@ -3,7 +3,7 @@ module Reg16(
     input clk, r,
     input we, oe,
     input [15:0] a,
-    output [15:0] oc, reg [15:0] o = 2
+    output [15:0] oc, reg [15:0] o
 
     );
 

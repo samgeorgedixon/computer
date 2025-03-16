@@ -8,39 +8,25 @@ module ALU(
 
     );
 
-    reg [16:0] res = 0;
+    reg [16:0] res;
 
     assign o = oe ? res[15:0] : 16'bz;
 
     assign f[0] = res == 0 ? 1 : 0;
     assign f[1] = res[16];
 
-    always @(posedge clk) begin
-
-        res <= 17'b0;
-
-        if (oe) begin
-
-            if          (sel == 'b000) begin
-                res <= {1'b0, a} + {1'b0, b};
-            end else if (sel == 'b001) begin
-                res <= {1'b0, a} - {1'b0, b};
-            end else if (sel == 'b010) begin
-                res <= {1'b0, a} + 1;
-            end else if (sel == 'b011) begin
-                res <= {1'b0, a} - 1;
-            end else if (sel == 'b100) begin
-                res <= {1'b0, a} * {1'b0, b};
-            end else if (sel == 'b101) begin
-                res <= {1'b0, a} / {1'b0, b};
-            end else if (sel == 'b110) begin
-                res <= {1'b0, a} & {1'b0, b};
-            end else if (sel == 'b111) begin
-                res <= {1'b0, a} | {1'b0, b};
-            end
-
-        end
-
+    always_comb begin
+        case (sel)
+            3'b000: res = {1'b0, a} + {1'b0, b};
+            3'b001: res = {1'b0, a} - {1'b0, b};
+            3'b010: res = {1'b0, a} + 1;
+            3'b011: res = {1'b0, a} - 1;
+            3'b100: res = {1'b0, a} * {1'b0, b};
+            3'b101: res = (b != 0) ? {1'b0, a} / {1'b0, b} : 17'b0;
+            3'b110: res = {1'b0, a} & {1'b0, b};
+            3'b111: res = {1'b0, a} | {1'b0, b};
+            default: res = 17'b0;
+        endcase
     end
 
 endmodule
