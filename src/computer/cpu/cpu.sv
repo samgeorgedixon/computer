@@ -1,9 +1,9 @@
-`include "src/cpu/program_counter.sv"
-`include "src/cpu/alu.sv"
-`include "src/cpu/reg_16bit.sv"
-`include "src/cpu/reg_8bit.sv"
-`include "src/cpu/registers_unit.sv"
-`include "src/cpu/control_unit.sv"
+`include "src/computer/cpu/program_counter.sv"
+`include "src/computer/cpu/alu.sv"
+`include "src/computer/cpu/reg_16bit.sv"
+`include "src/computer/cpu/reg_8bit.sv"
+`include "src/computer/cpu/registers_unit.sv"
+`include "src/computer/cpu/control_unit.sv"
 
 module CPU(
     

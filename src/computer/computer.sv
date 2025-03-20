@@ -1,6 +1,9 @@
-`include "src/cpu/cpu.sv"
-`include "src/memory_unit.sv"
-`include "src/drive_ext.sv"
+`timescale 1us/100ns
+
+`include "src/computer/cpu/cpu.sv"
+`include "src/computer/memory_unit.sv"
+`include "src/computer/exts/drive_ext.sv"
+`include "src/computer/exts/gpu_ext.sv"
 
 module Computer();
 
@@ -28,15 +31,20 @@ module Computer();
 
     DriveExt drive(clk, r, bus, addro, epawe, epaoe);
 
+    GPU_Ext gpu(clk, r, bus, addro, epbwe, epboe);
+
     initial begin
 
+        $display("---");
+        $display("Computer Test Running...");
+
         r = 1;
-        
-        #1100
+
+        #1.1
         r = 0;
 
     end
 
-    always #500 clk = ~clk; // Cycle of 1 Micro Second
+    always #0.5 clk = ~clk;
 
 endmodule

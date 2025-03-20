@@ -1,4 +1,4 @@
-`include "src/ram.sv"
+`include "src/computer/ram.sv"
 
 module MemoryUnit(
 

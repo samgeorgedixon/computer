@@ -1,7 +1,15 @@
-all: computer computer_run
+all: clean computer computer_run
 
-computer: src/computer_tb.sv
-	verilator --binary --trace -j 0 src/computer_tb.sv src/test.cpp src/load_rom_file.cpp --top ComputerTB
+computer: src/computer/computer.sv
+	verilator -j 0 -O3 --x-assign fast --x-initial fast --noassert -I../ \
+		--Mdir bin --trace --timing -cc --exe \
+		src/computer/computer.sv src/main.cpp src/testbench/application.cpp src/load_rom_file.cpp -o computer \
+		-CFLAGS "-I/usr/include/SDL2 -D_REENTRANT" -LDFLAGS "-lSDL2"
+
+	make -C ./bin -f Vcomputer.mk
 
 computer_run:
-	obj_dir/VComputerTB
+	bin/computer
+
+clean:
+	rm -rf bin
