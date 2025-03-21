@@ -5,7 +5,9 @@ module DriveExt(
     inout [15:0] bus,
     input [23:0] addr,
 
-    input we, oe
+    input we, oe,
+    
+    input string filePath
 
     );
 
@@ -19,7 +21,7 @@ module DriveExt(
 
     initial begin
         
-        int size = LoadROMFile("gpu_test.bin");
+        int size = LoadROMFile(filePath);
         
         if (size != 0) begin
 

@@ -49,6 +49,6 @@ module CPU(
 
     RegistersUnit regUnit(clk, r, bus, rsbi, rsbo, rsti, rsto, AI, AO, BI, BO, CI, CO, DI, DO, EI, EO, CSI, CSO, DSI, SSI, ESI, { SSO2, SSO1, SSO0 }, MI, II, IO, SPI, SPO, SBI, SBO, ao, bo, co, do_, eo, mo, io, spo, sbo, so);
 
-    ControlUnit controlUnit(clk, r, io, flagsOut, rsbi, rsbo, rsti, rsto, AI, AO, BI, BO, CI, CO, DI, DO, EI, EO, II, IO, MI, RI, RO, PCE, PCI, PCO, SO, S0, S1, S2, FI, AEI, AEO, BEI, BEO, CEI, CEO, DEI, DEO, SPI, SPO, SBI, SBO, CSI, CSO, DSI, SSI, ESI, SSO0, SSO1, SSO2, SSO, RSBI, RSBO, RSTI, RSTO);
+    ControlUnit controlUnit(clk, r, io, flagsOut, rsbi, rsbo, rsti, rsto, AI, AO, BI, BO, CI, CO, DI, DO, EI, EO, II, IO, MI, RI, RO, PCE, PCI, PCO, SO, S0, S1, S2, FI, AEI, AEO, BEI, BEO, CEI, CEO, DEI, DEO, SPI, SPO, SBI, SBO, CSI, CSO, DSI, SSI, ESI, SSO0, SSO1, SSO2, SSO, RSBI, RSBO, RSTI, RSTO, "bin/cpu_instr_gen/cpu_instr_rom.bin");
 
 endmodule

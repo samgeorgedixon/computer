@@ -52,7 +52,9 @@ module ControlUnit(
     output RSBI,
     output RSBO,
     output RSTI,
-    output RSTO
+    output RSTO,
+
+    input string cpuInstrRomFilePath
 
     );
 
@@ -134,7 +136,7 @@ module ControlUnit(
 
     initial begin
         
-        int size = LoadROMFile("cpu_instr_rom.bin");
+        int size = LoadROMFile(cpuInstrRomFilePath);
         
         if (size != 0) begin
 

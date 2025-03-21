@@ -27,9 +27,9 @@ module Computer();
 
     CPU cpu(clk, r, bus, addro, addr, saddr, rwe, roe, epawe, epaoe, epbwe, epboe, epcwe, epcoe, epdwe, epdoe);
 
-    MemoryUnit memoryUnit(clk, r, bus, rwe, roe, addr, saddr, addro);
+    MemoryUnit memoryUnit(clk, r, bus, rwe, roe, addr, saddr, addro, "bin/programs/bios.bin");
 
-    DriveExt drive(clk, r, bus, addro, epawe, epaoe);
+    DriveExt drive(clk, r, bus, addro, epawe, epaoe, "bin/programs/text_editor.bin");
 
     GPU_Ext gpu(clk, r, bus, addro, epbwe, epboe);
 

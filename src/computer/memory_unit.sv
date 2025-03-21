@@ -7,7 +7,9 @@ module MemoryUnit(
     input rwe, roe,
 
     input [15:0] addr, saddr,
-    output reg [23:0] addro
+    output reg [23:0] addro,
+
+    input string biosFilePath
 
     );
 
@@ -27,7 +29,7 @@ module MemoryUnit(
 
     initial begin
         
-        int size = LoadROMFile("bios.bin");
+        int size = LoadROMFile(biosFilePath);
         
         if (size != 0) begin
 
