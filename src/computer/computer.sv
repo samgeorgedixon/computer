@@ -18,20 +18,20 @@ module Computer();
     wire [15:0] addr;
     wire [15:0] saddr;
 
-    wire epawe, epaoe;
-    wire epbwe, epboe;
-    wire epcwe, epcoe;
-    wire epdwe, epdoe;
+    wire e1i, e1o;
+    wire e2i, e2o;
+    wire e3i, e3o;
+    wire e4i, e4o;
 
-    wire rwe, roe;
+    wire ri, ro;
 
-    CPU cpu(clk, r, bus, addro, addr, saddr, rwe, roe, epawe, epaoe, epbwe, epboe, epcwe, epcoe, epdwe, epdoe);
+    CPU cpu(clk, r, bus, addro, addr, saddr, ri, ro, e1i, e1o, e2i, e2o, e3i, e3o, e4i, e4o);
 
-    MemoryUnit memoryUnit(clk, r, bus, rwe, roe, addr, saddr, addro, "bin/programs/bios.bin");
+    MemoryUnit memoryUnit(clk, r, bus, ri, ro, addr, saddr, addro, "bin/programs/bios.bin");
 
-    DriveExt drive(clk, r, bus, addro, epawe, epaoe, "bin/programs/text_editor.bin");
+    DriveExt drive(clk, r, bus, addro, e1i, e1o, "bin/programs/tester.bin");
 
-    GPU_Ext gpu(clk, r, bus, addro, epbwe, epboe);
+    GPU_Ext gpu(clk, r, bus, addro, e2i, e2o);
 
     initial begin
 

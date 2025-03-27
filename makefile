@@ -23,7 +23,7 @@ cpu_instr_gen-run:
 	bin/cpu_instr_gen/cpu_instr_gen
 
 assembler: scripts/src/assembler.cpp
-	g++ scripts/src/assembler.cpp -o assembler
+	g++ scripts/src/assembler.cpp -o bin/assembler/assembler
 
 clean:
 	rm -rf bin

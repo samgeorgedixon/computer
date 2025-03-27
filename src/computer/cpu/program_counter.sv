@@ -1,7 +1,7 @@
 module ProgramCounter(
 
     input clk, r,
-    input [15:0] a,
+    inout [15:0] bus,
     input we, oe, e,
     output [15:0] o
 
@@ -9,12 +9,13 @@ module ProgramCounter(
 
     reg [15:0] pc = 0;
 
-    assign o = oe ? pc : 16'bz;
+    assign bus = oe ? pc : 16'bz;
+    assign o = pc;
 
     always @(posedge clk) begin
 
         if (we) begin
-            pc <= a;
+            pc <= bus;
         end
 
         if (r) begin

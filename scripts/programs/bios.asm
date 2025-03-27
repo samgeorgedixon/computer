@@ -1,14 +1,16 @@
+%segment code
 %org 0
 
-mov ra 16
-mov rb 512
+li r1 16
+li r2 512
 
 :loop
-ldepa rc ra
-str ra rc
-inc ra
+ldew e1 r3 [r1 0]
+stw c r3 [r1 0]
 
-cmp
-jz 16
+inc r1 r1
 
-jmp loop
+cmp r1 r2
+jz [r4 16]
+
+jmp [r4 loop]

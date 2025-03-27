@@ -46,6 +46,8 @@ void Setup() {
 }
 
 void Close() {
+    std::cout << "Computer Test Finished\n";
+
     //ImGuiEnd();
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
@@ -128,6 +130,8 @@ void Update() {
             vcd->close();
             
             vcdFinished = true;
+
+            std::cout << "VCD Finished\n";
         }
     }
     
