@@ -44,10 +44,10 @@ Here I have designed a custom Computer / CPU.
  -  Store Ext:      stew ext rs1 [rs2 imm]
 
 #### Jump / Conditions
- -  Jump:           jmp  [rs1 imm]
- -  Jump Far:       jmpf [rs1 imm] rs2
- -  Jump If Zero:   jz   [rs1 imm]
- -  Jump If Carry:  jc   [rs1 imm]
+ -  Jump:           jmp      [rs2 imm]
+ -  Jump Far:       jmpf rs1 [rs2 imm]
+ -  Jump If Zero:   jz       [rs2 imm]
+ -  Jump If Carry:  jc       [rs2 imm]
  -  Compare:        cmp rs1, rs2
 
 #### Arithmetic
@@ -63,8 +63,8 @@ Here I have designed a custom Computer / CPU.
  -  OR:             or  res rs1 rs2
 
 #### Stack and Functions
- -  Push Reg:       push rs2
+ -  Push Reg:       push rs1
  -  Pop Into Reg:   pop rs1
- -  Function:       call [rs1 imm]
- -  Function Far:   callf [rs1 imm] rs2
+ -  Function:       call [rs2 imm]
+ -  Function Far:   callf rs1 [rs2 imm]
  -  Return:         ret

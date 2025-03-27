@@ -1,21 +1,11 @@
 #include "application.h"
-
-#include <verilated.h>
-#include "Vcomputer.h"
-#include "verilated_vcd_c.h"
+#include "computer.h"
 
 #include <iostream>
+#include <vector>
 #include <thread>
 
 #include "SDL.h"
-
-VerilatedContext* contextp;
-Vcomputer* computer;
-
-VerilatedVcdC* vcd;
-bool vcdFinished = false;
-int vcdClockCycles = 1000;
-std::string vcdFileName = "logs/computer.vcd";
 
 SDL_Window* window;
 SDL_Renderer* renderer;
@@ -26,14 +16,7 @@ static std::vector<uint16_t> displayPixels;
 static bool s_finished = false;
 
 void Setup() {
-    contextp = new VerilatedContext;
-    computer = new Vcomputer(contextp);
-    
-    vcd = new VerilatedVcdC;
-    contextp->traceEverOn(true);
-    computer->trace(vcd, 99);
-
-    vcd->open(vcdFileName.c_str());
+    SetupComputer();
 
     displayPixels.reserve(256 * 256);
 
@@ -46,22 +29,13 @@ void Setup() {
 }
 
 void Close() {
-    std::cout << "Computer Test Finished\n";
-
     //ImGuiEnd();
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
-
+    
     SDL_Quit();
 
-    if (!vcdFinished) {
-        vcd->close();
-    }
-    computer->final();
-
-    delete vcd;
-    delete computer;
-    delete contextp;
+    CloseComputer();
 }
 
 void StartFrame() {
@@ -121,29 +95,10 @@ void Rendering() {
     }
 }
 
-void Update() {
-    computer->eval();
-
-    if (!vcdFinished) {
-        vcd->dump(contextp->time());
-        if (contextp->time() / 10 >= vcdClockCycles) {
-            vcd->close();
-            
-            vcdFinished = true;
-
-            std::cout << "VCD Finished\n";
-        }
-    }
-    
-    contextp->timeInc(1);
-}
-
 void Run() {
     std::thread rendering(Rendering);
-    
-    while (!s_finished && !contextp->gotFinish()) {
-        Update();
-    }
+
+    RunComputer(s_finished);
 
     rendering.join();
 }

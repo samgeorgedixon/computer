@@ -38,4 +38,4 @@ ret
 %segment data
 
 :colour
-%dw 0b0111111111111111
+%dw 0b0111110000011111

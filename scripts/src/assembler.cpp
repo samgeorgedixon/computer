@@ -18,7 +18,8 @@ enum InstrCode {
     NOP = 0, MOV, LI,
     LDW, STW, LDEW, STEW,
     JMP, JMPF, CMP, JZ, JC,
-    ADD, SUB, INC, DEC, MULT, DIV, AND, OR
+    ADD, SUB, INC, DEC, MULT, DIV, AND, OR,
+    PUSH, POP, CALL, CALLF, RET, RETF
 };
 enum ParameterIndex {
     RS = 0, RS1, RS2, IMM
@@ -54,6 +55,13 @@ std::unordered_map<std::string, Instruction> instructions {
     { "div",   { DIV,   1, { RS, RS1, RS2 } } },
     { "and",   { AND,   1, { RS, RS1, RS2 } } },
     { "or",    { OR,    1, { RS, RS1, RS2 } } },
+
+    { "push",  { PUSH,  1, { RS1 } } },
+    { "pop",   { POP,   1, { RS1 } } },
+    { "call",  { CALL,  2, { RS2, IMM } } },
+    { "callf", { CALLF, 2, { RS1, RS2, IMM } } },
+    { "ret",   { RET,   1, {} } },
+    { "retf",  { RETF,  1, {} } },
 };
 
 // Register Index
