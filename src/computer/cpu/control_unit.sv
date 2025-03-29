@@ -37,7 +37,9 @@ module ControlUnit(
     output MI  ,
     output MO  ,
     output RI  ,
+    output RBI ,
     output RO  ,
+    output RBO ,
     output PCE ,
     output PCI ,
     output PCO ,
@@ -101,27 +103,29 @@ module ControlUnit(
     assign MI   = microCodeROM[addr][23];
     assign MO   = microCodeROM[addr][24];
     assign RI   = microCodeROM[addr][25];
-    assign RO   = microCodeROM[addr][26];
-    assign PCE  = microCodeROM[addr][27];
-    assign PCI  = microCodeROM[addr][28];
-    assign PCO  = microCodeROM[addr][29];
-    assign SO   = microCodeROM[addr][30];
-    assign FI   = microCodeROM[addr][31];
+    assign RBI  = microCodeROM[addr][26];
+    assign RO   = microCodeROM[addr][27];
+    assign RBO  = microCodeROM[addr][28];
+    assign PCE  = microCodeROM[addr][29];
+    assign PCI  = microCodeROM[addr][30];
+    assign PCO  = microCodeROM[addr][31];
+    assign SO   = microCodeROM[addr][32];
+    assign FI   = microCodeROM[addr][33];
     
-    assign OS1I = microCodeROM[addr][47];
-    assign OS1O = microCodeROM[addr][48];
-    assign OS1A = microCodeROM[addr][49];
-    assign OS2I = microCodeROM[addr][50];
-    assign OS2O = microCodeROM[addr][51];
-    assign OS2B = microCodeROM[addr][52];
-    assign OSLI = microCodeROM[addr][53];
-    assign OSLO = microCodeROM[addr][54];
+    assign OS1I = microCodeROM[addr][49];
+    assign OS1O = microCodeROM[addr][50];
+    assign OS1A = microCodeROM[addr][51];
+    assign OS2I = microCodeROM[addr][52];
+    assign OS2O = microCodeROM[addr][53];
+    assign OS2B = microCodeROM[addr][54];
+    assign OSLI = microCodeROM[addr][55];
+    assign OSLO = microCodeROM[addr][56];
 
-    assign aluOpSel = microCodeROM[addr][35:32];
-    assign aluASel = OS1A ? instr[7:4] : microCodeROM[addr][39:36];
-    assign aluBSel = OS2B ? instr[3:0] : microCodeROM[addr][43:40];
+    assign aluOpSel = microCodeROM[addr][37:34];
+    assign aluASel = OS1A ? instr[7:4] : microCodeROM[addr][41:38];
+    assign aluBSel = OS2B ? instr[3:0] : microCodeROM[addr][45:42];
 
-    assign segSel = microCodeROM[addr][46:44];
+    assign segSel = microCodeROM[addr][48:46];
 
     // Set All the Selects    
     assign addr[3:0] = microCodeIndex;
@@ -139,7 +143,7 @@ module ControlUnit(
     
     assign operandSelect3b = {1'bz, instr[9:8]};
     assign operandSelect = operandSelect3b + 1;
-    assign operandSelectJob = microCodeROM[addr][56:55];
+    assign operandSelectJob = microCodeROM[addr][58:57];
 
     assign segSel   = operandSelectJob == 1 ? OSLO ? operandSelect : 3'bz : 3'bz;
     assign esi      = operandSelectJob == 2 ? OSLI ? operandSelect : 3'bz : 3'bz;

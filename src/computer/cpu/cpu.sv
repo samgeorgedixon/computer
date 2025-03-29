@@ -14,7 +14,7 @@ module CPU(
     output [15:0] addr,
     output [15:0] saddr,
 
-    output ri, ro,
+    output ri, rbi, ro, rbo,
 
     output e1i, e1o,
     output e2i, e2o,
@@ -44,7 +44,7 @@ module CPU(
     RegistersUnit regUnit(clk, r, bus, rsi, rso, R1I, R1O, R2I, R2O, R3I, R3O, R4I, R4O, CSI, CSO, DSI, DSO, SSI, SSO, ESI, ESO, ZO, segSel, II, IO, MI, MO, SPI, SPO, SBI, SBO, r1o, r2o, r3o, r4o, mo, io, spo, bpo, cso, sso, dso, eso, zo, so);
 
     ControlUnit controlUnit(clk, r, io, flagsOut, rsi, rso, aluOpSel, aluASel, aluBSel, segSel,
-            R1I, R1O, R2I, R2O, R3I, R3O, R4I, R4O, SPI, SPO, SBI, SBO, CSI, CSO, DSI, DSO, SSI, SSO, ESI, ESO, ZO, II, IO, MI, MO, ri, ro, PCE, PCI, PCO, SO, FI, OS1I, OS1O, OS1A, OS2I, OS2O, OS2B, OSLI, OSLO, e1i, e1o, e2i, e2o, e3i, e3o, e4i, e4o,
+            R1I, R1O, R2I, R2O, R3I, R3O, R4I, R4O, SPI, SPO, SBI, SBO, CSI, CSO, DSI, DSO, SSI, SSO, ESI, ESO, ZO, II, IO, MI, MO, ri, rbi, ro, rbo, PCE, PCI, PCO, SO, FI, OS1I, OS1O, OS1A, OS2I, OS2O, OS2B, OSLI, OSLO, e1i, e1o, e2i, e2o, e3i, e3o, e4i, e4o,
             "bin/cpu_instr_gen/cpu_instr_rom.bin");
 
 endmodule

@@ -6,7 +6,7 @@ li r2 0x300
 li r4 2
 
 :loop
-ldew e1 r3 [r1 0]
+lde e1 r3 [r1 0]
 stw c r3 [r1 0]
 
 add r1 r1 r4

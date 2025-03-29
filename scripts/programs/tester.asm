@@ -30,7 +30,7 @@ li r1 0
 ldw s r2 [bp 6]
 
 :fill_loop
-stew e2 r2 [r1 0]
+ste e2 r2 [r1 0]
 inc r1 r1
 
 jc [z fill_end]

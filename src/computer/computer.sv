@@ -23,11 +23,11 @@ module Computer();
     wire e3i, e3o;
     wire e4i, e4o;
 
-    wire ri, ro;
+    wire ri, rbi, ro, rbo;
 
-    CPU cpu(clk, r, bus, addro, addr, saddr, ri, ro, e1i, e1o, e2i, e2o, e3i, e3o, e4i, e4o);
+    CPU cpu(clk, r, bus, addro, addr, saddr, ri, rbi, ro, rbo, e1i, e1o, e2i, e2o, e3i, e3o, e4i, e4o);
 
-    MemoryUnit memoryUnit(clk, r, bus, ri, ro, addr, saddr, addro, "bin/programs/bios.bin");
+    MemoryUnit memoryUnit(clk, r, bus, ri, rbi, ro, rbo, addr, saddr, addro, "bin/programs/bios.bin");
 
     DriveExt drive(clk, r, bus, addro, e1i, e1o, "bin/programs/tester.bin");
 

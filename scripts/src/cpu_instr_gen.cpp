@@ -34,42 +34,44 @@
 #define MI      ((uint64_t)1 << 23)     // Memory In
 #define MO      ((uint64_t)1 << 24)     // Memory Out
 #define RI      ((uint64_t)1 << 25)     // RAM In
-#define RO      ((uint64_t)1 << 26)     // RAM Out
-#define PCE     ((uint64_t)1 << 27)     // Program Counter Enable
-#define PCI     ((uint64_t)1 << 28)     // Program Counter In
-#define PCO     ((uint64_t)1 << 29)     // Program Counter Out
+#define RBI     ((uint64_t)1 << 26)     // RAM Byte In
+#define RO      ((uint64_t)1 << 27)     // RAM Out
+#define RBO     ((uint64_t)1 << 28)     // RAM Byte Out
+#define PCE     ((uint64_t)1 << 29)     // Program Counter Enable
+#define PCI     ((uint64_t)1 << 30)     // Program Counter In
+#define PCO     ((uint64_t)1 << 31)     // Program Counter Out
 
-#define SO      ((uint64_t)1 << 30)     // Sum Out
-#define FI      ((uint64_t)1 << 31)     // Flags In
-#define S0      ((uint64_t)1 << 32)     // Sum Select 0
-#define S1      ((uint64_t)1 << 33)     // Sum Select 1
-#define S2      ((uint64_t)1 << 34)     // Sum Select 2
-#define S3      ((uint64_t)1 << 35)     // Sum Select 3
-#define AS0     ((uint64_t)1 << 36)     // A Select 0
-#define AS1     ((uint64_t)1 << 37)     // A Select 1
-#define AS2     ((uint64_t)1 << 38)     // A Select 2
-#define AS3     ((uint64_t)1 << 39)     // A Select 3
-#define BS0     ((uint64_t)1 << 40)     // B Select 0
-#define BS1     ((uint64_t)1 << 41)     // B Select 1
-#define BS2     ((uint64_t)1 << 42)     // B Select 2
-#define BS3     ((uint64_t)1 << 43)     // B Select 3
+#define SO      ((uint64_t)1 << 32)     // Sum Out
+#define FI      ((uint64_t)1 << 33)     // Flags In
+#define S0      ((uint64_t)1 << 34)     // Sum Select 0
+#define S1      ((uint64_t)1 << 35)     // Sum Select 1
+#define S2      ((uint64_t)1 << 36)     // Sum Select 2
+#define S3      ((uint64_t)1 << 37)     // Sum Select 3
+#define AS0     ((uint64_t)1 << 38)     // A Select 0
+#define AS1     ((uint64_t)1 << 39)     // A Select 1
+#define AS2     ((uint64_t)1 << 40)     // A Select 2
+#define AS3     ((uint64_t)1 << 41)     // A Select 3
+#define BS0     ((uint64_t)1 << 42)     // B Select 0
+#define BS1     ((uint64_t)1 << 43)     // B Select 1
+#define BS2     ((uint64_t)1 << 44)     // B Select 2
+#define BS3     ((uint64_t)1 << 45)     // B Select 3
 
-#define SSO0    ((uint64_t)1 << 44)     // Segment Select 0
-#define SSO1    ((uint64_t)1 << 45)     // Segment Select 1
-#define SSO2    ((uint64_t)1 << 46)     // Segment Select 2
+#define SSO0    ((uint64_t)1 << 46)     // Segment Select 0
+#define SSO1    ((uint64_t)1 << 47)     // Segment Select 1
+#define SSO2    ((uint64_t)1 << 48)     // Segment Select 2
 
-#define OS1I    ((uint64_t)1 << 47)     // Operand 1 Select In
-#define OS1O    ((uint64_t)1 << 48)     // Operand 1 Select Out
-#define OS1A    ((uint64_t)1 << 49)     // Operand 1 Select ASum
+#define OS1I    ((uint64_t)1 << 49)     // Operand 1 Select In
+#define OS1O    ((uint64_t)1 << 50)     // Operand 1 Select Out
+#define OS1A    ((uint64_t)1 << 51)     // Operand 1 Select ASum
 
-#define OS2I    ((uint64_t)1 << 50)     // Operand 2 Select In
-#define OS2O    ((uint64_t)1 << 51)     // Operand 2 Select Out
-#define OS2B    ((uint64_t)1 << 52)    // Operand 2 Select BSum
+#define OS2I    ((uint64_t)1 << 52)     // Operand 2 Select In
+#define OS2O    ((uint64_t)1 << 53)     // Operand 2 Select Out
+#define OS2B    ((uint64_t)1 << 54)    // Operand 2 Select BSum
 
-#define OSLI    ((uint64_t)1 << 53)     // Operand Select In
-#define OSLO    ((uint64_t)1 << 54)     // Operand Select Out
-#define OSL0    ((uint64_t)1 << 55)     // Operand Job Select 0
-#define OSL1    ((uint64_t)1 << 56)    // Operand Job Select 1
+#define OSLI    ((uint64_t)1 << 55)     // Operand Select In
+#define OSLO    ((uint64_t)1 << 56)     // Operand Select Out
+#define OSL0    ((uint64_t)1 << 57)     // Operand Job Select 0
+#define OSL1    ((uint64_t)1 << 58)    // Operand Job Select 1
 
 #define R       ((uint64_t)1 << 63)     // Intruction End
 
@@ -148,10 +150,12 @@ std::vector<std::vector<uint64_t>> instructions = {
     { NOP, PCO|MI, OS1I|RO|SCODE|PCE, R },                                      // li
 
     { NOP, PCO|MI, MI|SCODE|RO|PCE, MI|ADD|ASM|OS2B, OS1I|RO|SSELO, R },        // ldw
+    { NOP, PCO|MI, MI|SCODE|RO|PCE, MI|ADD|ASM|OS2B, OS1I|RBO|SSELO, R },       // ldb
     { NOP, PCO|MI, MI|SCODE|RO|PCE, MI|ADD|ASM|OS2B, OS1O|RI|SSELO, R },        // stw
+    { NOP, PCO|MI, MI|SCODE|RO|PCE, MI|ADD|ASM|OS2B, OS1O|RBI|SSELO, R },       // stb
 
-    { NOP, PCO|MI, MI|SCODE|RO|PCE, MI|ADD|ASM|OS2B, OS1I|ESELO|SEXTRA, R },    // ldew
-    { NOP, PCO|MI, MI|SCODE|RO|PCE, MI|ADD|ASM|OS2B, OS1O|ESELI|SEXTRA, R },    // stew
+    { NOP, PCO|MI, MI|SCODE|RO|PCE, MI|ADD|ASM|OS2B, OS1I|ESELO|SEXTRA, R },    // lde
+    { NOP, PCO|MI, MI|SCODE|RO|PCE, MI|ADD|ASM|OS2B, OS1O|ESELI|SEXTRA, R },    // ste
     
     // Jump / Conditions
     { NOP, PCO|MI, PCI|RO|SCODE, PCI|ADD|ASPC|OS2B, R },                        // jmp
@@ -200,8 +204,9 @@ void ReplaceRomInstruction(uint16_t startAddress, uint64_t instruction, char* ro
 int main(int argc, char* argv[]) {
     char* rom = new char[ROM_SIZE];
 
-    for (int i = 0; i < ROM_SIZE; i++)
-        rom[i] = 0x00;
+    for (int i = 0; i < ROM_SIZE; i++) {
+        rom[i] = 0;
+    }
 
     for (int i = 0; i < instructions.size(); i++) {
         for (int j = 0; j < instructions[i].size(); j++) {
@@ -221,25 +226,25 @@ int main(int argc, char* argv[]) {
     std::cout << "Flags Section: \n";
 
     // If JZ+ZF - JMP
-    ReplaceRomInstruction(0b010010100010000, PCO|MI, rom);
-    ReplaceRomInstruction(0b010010100011000, PCI|RO|SCODE, rom);
-    ReplaceRomInstruction(0b010010100100000, PCI|ADD|ASPC|OS2B, rom);
-    ReplaceRomInstruction(0b010010100101000, R, rom);
+    ReplaceRomInstruction(0b010011000010000, PCO|MI, rom);
+    ReplaceRomInstruction(0b010011000011000, PCI|RO|SCODE, rom);
+    ReplaceRomInstruction(0b010011000100000, PCI|ADD|ASPC|OS2B, rom);
+    ReplaceRomInstruction(0b010011000101000, R, rom);
     // If JC+CF - JMP
-    ReplaceRomInstruction(0b100010110010000, PCO|MI, rom);
-    ReplaceRomInstruction(0b100010110011000, PCI|RO|SCODE, rom);
-    ReplaceRomInstruction(0b100010110100000, PCI|ADD|ASPC|OS2B, rom);
-    ReplaceRomInstruction(0b100010110101000, R, rom);
+    ReplaceRomInstruction(0b100011010010000, PCO|MI, rom);
+    ReplaceRomInstruction(0b100011010011000, PCI|RO|SCODE, rom);
+    ReplaceRomInstruction(0b100011010100000, PCI|ADD|ASPC|OS2B, rom);
+    ReplaceRomInstruction(0b100011010101000, R, rom);
     // If JZ+ZF/JC+CF - JMP
-    ReplaceRomInstruction(0b110010100010000, PCO|MI, rom);
-    ReplaceRomInstruction(0b110010100011000, PCI|RO|SCODE, rom);
-    ReplaceRomInstruction(0b110010100100000, PCI|ADD|ASPC|OS2B, rom);
-    ReplaceRomInstruction(0b110010100101000, R, rom);
+    ReplaceRomInstruction(0b110011000010000, PCO|MI, rom);
+    ReplaceRomInstruction(0b110011000011000, PCI|RO|SCODE, rom);
+    ReplaceRomInstruction(0b110011000100000, PCI|ADD|ASPC|OS2B, rom);
+    ReplaceRomInstruction(0b110011000101000, R, rom);
 
-    ReplaceRomInstruction(0b110010110010000, PCO|MI, rom);
-    ReplaceRomInstruction(0b110010110011000, PCI|RO|SCODE, rom);
-    ReplaceRomInstruction(0b110010110100000, PCI|ADD|ASPC|OS2B, rom);
-    ReplaceRomInstruction(0b110010110101000, R, rom);
+    ReplaceRomInstruction(0b110011010010000, PCO|MI, rom);
+    ReplaceRomInstruction(0b110011010011000, PCI|RO|SCODE, rom);
+    ReplaceRomInstruction(0b110011010100000, PCI|ADD|ASPC|OS2B, rom);
+    ReplaceRomInstruction(0b110011010101000, R, rom);
 
     std::ofstream file("bin/cpu_instr_gen/cpu_instr_rom.bin", std::ios::out | std::ios::binary);
     file.write(rom, (ROM_SIZE + 4) * sizeof(char));

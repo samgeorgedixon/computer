@@ -4,7 +4,7 @@ module MemoryUnit(
 
     input clk, r,
     inout [15:0] bus,
-    input rwe, roe,
+    input ri, rbi, ro, rbo,
 
     input [15:0] addr, saddr,
     output reg [23:0] addro,
@@ -16,12 +16,13 @@ module MemoryUnit(
     assign addro = { 8'b0, addr } + { saddr, 8'b0 };
 
     wire [15:0] ramInOut;
-    RAM8B24A ram(clk, r, rwe, roe, addro, ramInOut);
+    RAM8B24A ram(clk, r, ri|rbi, ro|rbo, addro, ramInOut);
 
     reg [7:0] biosROM [0:(2**8) - 1];
 
-    assign bus = roe ? addro < 256 ? { biosROM[addro[7:0]], biosROM[addro[7:0] + 1] } : ramInOut : 16'bz;
-    assign ramInOut = rwe ? addro > 255 ? bus : 16'bz : 16'bz;
+    assign bus = ro|rbo ? addro < 256 ? rbo ? { 8'b0, biosROM[addro[7:0]] } : { biosROM[addro[7:0]], biosROM[addro[7:0] + 1] } : ramInOut : 16'bz;
+
+    assign ramInOut = ri|rbi ? addro > 255 ? rbi ? { 8'b0, bus[7:0] } : bus : 16'bz : 16'bz;
 
     import "DPI-C" function int LoadROMFile(input string filePath);
     import "DPI-C" function byte GetROMFileByte(input int index);
