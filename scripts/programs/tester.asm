@@ -8,28 +8,36 @@ li ss 0x0000
 li bp 0xffff
 mov sp bp
 
-li r1 0
-call [r1 print]
+ldw d r1 [z red]
+
+push r1
+call [z fill]
+pop r1
+
+ldw d r1 [z green]
+
+push r1
+call [z fill]
+pop r1
 
 :end
-jmp [r3 end]
+jmp [z end]
 
-:print
+:fill
 push bp
 mov bp sp
 
 li r1 0
-li r3 0
-ldw d r2 [r3 colour]
+ldw s r2 [bp 3]
 
-:print_loop
+:fill_loop
 stew e2 r2 [r1 0]
 inc r1 r1
 
-jc [r3 print_end]
-jmp [r3 print_loop]
+jc [z fill_end]
+jmp [z fill_loop]
 
-:print_end
+:fill_end
 mov sp bp
 pop bp
 ret
@@ -37,5 +45,7 @@ ret
 %org 0x000100
 %segment data
 
-:colour
-%dw 0b0111110000011111
+:red
+%dw 0b0111110000000000
+:green
+%dw 0b0000001111100000

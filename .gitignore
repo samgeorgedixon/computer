@@ -4,3 +4,4 @@
 /computer
 
 .vscode
+*.code-workspace

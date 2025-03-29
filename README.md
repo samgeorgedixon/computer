@@ -10,6 +10,7 @@ Here I have designed a custom Computer / CPU.
  -  4 Extension Ports (e1, e2, e3, e4)
 
 ## Registers
+ -  zero
  -  r1, r2, r3, r4, r5
  -  instr, mem, pc
  -  sp, bp, f

@@ -14,6 +14,8 @@ module RegistersUnit(
     input dswe, dsoe,
     input sswe, ssoe,
     input eswe, esoe,
+    
+    input zeroo,
 
     input [2:0] sso,
 
@@ -23,7 +25,7 @@ module RegistersUnit(
     input spwe, spoe,
     input sbwe, sboe,
 
-    output [15:0] ao, bo, co, do_, mo, io, spo, sbo, csro, ssro, dsro, esro, so
+    output [15:0] ao, bo, co, do_, mo, io, spo, sbo, csro, ssro, dsro, esro, zo, so
 
     );
 
@@ -48,5 +50,7 @@ module RegistersUnit(
 
     Reg16 regStackPointer   (clk, r, spwe | rsi == 5 ? 1 : 0, spoe | rso == 5 ? 1 : 0, bus, bus, spo);
     Reg16 regStackBase      (clk, r, sbwe | rsi == 6 ? 1 : 0, sboe | rso == 6 ? 1 : 0, bus, bus, sbo);
+
+    Reg16 regZ(clk, r, 0, zeroo | rso == 11 ? 1 : 0, bus, bus, zo);
 
 endmodule

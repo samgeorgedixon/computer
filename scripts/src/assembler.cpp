@@ -78,6 +78,8 @@ std::unordered_map<std::string, Instruction> instructions {
 #define SS  9
 #define ES  10
 
+#define Z   11
+
 // Segment Indexes
 #define CSS  1
 #define DSS  2
@@ -161,6 +163,8 @@ InstrParamConverted ConvertInstrParam(std::string instrParamStr) {
         else if (instrParamStr == "ds")  { instrParam = DS; isReg = true; }
         else if (instrParamStr == "ss")  { instrParam = SS; isReg = true; }
         else if (instrParamStr == "es")  { instrParam = ES; isReg = true; }
+
+        else if (instrParamStr == "z")   { instrParam = Z; isReg = true; }
 
         else if (instrParamStr == "e1")  { instrParam = E1; isExt = true; }
         else if (instrParamStr == "e2")  { instrParam = E2; isExt = true; }
@@ -327,7 +331,7 @@ void PrintProgram() {
                 std::cout << "* - " << skipped << "\n";
                 skipped = 0;
             }
-            std::cout << "Instr: " << std::bitset<6>(program[i] >> 10)
+            std::cout << i << " - Instr: " << std::bitset<6>(program[i] >> 10)
                  << " - Param: " << std::bitset<10>(program[i]) << "\n";
         }
     }

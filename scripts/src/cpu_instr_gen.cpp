@@ -27,47 +27,49 @@
 #define ESI     ((uint64_t)1 << 18)     // Extra Segment In
 #define ESO     ((uint64_t)1 << 19)     // Extra Segment Out
 
-#define II      ((uint64_t)1 << 20)      // Instruction In
-#define IO      ((uint64_t)1 << 21)     // Instruction Out
-#define MI      ((uint64_t)1 << 22)     // Memory In
-#define MO      ((uint64_t)1 << 23)     // Memory Out
-#define RI      ((uint64_t)1 << 24)     // RAM In
-#define RO      ((uint64_t)1 << 25)     // RAM Out
-#define PCE     ((uint64_t)1 << 26)     // Program Counter Enable
-#define PCI     ((uint64_t)1 << 27)     // Program Counter In
-#define PCO     ((uint64_t)1 << 28)     // Program Counter Out
+#define ZO      ((uint64_t)1 << 20)     // Zero Register Out
 
-#define SO      ((uint64_t)1 << 29)     // Sum Out
-#define FI      ((uint64_t)1 << 30)     // Flags In
-#define S0      ((uint64_t)1 << 31)     // Sum Select 0
-#define S1      ((uint64_t)1 << 32)     // Sum Select 1
-#define S2      ((uint64_t)1 << 33)     // Sum Select 2
-#define S3      ((uint64_t)1 << 34)     // Sum Select 3
-#define AS0     ((uint64_t)1 << 35)     // A Select 0
-#define AS1     ((uint64_t)1 << 36)     // A Select 1
-#define AS2     ((uint64_t)1 << 37)     // A Select 2
-#define AS3     ((uint64_t)1 << 38)     // A Select 3
-#define BS0     ((uint64_t)1 << 39)     // B Select 0
-#define BS1     ((uint64_t)1 << 40)     // B Select 1
-#define BS2     ((uint64_t)1 << 41)     // B Select 2
-#define BS3     ((uint64_t)1 << 42)     // B Select 3
+#define II      ((uint64_t)1 << 21)      // Instruction In
+#define IO      ((uint64_t)1 << 22)     // Instruction Out
+#define MI      ((uint64_t)1 << 23)     // Memory In
+#define MO      ((uint64_t)1 << 24)     // Memory Out
+#define RI      ((uint64_t)1 << 25)     // RAM In
+#define RO      ((uint64_t)1 << 26)     // RAM Out
+#define PCE     ((uint64_t)1 << 27)     // Program Counter Enable
+#define PCI     ((uint64_t)1 << 28)     // Program Counter In
+#define PCO     ((uint64_t)1 << 29)     // Program Counter Out
 
-#define SSO0    ((uint64_t)1 << 43)     // Segment Select 0
-#define SSO1    ((uint64_t)1 << 44)     // Segment Select 1
-#define SSO2    ((uint64_t)1 << 45)     // Segment Select 2
+#define SO      ((uint64_t)1 << 30)     // Sum Out
+#define FI      ((uint64_t)1 << 31)     // Flags In
+#define S0      ((uint64_t)1 << 32)     // Sum Select 0
+#define S1      ((uint64_t)1 << 33)     // Sum Select 1
+#define S2      ((uint64_t)1 << 34)     // Sum Select 2
+#define S3      ((uint64_t)1 << 35)     // Sum Select 3
+#define AS0     ((uint64_t)1 << 36)     // A Select 0
+#define AS1     ((uint64_t)1 << 37)     // A Select 1
+#define AS2     ((uint64_t)1 << 38)     // A Select 2
+#define AS3     ((uint64_t)1 << 39)     // A Select 3
+#define BS0     ((uint64_t)1 << 40)     // B Select 0
+#define BS1     ((uint64_t)1 << 41)     // B Select 1
+#define BS2     ((uint64_t)1 << 42)     // B Select 2
+#define BS3     ((uint64_t)1 << 43)     // B Select 3
 
-#define OS1I    ((uint64_t)1 << 46)     // Operand 1 Select In
-#define OS1O    ((uint64_t)1 << 47)     // Operand 1 Select Out
-#define OS1A    ((uint64_t)1 << 48)     // Operand 1 Select ASum
+#define SSO0    ((uint64_t)1 << 44)     // Segment Select 0
+#define SSO1    ((uint64_t)1 << 45)     // Segment Select 1
+#define SSO2    ((uint64_t)1 << 46)     // Segment Select 2
 
-#define OS2I    ((uint64_t)1 << 49)     // Operand 2 Select In
-#define OS2O    ((uint64_t)1 << 50)     // Operand 2 Select Out
-#define OS2B    ((uint64_t)1 << 51)    // Operand 2 Select BSum
+#define OS1I    ((uint64_t)1 << 47)     // Operand 1 Select In
+#define OS1O    ((uint64_t)1 << 48)     // Operand 1 Select Out
+#define OS1A    ((uint64_t)1 << 49)     // Operand 1 Select ASum
 
-#define OSLI    ((uint64_t)1 << 52)     // Operand Select In
-#define OSLO    ((uint64_t)1 << 53)     // Operand Select Out
-#define OSL0    ((uint64_t)1 << 54)     // Operand Job Select 0
-#define OSL1    ((uint64_t)1 << 55)    // Operand Job Select 1
+#define OS2I    ((uint64_t)1 << 50)     // Operand 2 Select In
+#define OS2O    ((uint64_t)1 << 51)     // Operand 2 Select Out
+#define OS2B    ((uint64_t)1 << 52)    // Operand 2 Select BSum
+
+#define OSLI    ((uint64_t)1 << 53)     // Operand Select In
+#define OSLO    ((uint64_t)1 << 54)     // Operand Select Out
+#define OSL0    ((uint64_t)1 << 55)     // Operand Job Select 0
+#define OSL1    ((uint64_t)1 << 56)    // Operand Job Select 1
 
 #define R       ((uint64_t)1 << 63)     // Intruction End
 
@@ -100,8 +102,9 @@
 #define ASSS AS3        |AS0
 #define ASES AS3    |AS1
 
-#define ASM  AS3    |AS1|AS0
-#define ASPC AS3|AS2
+#define ASZ  AS3    |AS1|AS0
+#define ASM  AS3|AS2
+#define ASPC AS3|AS2|    AS0
 
 // ALU B Selects
 #define BSR1             BS0
@@ -117,8 +120,9 @@
 #define BSSS BS3        |BS0
 #define BSES BS3    |BS1
 
-#define BSM  BS3    |BS1|BS0
-#define BSPC BS3|BS2
+#define BSZ  BS3    |BS1|BS0
+#define BSM  BS3|BS2
+#define BSPC BS3|BS2|    BS0
 
 // Segments
 // SSO000 - none

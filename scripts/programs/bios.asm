@@ -11,6 +11,6 @@ stw c r3 [r1 0]
 inc r1 r1
 
 cmp r1 r2
-jz [r4 16]
+jz [z 16]
 
-jmp [r4 loop]
+jmp [z loop]
