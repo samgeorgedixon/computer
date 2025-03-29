@@ -173,14 +173,14 @@ std::vector<std::vector<uint64_t>> instructions = {
     { NOP, RSELI|OR|OS1A|OS2B|FI, R },                                          // or
 
     // Stack / Functions
-    { NOP, MI|SPO, RI|OS1O|SSTACK, SPI|DEC|ASSP, R },                           // push
-    { NOP, MI|SPI|INC|ASSP, OS1I|RO|SSTACK, R },                                // pop
+    { NOP, MI|SPO, RI|OS1O|SSTACK, SPI|DEC|ASSP, SPI|DEC|ASSP, R },             // push
+    { NOP, SPI|INC|ASSP, MI|SPI|INC|ASSP, OS1I|RO|SSTACK, R },                  // pop
 
-    { NOP, MI|SPO|PCE, RI|PCO|SSTACK, SPI|DEC|ASSP, MI|DEC|ASPC, PCI|RO|SCODE, PCI|ADD|ASPC|OS2B, R },                                              // call
-    { NOP, MI|SPO|PCE, RI|PCO|SSTACK, SPI|MI|DEC|ASSP, RI|CSO|SSTACK, SPI|DEC|ASSP, MI|DEC|ASPC, PCI|RO|SCODE, PCI|ADD|ASPC|OS2B, CSI|OS1O, R },    // callf
+    { NOP, MI|SPO|PCE, RI|PCO|SSTACK, SPI|DEC|ASSP, SPI|DEC|ASSP, MI|DEC|ASPC, MI|DEC|ASM, PCI|RO|SCODE, PCI|ADD|ASPC|OS2B, R }, // call
+    { NOP, MI|SPO|PCE, RI|PCO|SSTACK, SPI|DEC|ASSP, SPI|MI|DEC|ASSP, RI|CSO|SSTACK, SPI|DEC|ASSP, SPI|DEC|ASSP, MI|DEC|ASPC, MI|DEC|ASM, PCI|RO|SCODE, PCI|ADD|ASPC|OS2B, CSI|OS1O, R }, // callf
 
-    { NOP, SPI|MI|INC|ASSP, PCI|RO|SSTACK, R },                                 // ret
-    { NOP, SPI|MI|INC|ASSP, CSI|RO|SSTACK, SPI|MI|INC|ASSP, PCI|RO|SSTACK, R }, // retf
+    { NOP, SPI|INC|ASSP, SPI|MI|INC|ASSP, PCI|RO|SSTACK, R },                                               // ret
+    { NOP, SPI|INC|ASSP, SPI|MI|INC|ASSP, CSI|RO|SSTACK, SPI|INC|ASSP, SPI|MI|INC|ASSP, PCI|RO|SSTACK, R }, // retf
 };
 
 #define ROM_SIZE 0b111111111111 * 8 // 12 bit by 64 bit

@@ -11,9 +11,9 @@ module DriveExt(
 
     );
 
-    reg [15:0] drive [0:(2**24)-1];
+    reg [7:0] drive [0:(2**24)-1];
 
-    assign bus = oe ? drive[addr] : 16'bz;
+    assign bus = oe ? { drive[addr], drive[addr + 1] } : 16'bz;
 
     import "DPI-C" function int LoadROMFile(input string filePath);
     import "DPI-C" function byte GetROMFileByte(input int index);
@@ -25,14 +25,8 @@ module DriveExt(
         
         if (size != 0) begin
 
-            int j = 0;
-            for (int i = 0; i < size; i = i + 2) begin
-                
-                drive[j][15:8] = GetROMFileByte(i + 0);
-                drive[j][7:0] = GetROMFileByte(i + 1);
-
-                j += 1;
-                
+            for (int i = 0; i < size; i = i + 1) begin
+                drive[i][7:0] = GetROMFileByte(i);
             end
 
         end
@@ -43,7 +37,8 @@ module DriveExt(
     always @(posedge clk) begin
 
         if (we) begin
-            drive[addr] <= bus;
+            drive[addr + 1] <= bus[7:0];
+            drive[addr] <= bus[15:8];
         end
 
     end

@@ -10,7 +10,7 @@
 std::string srcPath;
 std::string outPath;
 
-std::vector<uint16_t> program;
+std::vector<char> program;
 std::unordered_map<std::string, unsigned int> labels;
 int currentAddress = 0;
 
@@ -27,41 +27,41 @@ enum ParameterIndex {
 
 struct Instruction {
     int index;
-    int wordSize;
+    int byteSize;
     std::vector<ParameterIndex> parameters;
 };
 
 std::unordered_map<std::string, Instruction> instructions {
-    { "nop",   { NOP,   1, {} } },
-    { "mov",   { MOV,   1, { RS1, RS2 } } },
-    { "li",    { LI,    2, { RS1, IMM } } },
+    { "nop",   { NOP,   2, {} } },
+    { "mov",   { MOV,   2, { RS1, RS2 } } },
+    { "li",    { LI,    4, { RS1, IMM } } },
 
-    { "ldw",   { LDW,   2, { RS, RS1, RS2, IMM } } },
-    { "stw",   { STW,   2, { RS, RS1, RS2, IMM } } },
-    { "ldew",   { LDEW,  2, { RS, RS1, RS2, IMM } } },
-    { "stew",   { STEW,  2, { RS, RS1, RS2, IMM } } },
+    { "ldw",   { LDW,   4, { RS, RS1, RS2, IMM } } },
+    { "stw",   { STW,   4, { RS, RS1, RS2, IMM } } },
+    { "ldew",  { LDEW,  4, { RS, RS1, RS2, IMM } } },
+    { "stew",  { STEW,  4, { RS, RS1, RS2, IMM } } },
 
-    { "jmp",   { JMP,   2, { RS2, IMM } } },
-    { "jmpf",  { JMPF,  2, { RS1, RS2, IMM } } },
-    { "cmp",   { CMP,   1, { RS1, RS2 } } },
-    { "jz",    { JZ,    2, { RS2, IMM } } },
-    { "jc",    { JC,    2, { RS2, IMM } } },
+    { "jmp",   { JMP,   4, { RS2, IMM } } },
+    { "jmpf",  { JMPF,  4, { RS1, RS2, IMM } } },
+    { "cmp",   { CMP,   2, { RS1, RS2 } } },
+    { "jz",    { JZ,    4, { RS2, IMM } } },
+    { "jc",    { JC,    4, { RS2, IMM } } },
 
-    { "add",   { ADD,   1, { RS, RS1, RS2 } } },
-    { "sub",   { SUB,   1, { RS, RS1, RS2 } } },
-    { "inc",   { INC,   1, { RS, RS1 } } },
-    { "dec",   { DEC,   1, { RS, RS1 } } },
-    { "mult",  { MULT,  1, { RS, RS1, RS2 } } },
-    { "div",   { DIV,   1, { RS, RS1, RS2 } } },
-    { "and",   { AND,   1, { RS, RS1, RS2 } } },
-    { "or",    { OR,    1, { RS, RS1, RS2 } } },
+    { "add",   { ADD,   2, { RS, RS1, RS2 } } },
+    { "sub",   { SUB,   2, { RS, RS1, RS2 } } },
+    { "inc",   { INC,   2, { RS, RS1 } } },
+    { "dec",   { DEC,   2, { RS, RS1 } } },
+    { "mult",  { MULT,  2, { RS, RS1, RS2 } } },
+    { "div",   { DIV,   2, { RS, RS1, RS2 } } },
+    { "and",   { AND,   2, { RS, RS1, RS2 } } },
+    { "or",    { OR,    2, { RS, RS1, RS2 } } },
 
-    { "push",  { PUSH,  1, { RS1 } } },
-    { "pop",   { POP,   1, { RS1 } } },
-    { "call",  { CALL,  2, { RS2, IMM } } },
-    { "callf", { CALLF, 2, { RS1, RS2, IMM } } },
-    { "ret",   { RET,   1, {} } },
-    { "retf",  { RETF,  1, {} } },
+    { "push",  { PUSH,  2, { RS1 } } },
+    { "pop",   { POP,   2, { RS1 } } },
+    { "call",  { CALL,  4, { RS2, IMM } } },
+    { "callf", { CALLF, 4, { RS1, RS2, IMM } } },
+    { "ret",   { RET,   2, {} } },
+    { "retf",  { RETF,  2, {} } },
 };
 
 // Register Index
@@ -196,8 +196,12 @@ int CheckLine(std::string line) {
             }
         }
         else if (lineTokens[0].substr(1) == "dw") {
+            return 2;
+        }
+        else if (lineTokens[0].substr(1) == "db") {
             return 1;
-        } else if (lineTokens[0].substr(1) == "segment") {
+        }
+        else if (lineTokens[0].substr(1) == "segment") {
             currentAddress = 0;
         }
         return 0;
@@ -210,7 +214,7 @@ int CheckLine(std::string line) {
         return 0;
     }
 
-    return instructions[lineTokens[0]].wordSize;
+    return instructions[lineTokens[0]].byteSize;
 }
 
 void SetLabels(std::vector<std::string> lines) {
@@ -227,7 +231,6 @@ int ConvertLineInstruction(std::string line) {
     for (int i = 0; i < line.size(); i++) {
         if (line[i] == ' ') {
             lineTokens.push_back(str);
-            std::cout << " : " << str << "\n";
             str = "";
         }
         else if (line[i] == '[') {
@@ -235,7 +238,6 @@ int ConvertLineInstruction(std::string line) {
         }
         else if (line[i] == ']') {
             lineTokens.push_back(str);
-            std::cout << "[: " << str << "\n";
             break;
         }
         else {
@@ -243,12 +245,10 @@ int ConvertLineInstruction(std::string line) {
 
             if (i >= line.size() - 1) {
                 lineTokens.push_back(str);
-                std::cout << "e: " << str << "\n";
                 break;
             }
         }
     }
-    std::cout << "-" << "\n";
 
     if (lineTokens[0][0] == '%') {
         if (lineTokens[0].substr(1) == "org") {
@@ -261,10 +261,26 @@ int ConvertLineInstruction(std::string line) {
                 program.push_back(0);
             }
             if (lineTokens.size() > 1) {
+                uint16_t instrParam = ConvertInstrParam(lineTokens[1]).instrParam;
+                program[currentAddress] = (instrParam & 0xff00) >> 8;
+                program.push_back(instrParam & 0x00ff);
+            }
+            else {
+                program[currentAddress] = 0;
+                program.push_back(0);
+            }
+            return 2;
+        }
+        else if (lineTokens[0].substr(1) == "db") {
+            while (program.size() <= currentAddress) {
+                program.push_back(0);
+            }
+            if (lineTokens.size() > 1) {
                 program[currentAddress] = ConvertInstrParam(lineTokens[1]).instrParam;
             }
-            else program[currentAddress] = 0;
-
+            else {
+                program[currentAddress] = 0;
+            }
             return 1;
         }
         return 0;
@@ -299,14 +315,16 @@ int ConvertLineInstruction(std::string line) {
         program.push_back(0);
     }
 
-    program[currentAddress] = 0xFC00&(instr << 10)|0x03FF&(instrParam);
+    uint16_t instrWord = 0xFC00&(instr << 10)|0x03FF&(instrParam);
+    program[currentAddress] = (instrWord & 0xff00) >> 8;
+    program.push_back(instrWord & 0x00ff);
 
     if (extraParamOn) {
-        program.push_back(extraParam);
-        return 2;
+        program.push_back((extraParam & 0xff00) >> 8);
+        program.push_back(extraParam & 0x00ff);
+        return 4;
     }
-
-    return 1;
+    return 2;
 }
 
 void CreateProgram(std::vector<std::string> lines) {
@@ -323,20 +341,21 @@ void CreateProgram(std::vector<std::string> lines) {
 void PrintProgram() {
     int skipped = 0;
 
-    for (int i = 0; i < program.size(); i++) {
-        if (program[i - 1] == 0 && program[i] == 0) {
-            skipped++;
-        } else {
-            if (skipped != 0) {
-                std::cout << "* - " << skipped << "\n";
-                skipped = 0;
+    for (int i = 0; i < program.size(); i += 2) {
+        if (i >= 2) {
+            if (program[i - 2] == 0 && program[i - 1] == 0 && program[i] == 0 && program[i + 1] == 0) {
+                skipped++;
+                continue;
             }
-            std::cout << i << " - Instr: " << std::bitset<6>(program[i] >> 10)
-                 << " - Param: " << std::bitset<10>(program[i]) << "\n";
         }
-    }
+        if (skipped != 0) {
+            std::cout << "* - " << skipped * 2 << "\n";
+            skipped = 0;
+        }
 
-    std::cout << "Words: " << program.size() << "\n" ;
+        std::cout << i << ": " << std::bitset<8>(program[i]) << " - " << i + 1 << ": " << std::bitset<8>(program[i + 1]) << "\n";
+    }
+    std::cout << "Bytes: " << program.size() << "\n" ;
 }
 
 int main(int argc, char* argv[]) {
@@ -365,10 +384,6 @@ int main(int argc, char* argv[]) {
     }
     srcFile.close();
 
-    for (int i = 0; i < lines.size(); i++) {
-        std::cout << lines[i] << "\n";
-    }
-
     SetLabels(lines);
 
     CreateProgram(lines);
@@ -376,14 +391,7 @@ int main(int argc, char* argv[]) {
     PrintProgram();
 
     std::ofstream outFile(outPath, std::ios::out | std::ios::binary);
-
-    std::vector<char> programBytes;
-    for (int i = 0; i < program.size(); i++) {
-        for (int j = 1; j >= 0; j--) {
-            programBytes.push_back(program[i] >> (j * 8));
-        }
-    }
-    outFile.write(&programBytes[0], programBytes.size() * sizeof(char));
+    outFile.write(&program[0], program.size() * sizeof(char));
     outFile.close();
     
     return 0;

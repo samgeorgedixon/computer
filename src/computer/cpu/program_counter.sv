@@ -24,7 +24,7 @@ module ProgramCounter(
             if (pc == 'hffff) begin
                 pc <= 0;
             end else begin
-                pc <= pc + 1;
+                pc <= pc + 2;
             end
         end
 

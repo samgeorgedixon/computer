@@ -1,4 +1,4 @@
-module RAM16B24A(
+module RAM8B24A(
 
     input clk, r,
 
@@ -9,19 +9,20 @@ module RAM16B24A(
 
     );
 
-    reg [15:0] memory [0:(2**24)-1];
+    reg [7:0] memory [0:(2**24) - 1];
 
-    assign data = oe ? memory[addr] : 16'bz;
+    assign data = oe ? { memory[addr], memory[addr + 1] } : 16'bz;
 
     always @(posedge clk) begin
 
         if (r) begin
             integer i;
             for (i = 0; i < 2**24; i = i + 1) begin
-                memory[i] = 16'b0;
+                memory[i] = 8'b0;
             end
         end else if (we) begin
-            memory[addr] <= data;
+            memory[addr + 1] <= data[7:0];
+            memory[addr] <= data[15:8];
         end
 
     end

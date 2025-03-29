@@ -1,11 +1,10 @@
+%org 0x100
 %segment code
-%org 16
 
-li cs 0x0000
-li ds 0x0001
-li ss 0x0000
+li ds 0x0002
+li ss 0x0002
 
-li bp 0xffff
+li bp 0xff
 mov sp bp
 
 ldw d r1 [z red]
@@ -28,7 +27,7 @@ push bp
 mov bp sp
 
 li r1 0
-ldw s r2 [bp 3]
+ldw s r2 [bp 6]
 
 :fill_loop
 stew e2 r2 [r1 0]
@@ -42,7 +41,7 @@ mov sp bp
 pop bp
 ret
 
-%org 0x000100
+%org 0x200
 %segment data
 
 :red
