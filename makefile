@@ -22,8 +22,18 @@ cpu_instr_gen-build: scripts/src/cpu_instr_gen.cpp
 cpu_instr_gen-run:
 	bin/cpu_instr_gen/cpu_instr_gen
 
+file-system_manager: file-system_manager-build file-system_manager-run
+
+file-system_manager-build: scripts/src/file-system_manager.cpp
+	g++ scripts/src/file-system_manager.cpp -o bin/file-system_manager/file-system_manager
+file-system_manager-run:
+	bin/file-system_manager/file-system_manager
+
 assembler: scripts/src/assembler.cpp
 	g++ scripts/src/assembler.cpp -o bin/assembler/assembler
+
+compiler: scripts/src/compiler.cpp
+	g++ scripts/src/compiler.cpp -o bin/compiler/compiler
 
 clean:
 	rm -rf bin

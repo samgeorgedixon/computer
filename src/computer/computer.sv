@@ -29,7 +29,7 @@ module Computer();
 
     MemoryUnit memoryUnit(clk, r, bus, ri, rbi, ro, rbo, addr, saddr, addro, "bin/programs/bios.bin");
 
-    DriveExt drive(clk, r, bus, addro, e1i, e1o, "bin/programs/tester.bin");
+    DriveExt drive(clk, r, bus, addro, e1i, e1o, "bin/drives/drive.bin");
 
     GPU_Ext gpu(clk, r, bus, addro, e2i, e2o);
 
