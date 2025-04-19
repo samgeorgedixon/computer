@@ -16,7 +16,7 @@ struct File {
 
 std::vector<File> files = {
     { "boot  ", "bin/programs/bootloader.bin" },
-    { "AAAAAA", "bin/programs/tester.bin" },
+    { "kernel", "bin/programs/kernel.bin" },
 };
 
 /*

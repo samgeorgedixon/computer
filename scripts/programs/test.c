@@ -5,7 +5,7 @@
 
 int16_t h = 2;
 
-void FindFile() {
+void main() {
     asm("li r4 5");
 
     int16_t a = 5;

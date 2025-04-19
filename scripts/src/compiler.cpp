@@ -396,6 +396,10 @@ void LoadLine(std::vector<std::vector<std::string>>& lines, int index, std::vect
             scopes.clear();
             scopes.push_back({ ScopeType::Func, name });
 
+            if (name == "main") {
+                program.insert(program.begin() + 1, "call [z main]");
+            }
+
             program.push_back(":" + name);
             program.push_back("push bp");
             program.push_back("mov bp sp");
@@ -409,7 +413,7 @@ void LoadLine(std::vector<std::vector<std::string>>& lines, int index, std::vect
             if      (type == Types::INT16) { vars["return"].type = Types::INT16; offset += 2; }
             else if (type == Types::INT8 ) { vars["return"].type = Types::INT8; offset += 1; }
 
-            for (int i = 0; i < params.params.size(); i += 2) {
+            for (int i = params.params.size() - 1; i >= 0; i += 2) {
                 vars[params.params[i + 1]].addr = offset;
                 vars[params.params[i + 1]].isStack = true;
 

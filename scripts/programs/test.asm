@@ -1,3 +1,4 @@
+call [z main]
 %segment code
 :Blah
 push bp
@@ -12,7 +13,7 @@ jmp [z Blah_end]
 mov sp bp
 pop bp
 ret
-:FindFile
+:main
 push bp
 mov bp sp
 li r4 5
@@ -35,9 +36,9 @@ stw s r1 [bp -1]
 ldw s r1 [bp -1]
 li r2 6
 cmp r1 r2
-jz [z if_34_a]
-jmp [z if_34_a_end]
-:if_34_a
+jz [z if_35_a]
+jmp [z if_35_a_end]
+:if_35_a
 ldw s r1 [bp -1]
 push r1
 li r1 0
@@ -46,16 +47,16 @@ call [z Blah]
 pop r1
 pop r2
 stw s r1 [bp -1]
-:if_34_a_end
-:while_49_true
+:if_35_a_end
+:while_50_true
 li r2 1
 li r1 0
 cmp r1 r2
-jz [z while_49_true_end]
-:while_49_true_loop
-jmp [z while_49_true]
-:while_49_true_end
-:FindFile_end
+jz [z while_50_true_end]
+:while_50_true_loop
+jmp [z while_50_true]
+:while_50_true_end
+:main_end
 mov sp bp
 pop bp
 ret
