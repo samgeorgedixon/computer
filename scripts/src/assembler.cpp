@@ -1,14 +1,13 @@
 #include <iostream>
-#include <fstream>
 #include <vector>
 #include <unordered_map>
 #include <string>
 #include <sstream>
 #include <cctype>
 #include <bitset>
+#include <fstream>
 
-std::string srcPath;
-std::string outPath;
+#include "assembler.h"
 
 std::vector<char> program;
 std::unordered_map<std::string, unsigned int> labels;
@@ -94,7 +93,7 @@ std::unordered_map<std::string, Instruction> instructions {
 #define E3  3
 #define E4  4
 
-std::string Trim(std::string str, std::string whitespace = " \t\r") {
+std::string TrimA(std::string str, std::string whitespace = " \t\r") {
     int strBegin = str.find_first_not_of(whitespace);
 
     if (strBegin == std::string::npos) {
@@ -107,18 +106,22 @@ std::string Trim(std::string str, std::string whitespace = " \t\r") {
     return str.substr(strBegin, strRange);
 }
 
-void GetPaths(int argc, char* argv[]) {
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '-' && argv[i][1] == 'o') {
-            i++;
-            outPath = argv[i];
-        } else {
-            srcPath = argv[i];
-        }
+std::vector<std::string> SplitA(std::string str, char delim) {
+    std::vector<std::string> result;
+    std::stringstream ss(str);
+    std::string item;
+
+    while (getline(ss, item, delim)) {
+        result.push_back(TrimA(item));
     }
+    if (result.size() == 0 && TrimA(str).size() != 0) {
+        result.push_back(TrimA(str));
+    }
+
+    return result;
 }
 
-bool IsStrAlpha(std::string str) {
+bool IsStrAlphaA(std::string str) {
     bool strAlpha = false;
     for (int i = 0; i < str.length(); i++) {
         strAlpha = isalpha(str[i]);
@@ -128,58 +131,47 @@ bool IsStrAlpha(std::string str) {
     return strAlpha;
 }
 
-struct InstrParamConverted {
-    int instrParam;
-    bool isSeg;
-    bool isExt;
-    bool isReg;
-};
-
-InstrParamConverted ConvertInstrParam(std::string instrParamStr) {
-    int instrParam = 0;
-    bool isSeg = false;
-    bool isExt = false;
-    bool isReg = false;
-
+uint16_t ConvertInstrParam(std::string instrParamStr) {
+    uint16_t instrParam = 0;
+    
     if (instrParamStr[0] == '0' && instrParamStr[1] == 'x') {
         instrParam = std::stoi(instrParamStr.substr(2), nullptr, 16);
     }
     else if (instrParamStr[0] == '0' && instrParamStr[1] == 'b') {
         instrParam = std::stoi(instrParamStr.substr(2), nullptr, 2);
     }
-    else if (IsStrAlpha(instrParamStr)) {
-        if      (instrParamStr == "c") { instrParam = CSS; isSeg = true; }
-        else if (instrParamStr == "d") { instrParam = DSS; isSeg = true; }
-        else if (instrParamStr == "s") { instrParam = SSS; isSeg = true; }
-        else if (instrParamStr == "e") { instrParam = ESS; isSeg = true; }
+    else if (IsStrAlphaA(instrParamStr)) {
+        if      (instrParamStr == "c") { instrParam = CSS; }
+        else if (instrParamStr == "d") { instrParam = DSS; }
+        else if (instrParamStr == "s") { instrParam = SSS; }
+        else if (instrParamStr == "e") { instrParam = ESS; }
 
-        else if (instrParamStr == "r1") { instrParam = R1; isReg = true; }
-        else if (instrParamStr == "r2") { instrParam = R2; isReg = true; }
-        else if (instrParamStr == "r3") { instrParam = R3; isReg = true; }
-        else if (instrParamStr == "r4") { instrParam = R4; isReg = true; }
+        else if (instrParamStr == "r1") { instrParam = R1; }
+        else if (instrParamStr == "r2") { instrParam = R2; }
+        else if (instrParamStr == "r3") { instrParam = R3; }
+        else if (instrParamStr == "r4") { instrParam = R4; }
 
-        else if (instrParamStr == "sp") { instrParam = SP; isReg = true; }
-        else if (instrParamStr == "bp") { instrParam = BP; isReg = true; }
+        else if (instrParamStr == "sp") { instrParam = SP; }
+        else if (instrParamStr == "bp") { instrParam = BP; }
 
-        else if (instrParamStr == "cs")  { instrParam = CS; isReg = true; }
-        else if (instrParamStr == "ds")  { instrParam = DS; isReg = true; }
-        else if (instrParamStr == "ss")  { instrParam = SS; isReg = true; }
-        else if (instrParamStr == "es")  { instrParam = ES; isReg = true; }
+        else if (instrParamStr == "cs")  { instrParam = CS; }
+        else if (instrParamStr == "ds")  { instrParam = DS; }
+        else if (instrParamStr == "ss")  { instrParam = SS; }
+        else if (instrParamStr == "es")  { instrParam = ES; }
 
-        else if (instrParamStr == "z")   { instrParam = Z; isReg = true; }
+        else if (instrParamStr == "z")   { instrParam = Z; }
 
-        else if (instrParamStr == "e1")  { instrParam = E1; isExt = true; }
-        else if (instrParamStr == "e2")  { instrParam = E2; isExt = true; }
-        else if (instrParamStr == "e3")  { instrParam = E3; isExt = true; }
-        else if (instrParamStr == "e4")  { instrParam = E4; isExt = true; }
+        else if (instrParamStr == "e1")  { instrParam = E1; }
+        else if (instrParamStr == "e2")  { instrParam = E2; }
+        else if (instrParamStr == "e3")  { instrParam = E3; }
+        else if (instrParamStr == "e4")  { instrParam = E4; }
 
         else instrParam = labels[instrParamStr];
     }
     else {
         instrParam = std::stoi(instrParamStr);
     }
-
-    return { instrParam, isSeg, isExt, isReg };
+    return instrParam;
 }
 
 int CheckLine(std::string line) {
@@ -194,7 +186,7 @@ int CheckLine(std::string line) {
     if (line[0] == '%') {
         if (lineTokens[0].substr(1) == "org") {
             if (lineTokens.size() > 1) {
-                currentAddress = ConvertInstrParam(lineTokens[1]).instrParam;
+                currentAddress = ConvertInstrParam(lineTokens[1]);
             }
         }
         else if (lineTokens[0].substr(1) == "dw") {
@@ -219,7 +211,7 @@ int CheckLine(std::string line) {
     return instructions[lineTokens[0]].byteSize;
 }
 
-void SetLabels(std::vector<std::string> lines) {
+void SetLabels(const std::vector<std::string>& lines) {
     for (int i = 0; i < lines.size(); i++) {
         currentAddress += CheckLine(lines[i]);
     }
@@ -229,6 +221,8 @@ int ConvertLineInstruction(std::string line) {
     std::vector<std::string> lineTokens;
 
     std::string str;
+
+    std::cout << line << "\n";
 
     for (int i = 0; i < line.size(); i++) {
         if (line[i] == ' ') {
@@ -255,7 +249,7 @@ int ConvertLineInstruction(std::string line) {
     if (lineTokens[0][0] == '%') {
         if (lineTokens[0].substr(1) == "org") {
             if (lineTokens.size() > 1) {
-                currentAddress = ConvertInstrParam(lineTokens[1]).instrParam;
+                currentAddress = ConvertInstrParam(lineTokens[1]);
             }
         }
         else if (lineTokens[0].substr(1) == "dw") {
@@ -263,7 +257,7 @@ int ConvertLineInstruction(std::string line) {
                 program.push_back(0);
             }
             if (lineTokens.size() > 1) {
-                uint16_t instrParam = ConvertInstrParam(lineTokens[1]).instrParam;
+                uint16_t instrParam = ConvertInstrParam(lineTokens[1]);
                 program[currentAddress] = (instrParam & 0xff00) >> 8;
                 program.push_back(instrParam & 0x00ff);
             }
@@ -278,7 +272,7 @@ int ConvertLineInstruction(std::string line) {
                 program.push_back(0);
             }
             if (lineTokens.size() > 1) {
-                program[currentAddress] = ConvertInstrParam(lineTokens[1]).instrParam;
+                program[currentAddress] = ConvertInstrParam(lineTokens[1]);
             }
             else {
                 program[currentAddress] = 0;
@@ -299,16 +293,16 @@ int ConvertLineInstruction(std::string line) {
 
     for (int i = 0; i < instructions[lineTokens[0]].parameters.size(); i++) {
         if (instructions[lineTokens[0]].parameters[i] == ParameterIndex::RS) {
-            instrParam |= ((ConvertInstrParam(lineTokens[i + 1]).instrParam & 0b11) - 1 << 8);
+            instrParam |= ((ConvertInstrParam(lineTokens[i + 1]) & 0b11) - 1 << 8);
         }
         else if (instructions[lineTokens[0]].parameters[i] == ParameterIndex::RS1) {
-            instrParam |= ((ConvertInstrParam(lineTokens[i + 1]).instrParam & 0b1111) << 4);
+            instrParam |= ((ConvertInstrParam(lineTokens[i + 1]) & 0b1111) << 4);
         }
         else if (instructions[lineTokens[0]].parameters[i] == ParameterIndex::RS2) {
-            instrParam |= (ConvertInstrParam(lineTokens[i + 1]).instrParam & 0b1111);
+            instrParam |= (ConvertInstrParam(lineTokens[i + 1]) & 0b1111);
         }
         else if (instructions[lineTokens[0]].parameters[i] == ParameterIndex::IMM) {
-            extraParam = ConvertInstrParam(lineTokens[i + 1]).instrParam;
+            extraParam = ConvertInstrParam(lineTokens[i + 1]);
             extraParamOn = true;
         }
     }
@@ -329,7 +323,7 @@ int ConvertLineInstruction(std::string line) {
     return 2;
 }
 
-void CreateProgram(std::vector<std::string> lines) {
+void CreateProgram(const std::vector<std::string>& lines) {
     currentAddress = 0;
 
     for (int i = 0; i < lines.size(); i++) {
@@ -360,41 +354,90 @@ void PrintProgram() {
     std::cout << "Bytes: " << program.size() << "\n" ;
 }
 
-int main(int argc, char* argv[]) {
-    GetPaths(argc, argv);
+void Preprosessor(std::vector<std::string>& lines) {
+    std::unordered_map<std::string, std::vector<std::string>> defines;
 
-    std::ifstream srcFile(srcPath);
+    for (int i = 0; i < lines.size(); i++) {
+        std::vector<std::string> lineTokens;
+        std::vector<std::string> instructions;
+        std::string str;
 
-    if (!srcFile.is_open()) {
-        std::cout << "Unable to open src file.\n";
+        for (int j = 0; j < lines[i].size(); j++) {
+            if (lines[i][j] == ' ' && lineTokens.size() <= 1) {
+                lineTokens.push_back(str);
+                str = "";
+            }
+            else {
+                str.push_back(lines[i][j]);
 
-        srcFile.close();
-        return 1;
-    }
-    
-    std::string line;
-    std::vector<std::string> lines;
-
-    while(getline(srcFile, line)) {
-        line = Trim(line);
-
-        if (line.empty()) {
-            continue;
+                if (j >= lines[i].size() - 1) {
+                    lineTokens.push_back(str);
+                    break;
+                }
+            }
         }
+
+        if (lineTokens[0] == "%define") {
+            instructions = SplitA(lineTokens[2], '&');
+
+            defines[lineTokens[1]] = instructions;
+        }
+        else if (lineTokens[0] == "%include") {
+            std::string includePath = lines[i].substr(lines[i].find(' ') + 2, lines[i].substr(lines[i].find(' ') + 2).size() - 1);
+            std::ifstream includeFile(includePath);
+
+            if (!includeFile.is_open()) {
+                std::cout << "Unable to open include file: " << includePath << "\n";
+                includeFile.close();
+            }
+            
+            std::string line;
         
-        lines.push_back(line);
+            int offset = 1;
+            while(getline(includeFile, line)) {
+                line = TrimA(line);
+
+                if (line.empty()) {
+                    continue;
+                }
+
+                std::cout << line << "\n";
+                
+                lines.insert(lines.begin() + i + offset, line);
+                offset++;
+            }
+            includeFile.close();
+        }
+
+        for (int j = 0; j < lines[i].size(); j++) {
+            if (lines[i][j] == '$') {
+                int defineS = j + 1, defineE = lines[i].substr(j + 1).find(' ');
+
+                if (defineE == -1) {
+                    defineE = lines[i].size() - 1;
+                }
+
+                std::vector<std::string> define = defines[lines[i].substr(defineS, defineE)];
+
+                lines[i].replace(defineS, defineE - defineS + 1, defines[lines[i].substr(defineS, defineE)][0]);
+                lines[i].erase(defineS - 1, 1);
+
+                for (int k = 1; k < define.size(); k++) {
+                    std::cout << define[k] << "\n";
+
+                    lines.insert(lines.begin() + i + 1, define[k]);
+                }
+            }
+        }
     }
-    srcFile.close();
-
     SetLabels(lines);
+}
 
+std::vector<char> AssembleLines(std::vector<std::string>& lines) {
+    Preprosessor(lines);
     CreateProgram(lines);
 
     PrintProgram();
 
-    std::ofstream outFile(outPath, std::ios::out | std::ios::binary);
-    outFile.write(&program[0], program.size() * sizeof(char));
-    outFile.close();
-    
-    return 0;
+    return program;
 }

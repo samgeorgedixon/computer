@@ -33,7 +33,7 @@ assembler: scripts/src/assembler.cpp
 	g++ scripts/src/assembler.cpp -o bin/assembler/assembler
 
 compiler: scripts/src/compiler.cpp
-	g++ scripts/src/compiler.cpp -o bin/compiler/compiler
+	g++ scripts/src/compiler.cpp scripts/src/assembler.cpp -o bin/compiler/compiler
 
 clean:
 	rm -rf bin

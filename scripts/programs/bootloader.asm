@@ -1,22 +1,37 @@
 %segment code
-%org 0x10
 
-mov cs 0
+%include "scripts/programs/file_system.asm"
 
-mov ra 0x200
-mov rb 0x
+:setup
+    li ds 2
+    li ss 2
+    
+    li bp 0xff
+    mov sp bp
 
-:loop
-lddr rc ra
-str ra rc
-inc ra
+:test
+    li r1 0
+    push r1
+    push r1
 
-cmp
-jz 16
+    li r1 0x4141
+    push r1
+    push r1
+    push r1
 
-jmp loop
+    call [z find_file]
 
+    pop 0
+    pop 0
+    pop 0
 
-mov cs 0x0002
-mov ds 0x0102
-mov ss 0x0202
+    pop r2
+    pop r1
+
+:end
+    jmp [z end]
+
+%org 0x100
+%segment data
+
+%dw 0

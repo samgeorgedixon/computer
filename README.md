@@ -41,15 +41,15 @@ Here I have designed a custom Computer / CPU.
  -  Store Word:     stw seg rs1 [rs2 imm]
  -  Store Byte:     stb seg rs1 [rs2 imm]
 
- -  Load Ext:       ldew ext rs1 [rs2 imm]
- -  Store Ext:      stew ext rs1 [rs2 imm]
+ -  Load Ext:       lde ext rs1 [rs2 imm]
+ -  Store Ext:      ste ext rs1 [rs2 imm]
 
 #### Jump / Conditions
  -  Jump:           jmp      [rs2 imm]
  -  Jump Far:       jmpf rs1 [rs2 imm]
  -  Jump If Zero:   jz       [rs2 imm]
  -  Jump If Carry:  jc       [rs2 imm]
- -  Compare:        cmp rs1, rs2
+ -  Compare:        cmp rs1 rs2
 
 #### Arithmetic
  -  Addition:       add res rs1 rs2
@@ -69,3 +69,4 @@ Here I have designed a custom Computer / CPU.
  -  Function:       call [rs2 imm]
  -  Function Far:   callf rs1 [rs2 imm]
  -  Return:         ret
+ -  Return Far:     retf

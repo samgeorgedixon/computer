@@ -11,7 +11,7 @@ Vcomputer* computer;
 
 VerilatedVcdC* vcd;
 bool vcdFinished = false;
-int vcdClockCycles = 1000;
+int vcdClockCycles = 100000;
 std::string vcdFileName = "logs/computer.vcd";
 
 void SetupComputer() {
