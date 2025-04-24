@@ -29,11 +29,11 @@ file-system_manager-build: scripts/src/file-system_manager.cpp
 file-system_manager-run:
 	bin/file-system_manager/file-system_manager
 
-assembler: scripts/src/assembler.cpp
+assembler: scripts/src/toolchain/assembler.cpp
 	g++ scripts/src/assembler.cpp -o bin/assembler/assembler
 
-compiler: scripts/src/compiler.cpp
-	g++ scripts/src/compiler.cpp scripts/src/assembler.cpp -o bin/compiler/compiler
+compiler: scripts/src/toolchain/compiler.cpp
+	g++ scripts/src/toolchain/compiler.cpp scripts/src/toolchain/assembler.cpp scripts/src/misc.cpp -o bin/compiler/compiler
 
 clean:
 	rm -rf bin

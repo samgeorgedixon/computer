@@ -1,7 +1,7 @@
 #include "stdint.h"
 #include "stdbool.h"
 
-bool CheckStrEqual(char strA[], char strB[]) {
+bool CheckStrEqual(char strA[20], char strB[20]) {
     int16_t i = 0;
     bool equal = true;
 

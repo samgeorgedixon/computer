@@ -1,7 +1,7 @@
 #include "stdint.h"
 #include "stdbool.h"
 
-#include "scripts/programs/os/str.c"
+#include "src/os/str.c"
 
 int8_t GetDriveByte(int16_t addr, int16_t segment) {
     asm("ldw s r2 [bp 9]");

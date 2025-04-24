@@ -1,7 +1,13 @@
 /bin
+/bin_int
 /logs
 /vendor_includes
 /computer
 
 .vscode
+.vs
+*.sln
 *.code-workspace
+*.vcxproj
+*.vcxproj.user
+*.vcxproj.filters

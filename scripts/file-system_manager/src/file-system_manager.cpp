@@ -4,6 +4,8 @@
 #include <bitset>
 #include <cmath>
 
+std::string relitivePath = "../../";
+
 std::vector<char> drive;
 std::vector<char> fileTable;
 
@@ -15,8 +17,8 @@ struct File {
 };
 
 std::vector<File> files = {
-    { "boot  ", "bin/programs/bootloader.bin" },
-    { "kernel", "bin/programs/kernel.bin" },
+    { "boot  ", relitivePath + "bin/programs/bootloader.bin" },
+    { "kernel", relitivePath + "bin/programs/kernel.bin" },
 };
 
 /*
@@ -77,7 +79,7 @@ void WriteDrive(std::string filePath) {
 int main(int argc, char* argv[]) {
     AddFiles();
 
-    WriteDrive("bin/drives/drive.bin");
+    WriteDrive(relitivePath + "bin/drives/drive.bin");
 
     return 0;
 }
