@@ -1,9 +1,8 @@
-#include "stdint.h"
-#include "stdbool.h"
+#include "../myc.h"
 
 #include "src/os/str.c"
 
-int8_t GetDriveByte(int16_t addr, int16_t segment) {
+void GetDriveByte(int16_t addr, int16_t segment[3], int8_tR byte) {
     asm("ldw s r2 [bp 9]");
     asm("ldw s es [bp 7]");
     
@@ -11,7 +10,7 @@ int8_t GetDriveByte(int16_t addr, int16_t segment) {
 
     asm("stb s r1 [bp 6]");
 }
-int16_t GetDriveWord(int16_t addr, int16_t segment) {
+void GetDriveWord(int16_t addr, int16_t segment, int16_tR word) {
     asm("ldw s r2 [bp 10]");
     asm("ldw s es [bp 8]");
     
@@ -20,7 +19,7 @@ int16_t GetDriveWord(int16_t addr, int16_t segment) {
     asm("stw s r1 [bp 6]");
 }
 
-int16_t GetFileTableIndex(char name[7]) {
+void GetFileTableIndex(char name[7], int16_tR index) {
     int16_t i = 0;
     while (i != 250) {
         char fileName[7];
@@ -29,28 +28,27 @@ int16_t GetFileTableIndex(char name[7]) {
         while (j != 6) {
             int16_t k = i;
             k += j;
-            fileName[j] = GetDriveByte(k, 0);
+
+            GetDriveByte(k, 0, fileName[j]);
 
             j += 1;
         }
-        bool equal = CheckStrEqual(name, fileName);
+        bool equal;
+        CheckStrEqual(name, fileName, equal);
 
         if (equal) {
-            return i;
+            index = i;
+            return;
         }
 
         i += 10;
     }
 }
 
-int16_t GetFileAddress(int16_t tableIndex) {
+void GetFile(int16_t tableIndex, int16_tR addr, int16_tR size) {
     tableIndex += 6;
-    int16_t addr = GetDriveWord(tableIndex, 0);
-    return addr;
-}
+    GetDriveWord(tableIndex, 0, addr);
 
-int16_t GetFileSize(int16_t tableIndex) {
-    tableIndex += 8;
-    int16_t size = GetDriveWord(tableIndex, 0);
-    return size;
+    tableIndex += 2;
+    GetDriveWord(tableIndex, 0, size);
 }

@@ -1,9 +1,8 @@
-#include "stdint.h"
-#include "stdbool.h"
+#include "../myc.h"
 
-bool CheckStrEqual(char strA[20], char strB[20]) {
+void CheckStrEqual(char strA[20], char strB[20], boolR equal) {
     int16_t i = 0;
-    bool equal = true;
+    equal = true;
 
     while (i != -1) {
         if (strA[i] != strB[i]) {
@@ -14,5 +13,4 @@ bool CheckStrEqual(char strA[20], char strB[20]) {
             i = -1;
         }
     }
-    return equal;
 }

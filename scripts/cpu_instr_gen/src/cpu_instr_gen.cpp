@@ -178,7 +178,9 @@ std::vector<std::vector<uint64_t>> instructions = {
 
     // Stack / Functions
     { NOP, MI|SPO, RI|OS1O|SSTACK, SPI|DEC|ASSP, SPI|DEC|ASSP, R },             // push
+    { NOP, MI|SPO, RBI|OS1O|SSTACK, SPI|DEC|ASSP, R },                          // pushb
     { NOP, SPI|INC|ASSP, MI|SPI|INC|ASSP, OS1I|RO|SSTACK, R },                  // pop
+    { NOP, MI|SPI|INC|ASSP, OS1I|RBO|SSTACK, R },                               // popb
 
     { NOP, MI|SPO|PCE, RI|PCO|SSTACK, SPI|DEC|ASSP, SPI|DEC|ASSP, MI|DEC|ASPC, MI|DEC|ASM, PCI|RO|SCODE, PCI|ADD|ASPC|OS2B, R }, // call
     { NOP, MI|SPO|PCE, RI|PCO|SSTACK, SPI|DEC|ASSP, SPI|MI|DEC|ASSP, RI|CSO|SSTACK, SPI|DEC|ASSP, SPI|DEC|ASSP, MI|DEC|ASPC, MI|DEC|ASM, PCI|RO|SCODE, PCI|ADD|ASPC|OS2B, CSI|OS1O, R }, // callf

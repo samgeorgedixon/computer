@@ -1,11 +1,13 @@
-#include "stdbool.h"
-#include "stdint.h"
+#include "../myc.h"
 
 #include "src/tests/blah.c"
 
 int16_t h = 2;
-
 int8_t hdj[4];
+
+void hello(int16_t i, int8_t j, charR arr[5]) {
+    return;
+}
 
 void main() {
     asm("li r4 5");
@@ -28,8 +30,10 @@ void main() {
     a *= h;
 
     if (a == 6) {
-        a = Blah(a);
+        Blah(a);
     }
+
+    hello(a, h, arrb);
 
     while (true) {}
 }

@@ -1,15 +1,16 @@
-#include "stdint.h"
-#include "stdbool.h"
+#include "../myc.h"
 
 #include "src/os/drive.c"
 
-char[7] LoadKernel() {
+void LoadKernel(charR name[7]) {
     char fileName[7];
 
-    int16_t fileTableIndex = GetFileTableIndex(fileName);
+    int16_t fileTableIndex;
+    GetFileTableIndex(fileName, fileTableIndex);
 
-    int16_t fileAddr = GetFileAddress(fileTableIndex);
-    int16_t fileSize = GetFileSize(fileTableIndex);
+    int16_t fileAddr;
+    int16_t fileSize;
+    GetFile(fileTableIndex, fileAddr, fileSize);
 
     return fileName;
 }
@@ -22,7 +23,7 @@ void main() {
     asm("mov sp bp");
 
     char fileName[7];
-    fileName = LoadKernel();
+    LoadKernel(fileName);
 
     while (true) {}
 }

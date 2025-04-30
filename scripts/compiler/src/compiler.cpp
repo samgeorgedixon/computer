@@ -230,9 +230,13 @@ std::unordered_map<std::string, Type> types = {
     { "",           N },
     { "void",       VOID },
     { "int16_t",    INT16 },
+    { "int16_tR",   INT16 },
     { "int8_t",     INT8 },
+    { "int8_tR",    INT8 },
     { "char",       INT8 },
+    { "charR",      INT8 },
     { "bool",       INT8 },
+    { "boolR",      INT8 },
 };
 std::unordered_map<Type, std::string> typesToString = {
     { N,     "" },
@@ -401,17 +405,21 @@ std::string GetAssignment(const std::vector<std::string>& line, int checkIndex) 
 
 int CallFunction(ProgramData& programData, std::string name, std::vector<std::string>& params, bool cleanStack);
 
-void SetVariable(ProgramData& programData, std::string name, std::string nameArray, std::string assignment, std::string assignmentArray, std::string assignmentOperator, std::vector<std::string>& params, std::pair<VarData, bool> nameVarOveride) {
+void SetVariable(ProgramData& programData, std::string name, std::string nameArray, std::string assignment, std::string assignmentArray, std::string assignmentOperator, std::vector<std::string>& params, std::pair<VarData, bool> nameVarOveride, std::pair<VarData, bool> assignmentVarOveride) {
     int addrOffset = 0;
     bool setVar = false;
     
     VarData& nameVar = programData.vars[name];
-    
     if (nameVarOveride.second) {
         nameVar = nameVarOveride.first;
     }
+
+    VarData& assignmentVar = programData.vars[assignment];
+    if (assignmentVarOveride.second) {
+        assignmentVar = assignmentVarOveride.first;
+    }
     
-    if (StringToImm(assignment).first) {
+    if (StringToImm(assignment).first || assignmentVarOveride.second) {
         if (params.size() != 0) { // Function Assignment
             int bytesToClear = CallFunction(programData, assignment, params, false);
 
@@ -453,29 +461,29 @@ void SetVariable(ProgramData& programData, std::string name, std::string nameArr
                     if      (nameVar.type == Type::INT16) { LdStVar(programData.vars[assignmentArray], programData.program, "r3", "ld", 0); programData.program.push_back("add r3 r3 r3") ; }
                     else if (nameVar.type == Type::INT8)  { LdStVar(programData.vars[assignmentArray], programData.program, "r3", "ld", 0); }
 
-                    LdStVarOffsetReg(programData.vars[assignment], programData.program, "r1", "ld", "r3");
+                    LdStVarOffsetReg(assignmentVar, programData.program, "r1", "ld", "r3");
                 } else { // Imm Index
                     if      (nameVar.type == Type::INT16) { varAddrOffset = StringToImm(assignmentArray).second * 2; }
                     else if (nameVar.type == Type::INT8) { varAddrOffset = StringToImm(assignmentArray).second; }
                     
-                    LdStVar(programData.vars[assignment], programData.program, "r1", "ld", varAddrOffset);
+                    LdStVar(assignmentVar, programData.program, "r1", "ld", varAddrOffset);
                 }
             }
             else if (nameVar.count > 1) { // Array Variable
                 for (int i = 0; i < nameVar.count; i++) {
                     if (nameVar.type == Type::INT16) {
-                        LdStVar(programData.vars[assignment], programData.program, "r1", "ld", i * 2);
+                        LdStVar(assignmentVar, programData.program, "r1", "ld", i * 2);
                         LdStVar(nameVar, programData.program, "r1", "st", i * 2);
                     }
                     else if (nameVar.type == Type::INT8) {
-                        LdStVar(programData.vars[assignment], programData.program, "r1", "ld", i);
+                        LdStVar(assignmentVar, programData.program, "r1", "ld", i);
                         LdStVar(nameVar, programData.program, "r1", "st", i);
                     }
                 }
                 setVar = true;
             }
             else { // Variable
-                LdStVar(programData.vars[assignment], programData.program, "r1", "ld", varAddrOffset);
+                LdStVar(assignmentVar, programData.program, "r1", "ld", varAddrOffset);
             }
         }
     } else { // Imm Assignment
@@ -529,10 +537,10 @@ void SetVariable(ProgramData& programData, std::string name, std::string nameArr
     }
 }
 
-void CreateStackVar(ProgramData& programData, std::string name, Type type, std::string nameArray, std::string assignment, std::string assignmentArray, std::string assignmentOperator, std::vector<std::string>& params) {
+VarData CreateStackVar(ProgramData& programData, std::string name, Type type, std::string nameArray, std::string assignment, std::string assignmentArray, std::string assignmentOperator, std::vector<std::string>& params) {
     int count = 1;
     bool array = false;
-
+    
     if (nameArray != "") {
         array = true;
         count = StringToImm(nameArray).second;
@@ -567,8 +575,10 @@ void CreateStackVar(ProgramData& programData, std::string name, Type type, std::
     }
     
     if (assignment != "") {
-        SetVariable(programData, name, "", assignment, assignmentArray, assignmentOperator, params, {{varAddr, true, type, count}, true});
+        SetVariable(programData, name, "", assignment, assignmentArray, assignmentOperator, params, {{varAddr, true, type, count}, true}, {});
     }
+    
+    return { varAddr, true, type, count };
 }
 
 void CreateDataVar(ProgramData& programData, std::string name, Type type, std::string arrayStr, int assignment) {
@@ -621,6 +631,9 @@ int CallFunction(ProgramData& programData, std::string name, std::vector<std::st
     
     std::vector<std::string> dumbyParams;
     int j = 0;
+
+    ProgramData refSetsProgramData = programData;
+    refSetsProgramData.program.clear();
     
     for (int i = 0; i < programData.functions[name].size(); i += 2) {
         Type paramType = types[programData.functions[name][i]];
@@ -628,6 +641,8 @@ int CallFunction(ProgramData& programData, std::string name, std::vector<std::st
         std::string assignment = "";
         std::string assignmentArray = "";
         std::string assignmentOperator = "";
+        
+        bool paramRef = (programData.functions[name][i][programData.functions[name][i].size() - 1] == 'R') ? true : false;
         
         if (j < params.size()) {
             assignment = params[j];
@@ -643,8 +658,14 @@ int CallFunction(ProgramData& programData, std::string name, std::vector<std::st
             i += 3;
         }
 
-        CreateStackVar(programData, "", paramType, nameArray, assignment, assignmentArray, assignmentOperator, dumbyParams);
-
+        VarData paramVar = CreateStackVar(programData, "", paramType, nameArray, assignment, assignmentArray, assignmentOperator, dumbyParams);
+        
+        if (paramRef) {
+            refSetsProgramData.relitiveStackPointer = programData.relitiveStackPointer;
+            
+            SetVariable(refSetsProgramData, assignment, assignmentArray, "", "", "=", dumbyParams, {}, {paramVar, true});
+        }
+        
         if (j < params.size()) {
             bytesToClear = (programData.relitiveStackPointer * -1) - (oldRelitiveStackPointer * -1);
         }
@@ -654,6 +675,10 @@ int CallFunction(ProgramData& programData, std::string name, std::vector<std::st
     programData.relitiveStackPointer = oldRelitiveStackPointer;
 
     programData.program.push_back("call [z " + name + "]");
+
+    for (int i = 0; i < refSetsProgramData.program.size(); i++) {
+        programData.program.push_back(refSetsProgramData.program[i]);
+    }
 
     if (cleanStack) {
         programData.program.push_back("li r1 " + std::to_string(bytesToClear));
@@ -676,31 +701,17 @@ void CreateFunction(ProgramData& programData, std::string name, Type type, std::
     programData.program.push_back("mov bp sp");
     
     programData.functions[name] = params;
-
-    int offset = 6;
-    int rcount = 1;
     
-    if (type != Type::VOID) {
-        programData.functions[name].push_back(typesToString[type]);
-        programData.functions[name].push_back("return");
-
-        if (array != "") {
-            rcount = StringToImm(array).second;
-
-            programData.functions[name].push_back("[");
-            programData.functions[name].push_back(array);
-            programData.functions[name].push_back("]");
+    int offset = 5;
+    
+    int paramsStartOffset = 1;
+    if (params.size() != 0) {
+        if (params[params.size() - 1] == "]") {
+            paramsStartOffset += 3;
         }
-
-        programData.vars["return"].addr = offset;
-        programData.vars["return"].isStack = true;
-        programData.vars["return"].count = rcount;
-
-        if (type == Type::INT16) { programData.vars["return"].type = Type::INT16; offset += 2; }
-        else if (type == Type::INT8) { programData.vars["return"].type = Type::INT8; offset += 1; }
     }
     
-    for (int i = params.size() - 2; i >= 0; i -= 2) {
+    for (int i = params.size() - 1 - paramsStartOffset; i >= 0; i -= 2) {
         int count = 1;
         bool array = false;
 
@@ -709,13 +720,19 @@ void CreateFunction(ProgramData& programData, std::string name, Type type, std::
                 count = StringToImm(params[i + 3]).second;
             }
         }
-
+        
         programData.vars[params[i + 1]].addr = offset;
         programData.vars[params[i + 1]].isStack = true;
         programData.vars[params[i + 1]].count = count;
         
         if      (types[params[i]] == Type::INT16) { programData.vars[params[i + 1]].type = Type::INT16; offset += 2 * count; }
         else if (types[params[i]] == Type::INT8 ) { programData.vars[params[i + 1]].type = Type::INT8; offset += 1 * count; }
+
+        if (params.size() > i + 2) {
+            if (params[i + 2] == "[") {
+                i -= 3;
+            }
+        }
     }
 }
 
@@ -740,10 +757,14 @@ void LoadLine(ProgramData& programData, int lineIndex) {
     if (type > 0) {
         name = line[assignmentIndex];
         
-        if (line[assignmentIndex + 1] == "(") { // Function Assignment
-            CreateFunction(programData, name, type, nameArray, params);
+        bool function = false;
+        if (line.size() > assignmentIndex + 1) {
+            if (line[assignmentIndex + 1] == "(") { // Function Assignment
+                CreateFunction(programData, name, type, nameArray, params);
+                function = true;
+            }
         }
-        else { // Variable Assignment
+        if (!function) { // Variable Assignment
             nameArray = GetArrayCountString(line, 1);
             if (nameArray != "") {
                 assignmentIndex += 3;
@@ -851,13 +872,6 @@ void LoadLine(ProgramData& programData, int lineIndex) {
             programData.program.push_back(":" + scopeName);
         }
         else if (line[0] == "return") {
-            assignmentIndex--;
-
-            assignment = GetAssignment(line, assignmentIndex + 0);
-            assignmentArray = GetArrayCountString(line, assignmentIndex + 1);
-
-            SetVariable(programData, "return", "", assignment, assignmentArray, "=", params, {});
-
             programData.program.push_back("jmp [z " + programData.scopes[0].name + "_end]");
         }
         else if (line[0] == "asm") {
@@ -914,7 +928,7 @@ void LoadLine(ProgramData& programData, int lineIndex) {
             CallFunction(programData, name, params, true);
         }
         else {
-            SetVariable(programData, name, nameArray, assignment, assignmentArray, assignmentOperator, params, {});
+            SetVariable(programData, name, nameArray, assignment, assignmentArray, assignmentOperator, params, {}, {});
         }
     }
 

@@ -11,7 +11,13 @@ bootloader: src\os\bootloader.c
 testc: src\tests\test.c
 	${CC} src\tests\test.c -a src\tests\test.asm
 
+gpu_test: src\tests\test.c
+	${CC} src\tests\gpu_test.c -a src\tests\gpu_test.asm -o ${BUILD_DIR}\gpu_test.bin
+
 # ASM
+
+bios: src\bios.asm
+	${ASM} src\bios.asm -o ${BUILD_DIR}\bios.bin
 
 testa: src\tests\tester.asm
 	${ASM} src\tests\tester.asm -o ${BUILD_DIR}\tester.bin

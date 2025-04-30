@@ -1,6 +1,5 @@
-#include "stdint.h"
+#include "../myc.h"
 
-int16_t Blah(int16_t a) {
+void Blah(int16_tR a) {
     a *= 2;
-    return a;
 }
