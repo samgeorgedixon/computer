@@ -11,8 +11,8 @@ bootloader: src\os\bootloader.c
 testc: src\tests\test.c
 	${CC} src\tests\test.c -a src\tests\test.asm
 
-gpu_test: src\tests\test.c
-	${CC} src\tests\gpu_test.c -a src\tests\gpu_test.asm -o ${BUILD_DIR}\gpu_test.bin
+gpu_test: src\tests\gpu_test.c
+	${CC} src\tests\gpu_test.c -e ofst_data 1 -a src\tests\gpu_test.asm -o ${BUILD_DIR}\gpu_test.bin
 
 # ASM
 

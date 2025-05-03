@@ -16,11 +16,8 @@ li r4 2
     jmp [z loop]
 
 :start
-    li ds 2
-    li ss 2
-
-    li bp 0xffff
-    mov sp bp
+    li ds 1
+    li ss 1
 
     li r1 1
     jmpf r1 [z 0]

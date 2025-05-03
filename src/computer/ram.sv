@@ -9,9 +9,7 @@ module RAM8B24A(
 
     );
 
-    reg [7:0] memory [0:(2**24) - 1];
 
-    assign data = oe ? { memory[addr], memory[addr + 1] } : 16'bz;
 
     always @(posedge clk) begin
 

@@ -18,7 +18,7 @@ enum InstrCode {
     LDW, LDB, STW, STB, LDE, STE,
     JMP, JMPF, CMP, JZ, JC,
     ADD, SUB, INC, DEC, MULT, DIV, AND, OR,
-    PUSH, POP, CALL, CALLF, RET, RETF
+    PUSH, PUSHB, POP, POPB, CALL, CALLF, RET, RETF
 };
 enum ParameterIndex {
     RS = 0, RS1, RS2, IMM
@@ -41,7 +41,7 @@ std::unordered_map<std::string, Instruction> instructions {
     { "stb",   { STB,   4, { RS, RS1, RS2, IMM } } },
     { "lde",   { LDE,   4, { RS, RS1, RS2, IMM } } },
     { "ste",   { STE,   4, { RS, RS1, RS2, IMM } } },
-
+    
     { "jmp",   { JMP,   4, { RS2, IMM } } },
     { "jmpf",  { JMPF,  4, { RS1, RS2, IMM } } },
     { "cmp",   { CMP,   2, { RS1, RS2 } } },
@@ -58,7 +58,9 @@ std::unordered_map<std::string, Instruction> instructions {
     { "or",    { OR,    2, { RS, RS1, RS2 } } },
 
     { "push",  { PUSH,  2, { RS1 } } },
+    { "pushb", { PUSHB, 2, { RS1 } } },
     { "pop",   { POP,   2, { RS1 } } },
+    { "popb",  { POPB,  2, { RS1 } } },
     { "call",  { CALL,  4, { RS2, IMM } } },
     { "callf", { CALLF, 4, { RS1, RS2, IMM } } },
     { "ret",   { RET,   2, {} } },

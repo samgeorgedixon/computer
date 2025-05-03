@@ -19,8 +19,10 @@ void GetDriveWord(int16_t addr, int16_t segment, int16_tR word) {
     asm("stw s r1 [bp 6]");
 }
 
-void GetFileTableIndex(char name[7], int16_tR index) {
+void GetFileAddrSize(char name[7], int16_tR addr, int16_tR size) {
+    int16_t fileTableIndex = 0;
     int16_t i = 0;
+    
     while (i != 250) {
         char fileName[7];
 
@@ -37,18 +39,20 @@ void GetFileTableIndex(char name[7], int16_tR index) {
         CheckStrEqual(name, fileName, equal);
 
         if (equal) {
-            index = i;
+            fileTableIndex = i;
             return;
         }
 
         i += 10;
     }
+
+    fileTableIndex += 6;
+    GetDriveWord(fileTableIndex, 0, addr);
+
+    fileTableIndex += 2;
+    GetDriveWord(fileTableIndex, 0, size);
 }
 
-void GetFile(int16_t tableIndex, int16_tR addr, int16_tR size) {
-    tableIndex += 6;
-    GetDriveWord(tableIndex, 0, addr);
+void LoadFile(char name[6]) {
 
-    tableIndex += 2;
-    GetDriveWord(tableIndex, 0, size);
 }

@@ -1,9 +1,15 @@
 #include "../myc.h"
 
+asm("li ds 2");
+asm("li ss 2");
+
+asm("li bp 0xffff");
+asm("mov sp bp");
+
 #include "src/os/drive.c"
 
-void LoadKernel(charR name[7]) {
-    char fileName[7];
+void LoadKernel(char name[6]) {
+    char fileName[6];
 
     int16_t fileTableIndex;
     GetFileTableIndex(fileName, fileTableIndex);
@@ -16,12 +22,6 @@ void LoadKernel(charR name[7]) {
 }
 
 void main() {
-    asm("li ds 2");
-    asm("li ss 2");
-    
-    asm("li bp 0xff");
-    asm("mov sp bp");
-
     char fileName[7];
     LoadKernel(fileName);
 

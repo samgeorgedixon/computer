@@ -12,30 +12,50 @@
 #include "assembler.h"
 #include "core.h"
 
-struct Paths {
+enum ExeType {
+    NONE = 0,
+    OFST_DATA,  // Offsets Data segment by segments.
+    SIZE_SEG    // Include sizes of segments at start.
+};
+
+struct Args {
     std::string src;
     std::string out;
     std::string asmb;
+
+    ExeType exeType;
+    int dataSegOffset;
 };
 
-Paths GetPaths(int argc, char* argv[]) {
-    Paths paths = { "", "", "" };
+Args GetPaths(int argc, char* argv[]) {
+    Args args = { "", "", "", ExeType::NONE, 0 };
 
     for (int i = 1; i < argc; i++) {
         if (argv[i][0] == '-' && argv[i][1] == 'o') {
             i++;
-            paths.out = argv[i];
+            args.out = argv[i];
         }
         else if ((argv[i][0] == '-' && argv[i][1] == 'a')) {
             i++;
-            paths.asmb = argv[i];
+            args.asmb = argv[i];
+        }
+        else if ((argv[i][0] == '-' && argv[i][1] == 'e')) {
+            i++;
+            if (Trim(argv[i]) == "ofst_data") {
+                args.exeType = ExeType::OFST_DATA;
+                i++;
+                args.dataSegOffset = std::stoi(Trim(argv[i]));
+            }
+            else if (Trim(argv[i]) == "size_seg") {
+                args.exeType = ExeType::SIZE_SEG;
+            }
         }
         else {
-            paths.src = argv[i];
+            args.src = argv[i];
         }
     }
 
-    return paths;
+    return args;
 }
 
 std::vector<std::vector<std::string>> ParseFileLines(std::ifstream& srcFile) {
@@ -210,7 +230,7 @@ std::vector<std::vector<std::string>> LoadFile(std::string filePath) {
     std::ifstream srcFile(filePath);
 
     if (!srcFile.is_open()) {
-        std::cout << "Unable to open src file.\n";
+        std::cout << "Unable to open src file: " << filePath << "\n";
 
         srcFile.close();
         return {};
@@ -275,6 +295,7 @@ struct ProgramData {
     int dataSegmentPointer;
 
     int mainIndex;
+    int firstFuncIndex;
 };
 
 std::vector<std::string> GetParams(const std::vector<std::string>& line) {
@@ -695,6 +716,9 @@ void CreateFunction(ProgramData& programData, std::string name, Type type, std::
     if (name == "main") {
         programData.mainIndex = programData.program.size() - 1;
     }
+    if (programData.functions.size() == 0) {
+        programData.firstFuncIndex = programData.program.size() - 1;
+    }
 
     programData.program.push_back(":" + name);
     programData.program.push_back("push bp");
@@ -736,7 +760,7 @@ void CreateFunction(ProgramData& programData, std::string name, Type type, std::
     }
 }
 
-void LoadLine(ProgramData& programData, int lineIndex) {
+void LoadLine(ProgramData& programData, Args& args, int lineIndex) {
     std::vector<std::string>& line = programData.lines[lineIndex];
     
     Type type = types[line[0]];
@@ -907,19 +931,24 @@ void LoadLine(ProgramData& programData, int lineIndex) {
                     std::vector<std::string> main(programData.program.begin() + programData.mainIndex + 1, programData.program.end());
                     
                     programData.program.erase(programData.program.begin() + programData.mainIndex + 1, programData.program.end());
-                    programData.program.insert(programData.program.begin() + 1, main.begin(), main.end());
+
+                    programData.program.insert(programData.program.begin() + programData.firstFuncIndex + 1, main.begin(), main.end());
                 }
                 break;
             case ScopeType::While:
                 programData.program.push_back("jmp [z " + programData.scopes[programData.scopes.size() - 1].name + "]");
                 programData.program.push_back(":" + programData.scopes[programData.scopes.size() - 1].name + "_end");
 
-                programData.program.push_back("li sp " + std::to_string(programData.scopes[programData.scopes.size() - 1].relitiveStackPointer));
+                programData.program.push_back("li r1 " + std::to_string(programData.scopes[programData.scopes.size() - 1].relitiveStackPointer));
+                programData.program.push_back("add r1 bp r1");
+                programData.program.push_back("mov sp r1");
                 break;
             case ScopeType::If:
                 programData.program.push_back(":" + programData.scopes[programData.scopes.size() - 1].name + "_end");
 
-                programData.program.push_back("li sp " + std::to_string(programData.scopes[programData.scopes.size() - 1].relitiveStackPointer));
+                programData.program.push_back("li r1 " + std::to_string(programData.scopes[programData.scopes.size() - 1].relitiveStackPointer));
+                programData.program.push_back("add r1 bp r1");
+                programData.program.push_back("mov sp r1");
                 break;
             }
             programData.scopes.pop_back();
@@ -935,7 +964,7 @@ void LoadLine(ProgramData& programData, int lineIndex) {
     std::cout << type << ":" << name << ":" << nameArray << ":" << assignment << ":" << assignmentArray << ":" << assignmentOperator << "\n";
 }
 
-std::vector<std::string> CreateProgram(std::vector<std::vector<std::string>>& lines) {
+std::vector<std::string> CreateProgram(std::vector<std::vector<std::string>>& lines, Args& args) {
     ProgramData programData;
 
     programData.lines = lines;
@@ -950,11 +979,14 @@ std::vector<std::string> CreateProgram(std::vector<std::vector<std::string>>& li
     programData.dataSegmentPointer = 0;
 
     programData.program.push_back("%segment code");
+    if (args.exeType == ExeType::SIZE_SEG) { programData.program.push_back("%dw data"); }
 
     for (int i = 0; i < programData.lines.size(); i++) {
-        LoadLine(programData, i);
+        LoadLine(programData, args, i);
     }
     
+    if (args.exeType == ExeType::SIZE_SEG) { programData.program.push_back(":data"); }
+    if (args.exeType == ExeType::OFST_DATA) { programData.program.push_back("%org " + std::to_string(((uint32_t)args.dataSegOffset) << 8)); }
     programData.program.push_back("%segment data");
     
     for (int i = 0; i < programData.dataSegment.size(); i++) {
@@ -970,27 +1002,27 @@ std::vector<std::string> CreateProgram(std::vector<std::vector<std::string>>& li
 }
 
 int main(int argc, char* argv[]) {
-    Paths paths = GetPaths(argc, argv);
+    Args args = GetPaths(argc, argv);
 
 #ifdef DEBUG
     paths.src = "../../programs/src/os/bootloader.c";
 #endif
 
-    std::vector<std::vector<std::string>> lines = LoadFile(paths.src);
+    std::vector<std::vector<std::string>> lines = LoadFile(args.src);
 
     if (lines.size() == 0) {
         return 1;
     }
 
-    std::vector<std::string> program = CreateProgram(lines);
+    std::vector<std::string> program = CreateProgram(lines, args);
     std::vector<char> binProgram = AssembleLines(program);
 
-    std::ofstream asmFile(paths.asmb);
+    std::ofstream asmFile(args.asmb);
     std::ostream_iterator<std::string> asmFileIterator(asmFile, "\n");
     std::copy(std::begin(program), std::end(program), asmFileIterator);
     asmFile.close();
 
-    std::ofstream outFile(paths.out, std::ios::out | std::ios::binary);
+    std::ofstream outFile(args.out, std::ios::out | std::ios::binary);
     outFile.write(&binProgram[0], binProgram.size() * sizeof(char));
     outFile.close();
 
