@@ -1,4 +1,4 @@
-#include "../stdc.h"
+#include "../myc.h"
 
 void main() {
     while(true) {}

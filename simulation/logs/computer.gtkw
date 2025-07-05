@@ -1,0 +1,47 @@
+[*]
+[*] GTKWave Analyzer v3.3.100 (w)1999-2019 BSI
+[*] Fri May 02 19:08:26 2025
+[*]
+[dumpfile] "N:\Circuits\computer\logs\computer.vcd"
+[dumpfile_mtime] "Fri May 02 19:06:48 2025"
+[dumpfile_size] 29738454
+[savefile] "N:\Circuits\computer\logs\computer.gtkw"
+[timestart] 6867750
+[size] 1920 1017
+[pos] -1 -1
+*-12.000000 6877230 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] TOP.
+[treeopen] TOP.Computer.
+[treeopen] TOP.Computer.cpu.
+[sst_width] 197
+[signals_width] 319
+[sst_expanded] 1
+[sst_vpaned_height] 300
+@28
+TOP.Computer.clk
+TOP.Computer.r
+@22
+TOP.Computer.cpu.so[15:0]
+TOP.Computer.cpu.mo[15:0]
+@25
+TOP.Computer.cpu.addro[23:0]
+@24
+TOP.Computer.cpu.pco[15:0]
+TOP.Computer.cpu.controlUnit.microCodeIndex[3:0]
+@28
+TOP.Computer.cpu.controlUnit.instr[15:0]
+@24
+TOP.Computer.cpu.bus[15:0]
+TOP.Computer.cpu.r1o[15:0]
+TOP.Computer.cpu.r2o[15:0]
+TOP.Computer.cpu.r3o[15:0]
+TOP.Computer.cpu.r4o[15:0]
+TOP.Computer.cpu.spo[15:0]
+TOP.Computer.cpu.bpo[15:0]
+@22
+TOP.Computer.cpu.cso[15:0]
+TOP.Computer.cpu.dso[15:0]
+TOP.Computer.cpu.sso[15:0]
+TOP.Computer.cpu.eso[15:0]
+[pattern_trace] 1
+[pattern_trace] 0
