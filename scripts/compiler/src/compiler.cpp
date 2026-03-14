@@ -9,54 +9,9 @@
 #include <algorithm>
 #include <iterator>
 
-#include "assembler.h"
+#include "compiler.h"
 #include "core.h"
-
-enum ExeType {
-    NONE = 0,
-    OFST_DATA,  // Offsets Data segment by segments.
-    SIZE_SEG    // Include sizes of segments at start.
-};
-
-struct Args {
-    std::string src;
-    std::string out;
-    std::string asmb;
-
-    ExeType exeType;
-    int dataSegOffset;
-};
-
-Args GetPaths(int argc, char* argv[]) {
-    Args args = { "", "", "", ExeType::NONE, 0 };
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '-' && argv[i][1] == 'o') {
-            i++;
-            args.out = argv[i];
-        }
-        else if ((argv[i][0] == '-' && argv[i][1] == 'a')) {
-            i++;
-            args.asmb = argv[i];
-        }
-        else if ((argv[i][0] == '-' && argv[i][1] == 'e')) {
-            i++;
-            if (Trim(argv[i]) == "ofst_data") {
-                args.exeType = ExeType::OFST_DATA;
-                i++;
-                args.dataSegOffset = std::stoi(Trim(argv[i]));
-            }
-            else if (Trim(argv[i]) == "size_seg") {
-                args.exeType = ExeType::SIZE_SEG;
-            }
-        }
-        else {
-            args.src = argv[i];
-        }
-    }
-
-    return args;
-}
+#include "entry.h"
 
 std::vector<std::vector<std::string>> ParseFileLines(std::ifstream& srcFile) {
     std::vector<std::vector<std::string>> lines;
@@ -70,6 +25,10 @@ std::vector<std::vector<std::string>> ParseFileLines(std::ifstream& srcFile) {
             continue;
         }
 
+        if (line[0] == '/' && line[1] == '/') {
+            continue;
+        }
+
         if (line[0] == '#') {
             std::vector<std::string> lineTokens;
             int lastTokenEnd = 0;
@@ -77,7 +36,7 @@ std::vector<std::vector<std::string>> ParseFileLines(std::ifstream& srcFile) {
 
             for (int i = 0; i < line.size(); i++) {
                 if (line[i] == ' ') {
-                    if (isString) {
+                    if (isString) { 
                         continue;
                     }
     
@@ -298,8 +257,27 @@ struct ProgramData {
     int firstFuncIndex;
 };
 
-std::vector<std::string> GetParams(const std::vector<std::string>& line) {
-    std::vector<std::string> params;
+struct ParamToken {
+    Type type;
+    std::string name;
+    std::string nameArray;
+};
+
+struct Token {
+    Type type;
+    std::string name;
+    std::string nameArray;
+    std::vector<ParamToken> params;
+};
+
+struct LexedLine {
+    Token primToken;
+    std::string op;
+    Token secToken;
+};
+
+std::vector<ParamToken> GetParams(const std::vector<std::string>& line) {
+    std::vector<ParamToken> params;
     
     bool isParams = false;
     int missed = 0;
@@ -760,7 +738,7 @@ void CreateFunction(ProgramData& programData, std::string name, Type type, std::
     }
 }
 
-void LoadLine(ProgramData& programData, Args& args, int lineIndex) {
+void LoadLine(ProgramData& programData, Args& args, int lineIndex, LexedLine lexedLine) {
     std::vector<std::string>& line = programData.lines[lineIndex];
     
     Type type = types[line[0]];
@@ -964,6 +942,33 @@ void LoadLine(ProgramData& programData, Args& args, int lineIndex) {
     std::cout << type << ":" << name << ":" << nameArray << ":" << assignment << ":" << assignmentArray << ":" << assignmentOperator << "\n";
 }
 
+LexedLine LexLine(ProgramData& programData, int lineIndex) {
+    std::vector<std::string>& line = programData.lines[lineIndex];
+    LexedLine lexedLine = {};
+    
+    lexedLine.primToken.type = types[line[0]];
+    lexedLine.primToken.name = line[0];
+    lexedLine.primToken.params = GetParams(line);
+
+    std::string nameArray = GetArrayCountString(line, 0);
+
+    int assignmentIndex = 1;
+    if (nameArray != "") {
+        assignmentIndex += 3;
+    }
+
+    std::string assignment = GetAssignment(line, assignmentIndex + 0);
+    std::string assignmentArray = GetArrayCountString(line, assignmentIndex + 1);
+    std::string assignmentOperator = GetAssignment(line, assignmentIndex - 1);
+}
+
+void LoadLines(ProgramData& programData, Args& args, int lineIndex) {
+    for (int i = 0; i < programData.lines.size(); i++) {
+        LexedLine lexedLine = LexLine(programData, lineIndex);
+        LoadLine(programData, args, i, lexedLine);
+    }
+}
+
 std::vector<std::string> CreateProgram(std::vector<std::vector<std::string>>& lines, Args& args) {
     ProgramData programData;
 
@@ -981,9 +986,7 @@ std::vector<std::string> CreateProgram(std::vector<std::vector<std::string>>& li
     programData.program.push_back("%segment code");
     if (args.exeType == ExeType::SIZE_SEG) { programData.program.push_back("%dw data"); }
 
-    for (int i = 0; i < programData.lines.size(); i++) {
-        LoadLine(programData, args, i);
-    }
+
     
     if (args.exeType == ExeType::SIZE_SEG) { programData.program.push_back(":data"); }
     if (args.exeType == ExeType::OFST_DATA) { programData.program.push_back("%org " + std::to_string(((uint32_t)args.dataSegOffset) << 8)); }
@@ -999,32 +1002,4 @@ std::vector<std::string> CreateProgram(std::vector<std::vector<std::string>>& li
     std::cout << "---\n";
 
     return programData.program;
-}
-
-int main(int argc, char* argv[]) {
-    Args args = GetPaths(argc, argv);
-
-#ifdef DEBUG
-    paths.src = "../../programs/src/os/bootloader.c";
-#endif
-
-    std::vector<std::vector<std::string>> lines = LoadFile(args.src);
-
-    if (lines.size() == 0) {
-        return 1;
-    }
-
-    std::vector<std::string> program = CreateProgram(lines, args);
-    std::vector<char> binProgram = AssembleLines(program);
-
-    std::ofstream asmFile(args.asmb);
-    std::ostream_iterator<std::string> asmFileIterator(asmFile, "\n");
-    std::copy(std::begin(program), std::end(program), asmFileIterator);
-    asmFile.close();
-
-    std::ofstream outFile(args.out, std::ios::out | std::ios::binary);
-    outFile.write(&binProgram[0], binProgram.size() * sizeof(char));
-    outFile.close();
-
-    return 0;
 }

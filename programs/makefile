@@ -14,6 +14,9 @@ testc: src\tests\test.c
 gpu_test: src\tests\gpu_test.c
 	${CC} src\tests\gpu_test.c -e ofst_data 1 -a src\tests\gpu_test.asm -o ${BUILD_DIR}\gpu_test.bin
 
+kernel: src\os\kernel.c
+	${CC} src\os\kernel.c -e size_seg -a src\os\kernel.asm -o ${BUILD_DIR}\kernel.bin
+
 # ASM
 
 bios: src\bios.asm

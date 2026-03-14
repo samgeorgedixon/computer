@@ -1,7 +1,7 @@
 %segment code
 
-li r1 0x100
-li r2 0x300
+li r1 0x0100
+li r2 0x1000
 li r4 2
 
 :loop

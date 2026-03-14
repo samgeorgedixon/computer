@@ -17,7 +17,7 @@ struct File {
 };
 
 std::vector<File> files = {
-    { "boot  ", relitivePath + "programs/bin/programs/gpu_test.bin" },
+    { "boot  ", relitivePath + "programs/bin/programs/bootloader.bin" },
     { "kernel", relitivePath + "programs/bin/programs/kernel.bin" },
 };
 
