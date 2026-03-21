@@ -9,14 +9,14 @@ Here I have designed a custom Computer / CPU.
  -  4 General Registers
  -  4 Extension Ports (e1, e2, e3, e4)
 
-## Registers
+#### Registers
  -  zero
  -  r1, r2, r3, r4, r5
  -  instr, mem, pc
  -  sp, bp, f
  -  cs, ds, ss, es - Segments (code, data, stack, extra)
 
-## ALU
+#### ALU
  -  Operation Select - 4b
  -  A Select - 4b
  -  B Select - 4b
