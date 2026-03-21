@@ -9,8 +9,6 @@ module RAM8B24A(
 
     );
 
-
-
     always @(posedge clk) begin
 
         if (r) begin

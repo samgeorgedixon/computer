@@ -1,9 +1,9 @@
-`include "src/computer/cpu/program_counter.sv"
-`include "src/computer/cpu/alu.sv"
-`include "src/computer/cpu/reg_16bit.sv"
-`include "src/computer/cpu/reg_8bit.sv"
-`include "src/computer/cpu/registers_unit.sv"
-`include "src/computer/cpu/control_unit.sv"
+`include "src/cpu/program_counter.sv"
+`include "src/cpu/alu.sv"
+`include "src/cpu/reg_16bit.sv"
+`include "src/cpu/reg_8bit.sv"
+`include "src/cpu/registers_unit.sv"
+`include "src/cpu/control_unit.sv"
 
 module CPU(
     
@@ -45,6 +45,6 @@ module CPU(
 
     ControlUnit controlUnit(clk, r, io, flagsOut, rsi, rso, aluOpSel, aluASel, aluBSel, segSel,
             R1I, R1O, R2I, R2O, R3I, R3O, R4I, R4O, SPI, SPO, SBI, SBO, CSI, CSO, DSI, DSO, SSI, SSO, ESI, ESO, ZO, II, IO, MI, MO, ri, rbi, ro, rbo, PCE, PCI, PCO, SO, FI, OS1I, OS1O, OS1A, OS2I, OS2O, OS2B, OSLI, OSLO, e1i, e1o, e2i, e2o, e3i, e3o, e4i, e4o,
-            "../bin/cpu_instr_gen/cpu_instr_rom.bin");
+            "../bin/tools/cpu-instr-gen/cpu-instr-rom.bin");
 
 endmodule

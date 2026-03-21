@@ -17,8 +17,8 @@ struct File {
 };
 
 std::vector<File> files = {
-    { "boot  ", relitivePath + "programs/bin/programs/bootloader.bin" },
-    { "kernel", relitivePath + "programs/bin/programs/kernel.bin" },
+    { "boot  ", relitivePath + "bin/software/bootloader.bin" },
+    { "kernel", relitivePath + "bin/software/kernel.bin" },
 };
 
 /*
@@ -79,7 +79,7 @@ void WriteDrive(std::string filePath) {
 int main(int argc, char* argv[]) {
     AddFiles();
 
-    WriteDrive(relitivePath + "programs/bin/drives/drive.bin");
+    WriteDrive(relitivePath + "bin/drives/drive.bin");
 
     return 0;
 }

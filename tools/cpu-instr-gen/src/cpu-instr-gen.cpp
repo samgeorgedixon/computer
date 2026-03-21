@@ -2,6 +2,7 @@
 #include <vector>
 #include <fstream>
 #include <bitset>
+#include <inttypes.h>
 #include "memory.h"
 
 // Micro Instructions
@@ -248,7 +249,7 @@ int main(int argc, char* argv[]) {
     ReplaceRomInstruction(0b110011010100000, PCI|ADD|ASPC|OS2B, rom);
     ReplaceRomInstruction(0b110011010101000, R, rom);
 
-    std::ofstream file("../../bin/tools/cpu_instr_gen/cpu_instr_rom.bin", std::ios::out | std::ios::binary);
+    std::ofstream file("../../bin/tools/cpu-instr-gen/cpu-instr-rom.bin", std::ios::out | std::ios::binary);
     file.write(rom, (ROM_SIZE + 4) * sizeof(char));
     file.close();
 

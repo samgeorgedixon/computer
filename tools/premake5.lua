@@ -1,4 +1,4 @@
-workspace "computer-scripts"
+workspace "computer-tools"
     architecture "x64"
     language "C++"
     cppdialect "C++17"
@@ -18,14 +18,16 @@ workspace "computer-scripts"
         defines "RELEASE"
         optimize "on"
 
-builddir = "%{cfg.buildcfg}_%{cfg.system}_%{cfg.architecture}"
+build = "%{cfg.buildcfg}-%{cfg.system}"
+bin = "%{wks.location}/../bin/tools/"
+bin_int = "%{wks.location}/../bin/bin-int/tools/"
 
 project "compiler"
     location "compiler"
     kind "ConsoleApp"
 
-    targetdir ("%{wks.location}/../bin/%{prj.name}/" .. builddir)
-    objdir ("%{wks.location}/../bin_int/%{prj.name}/" .. builddir)
+    targetdir (bin .. "%{prj.name}/" .. build)
+    objdir (bin_int .. "/%{prj.name}/" .. build)
 
     files {
         "%{prj.name}/src/**.cpp",
@@ -43,8 +45,8 @@ project "assembler"
     location "assembler/asm_src"
     kind "StaticLib"
 
-    targetdir ("%{wks.location}/../bin/%{prj.name}/" .. builddir)
-    objdir ("%{wks.location}/../bin_int/%{prj.name}/" .. builddir)
+    targetdir (bin .. "%{prj.name}/" .. build)
+    objdir (bin_int .. "/%{prj.name}/" .. build)
 
     files {
         "%{wks.location}/assembler/asm_src/**.cpp",
@@ -59,8 +61,8 @@ project "assembler-app"
     location "assembler/app_src"
     kind "ConsoleApp"
 
-    targetdir ("%{wks.location}/../bin/%{prj.name}/" .. builddir)
-    objdir ("%{wks.location}/../bin_int/%{prj.name}/" .. builddir)
+    targetdir (bin .. "%{prj.name}/" .. build)
+    objdir (bin_int .. "/%{prj.name}/" .. build)
 
     files {
         "%{wks.location}/assembler/app_src/**.cpp",
@@ -74,12 +76,12 @@ project "assembler-app"
 
     links { "assembler", "core" }
 
-project "cpu_instr_gen"
-    location "cpu_instr_gen"
+project "cpu-instr-gen"
+    location "cpu-instr-gen"
     kind "ConsoleApp"
 
-    targetdir ("%{wks.location}/../bin/%{prj.name}/" .. builddir)
-    objdir ("%{wks.location}/../bin_int/%{prj.name}/" .. builddir)
+    targetdir (bin .. "%{prj.name}/" .. build)
+    objdir (bin_int .. "/%{prj.name}/" .. build)
 
     files {
         "%{prj.name}/src/**.cpp",
@@ -89,12 +91,13 @@ project "cpu_instr_gen"
         "%{prj.name}/src"
     }
     
-project "file-system_manager"
-    location "file-system_manager"
+project "file-system-manager"
+    location "file-system-manager"
     kind "ConsoleApp"
 
-    targetdir ("%{wks.location}/../bin/%{prj.name}/" .. builddir)
-    objdir ("%{wks.location}/../bin_int/%{prj.name}/" .. builddir)
+    targetdir (bin .. "%{prj.name}/" .. build)
+    objdir (bin_int .. "/%{prj.name}/" .. build)
+
 
     files {
         "%{prj.name}/src/**.cpp",
@@ -108,8 +111,8 @@ project "core"
     location "core"
     kind "StaticLib"
 
-    targetdir ("%{wks.location}/../bin/%{prj.name}/" .. builddir)
-    objdir ("%{wks.location}/../bin_int/%{prj.name}/" .. builddir)
+    targetdir (bin .. "%{prj.name}/" .. build)
+    objdir (bin_int .. "/%{prj.name}/" .. build)
 
     files {
         "%{prj.name}/src/**.cpp",

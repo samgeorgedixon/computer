@@ -1,9 +1,9 @@
 `timescale 1us/100ns
 
-`include "src/computer/cpu/cpu.sv"
-`include "src/computer/memory_unit.sv"
-`include "src/computer/exts/drive_ext.sv"
-`include "src/computer/exts/gpu_ext.sv"
+`include "src/cpu/cpu.sv"
+`include "src/memory_unit.sv"
+`include "src/exts/drive_ext.sv"
+`include "src/exts/gpu_ext.sv"
 
 module Computer();
 
@@ -27,9 +27,9 @@ module Computer();
 
     CPU cpu(clk, r, bus, addro, addr, saddr, ri, rbi, ro, rbo, e1i, e1o, e2i, e2o, e3i, e3o, e4i, e4o);
 
-    MemoryUnit memoryUnit(clk, r, bus, ri, rbi, ro, rbo, addr, saddr, addro, "../programs/bin/programs/bios.bin");
+    MemoryUnit memoryUnit(clk, r, bus, ri, rbi, ro, rbo, addr, saddr, addro, "../bin/software/bios.bin");
 
-    DriveExt drive(clk, r, bus, addro, e1i, e1o, "../programs/bin/drives/drive.bin");
+    DriveExt drive(clk, r, bus, addro, e1i, e1o, "../bin/drives/drive.bin");
 
     GPU_Ext gpu(clk, r, bus, addro, e2i, e2o);
 
