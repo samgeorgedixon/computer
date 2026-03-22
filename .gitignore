@@ -1,3 +1,12 @@
-/obj_dir
+/bin
+logs
 
 .vscode
+.vs
+*.sln
+*.slnx
+*.code-workspace
+*.vcxproj
+*.vcxproj.user
+*.vcxproj.filters
+~*
