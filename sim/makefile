@@ -1,6 +1,8 @@
 BIN = ../bin
 BIN_COMPUTER = ${BIN}/computer
 
+## Dependencies: wsl2, build-essential, verilator, libsdl2-dev
+
 all: computer-build computer-run
 
 computer-build: src/computer.sv

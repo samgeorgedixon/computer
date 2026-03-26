@@ -1,50 +1,54 @@
-`include "src/cpu/program_counter.sv"
-`include "src/cpu/alu.sv"
-`include "src/cpu/reg_16bit.sv"
-`include "src/cpu/reg_8bit.sv"
-`include "src/cpu/registers_unit.sv"
-`include "src/cpu/control_unit.sv"
+`include "src/core.svh"
+`include "src/cpu/control-unit.sv"
+`include "src/cpu/register-unit.sv"
+`include "src/cpu/program-counter.sv"
 
 module CPU(
     
-    input clk, r,
-    inout [15:0] bus,
+    input logic clk, r,
+    inout wire [15:0] bus,
 
-    input [23:0] addro,
-    output [15:0] addr,
-    output [15:0] saddr,
+    input [23:0] addro
 
-    output ri, rbi, ro, rbo,
-
-    output e1i, e1o,
-    output e2i, e2o,
-    output e3i, e3o,
-    output e4i, e4o
-    
     );
 
-    wire R1I, R1O, R2I, R2O, R3I, R3O, R4I, R4O, SPI, SPO, SBI, SBO, CSI, CSO, DSI, DSO, SSI, SSO, ESI, ESO, ZO, II, IO, MI, MO, PCE, PCI, PCO, SO, FI, OS1I, OS1O, OS1A, OS2I, OS2O, OS2B, OSLI, OSLO;
+    wire [15:0] alu_a_bus,
+    wire [15:0] alu_b_bus,
 
-    wire [3:0] rsi, rso;
-    wire [3:0] aluOpSel, aluASel, aluBSel;
-    wire [2:0] segSel;
+    // Direct Registers
+    logic [15:0] instr;
+    logic [15:0] mem;
+
+    logic [7:0] flags;
+
+    // Control Signals
+    logic [4:0] bus_src,
+    logic [4:0] bus_dest,
+    logic [3:0] bus_dest_special,
     
-    wire [15:0] r1o, r2o, r3o, r4o, spo, bpo, cso, sso, dso, eso, zo, so, mo, io, pco;
-    
-    assign addr = mo;
-    assign saddr = so;
+    logic [31:0] bus_src_decoded;
+    logic [31:0] bus_dest_decoded;
+    logic [15:0] alu_a_decoded;
+    logic [15:0] alu_b_decoded;
 
-    wire [7:0] flagsIn, flagsOut;
-    Reg8 flags(clk, r, FI, 0, flagsIn, flagsOut, flagsOut);
+    logic [3:0] alu_op_sel__seg_sel,
+    logic       alu__seg_pc,
 
-    ProgramCounter pc(clk, r, bus, PCI, PCO, PCE, pco);
+    logic [3:0] alu_a_sel,
+    logic [3:0] alu_b_sel,
 
-    ALU alu(clk, bus, aluOpSel, aluASel, aluBSel, SO, r1o, r2o, r3o, r4o, spo, bpo, cso, sso, dso, eso, zo, mo, pco, flagsIn);
+    logic pc_e,
+    logic flags_e
 
-    RegistersUnit regUnit(clk, r, bus, rsi, rso, R1I, R1O, R2I, R2O, R3I, R3O, R4I, R4O, CSI, CSO, DSI, DSO, SSI, SSO, ESI, ESO, ZO, segSel, II, IO, MI, MO, SPI, SPO, SBI, SBO, r1o, r2o, r3o, r4o, mo, io, spo, bpo, cso, sso, dso, eso, zo, so);
+    // Units
+    ControlUnit cu(clk, r, instr, flags, bus_src, bus_dest, bus_dest_special, alu_op_sel__seg_sel, alu__seg_pc, alu_a_sel, alu_b_sel, pc_e, flags_e); // Finish Instruction Set
 
-    ControlUnit controlUnit(clk, r, io, flagsOut, rsi, rso, aluOpSel, aluASel, aluBSel, segSel,
-            R1I, R1O, R2I, R2O, R3I, R3O, R4I, R4O, SPI, SPO, SBI, SBO, CSI, CSO, DSI, DSO, SSI, SSO, ESI, ESO, ZO, II, IO, MI, MO, ri, rbi, ro, rbo, PCE, PCI, PCO, SO, FI, OS1I, OS1O, OS1A, OS2I, OS2O, OS2B, OSLI, OSLO, e1i, e1o, e2i, e2o, e3i, e3o, e4i, e4o,
-            "../bin/tools/cpu-instr-gen/cpu-instr-rom.bin");
+    Decoder_CU decoder(clk, r, bus_src, bus_dest, bus_dest_special, bus_src_decoded, bus_dest_decoded, alu_a_decoded, alu_b_decoded);
+
+    RegisterUnit ru(clk, r, bus, alu_a_bus, alu_b_bus, bus_src_decoded, bus_dest_decoded, alu_a_decoded, alu_b_decoded, alu_a_sel, alu_b_sel, instr, mem);
+
+    ProgramCounter pc(clk, r, pc_e, bus, alu_a_bus, alu_b_bus, bus_src_decoded, bus_dest_decoded, alu_a_decoded, alu_b_decoded);
+
+    // + ALU + Extension Units
 
 endmodule
