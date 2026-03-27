@@ -1,43 +1,37 @@
 `include "src/core.svh"
-`include "src/cpu/reg_16bit.sv"
+`include "src/cpu/registers/16b-register.sv"
 
 module RegisterUnit(
 
     input logic clk, r,
 
     inout wire [15:0] bus,
-    output wire [15:0] alu_a_bus,
-    output wire [15:0] alu_b_bus,
+    output wire [15:0] bus_alu_a,
+    output wire [15:0] bus_alu_b,
 
-    input logic [31:0] bus_src_decoded,
-    input logic [31:0] bus_dest_decoded,
-    input logic [15:0] alu_a_decoded,
-    input logic [15:0] alu_b_decoded,
+    output logic [15:0] instr_direct,
+    output logic [15:0] memory_direct,
 
-    input logic [3:0] alu_a_sel,
-    input logic [3:0] alu_b_sel,
-
-    output logic [15:0] instr,
-    output logic [15:0] mem
+    ControlSignals_if.unit controlSignals
 
     );
 
-    Reg16 r1(`REG16_FILL(`CS_R1));
-    Reg16 r2(`REG16_FILL(`CS_R2));
-    Reg16 r3(`REG16_FILL(`CS_R3));
-    Reg16 r4(`REG16_FILL(`CS_R4));
+    Register16b r1(`REG16_FILL(`CS_R1), .data());
+    Register16b r2(`REG16_FILL(`CS_R2), .data());
+    Register16b r3(`REG16_FILL(`CS_R3), .data());
+    Register16b r4(`REG16_FILL(`CS_R4), .data());
 
-    // Program Counter External - 5
-    Reg16 mem(`REG16_FILL(`CS_MEM), mem);
-    Reg16 instr(`REG16_FILL(`CS_INSTR), instr);
+    // CS_PC
+    Register16b mem(`REG16_FILL(`CS_MEM), mem);
+    Register16b instr(`REG16_FILL(`CS_INSTR), instr);
 
-    Reg16 sp(`REG16_FILL(`CS_SP));
-    Reg16 bp(`REG16_FILL(`CS_BP));
+    Register16b sp(`REG16_FILL(`CS_SP), .data());
+    Register16b bp(`REG16_FILL(`CS_BP), .data());
 
-    Reg16 cs(`REG16_FILL(`CS_CS)); // TODO: Direct Selections
-    Reg16 ds(`REG16_FILL(`CS_DS));
-    Reg16 ss(`REG16_FILL(`CS_SS));
-    Reg16 es(`REG16_FILL(`CS_ES));
+    Register16b cs(`REG16_FILL(`CS_CS), .data()); // TODO: Direct Selections
+    Register16b ds(`REG16_FILL(`CS_DS), .data());
+    Register16b ss(`REG16_FILL(`CS_SS), .data());
+    Register16b es(`REG16_FILL(`CS_ES), .data());
 
     // Zero `Register`
     assign bus = bus_src_decoded[`CS_ZERO] ? 16'b0 : 16'bz;

@@ -1,23 +1,21 @@
-module Reg16(
+module Register16b(
 
     input logic clk, r,
 
-    input logic bus_we, bus_oe,
+    input logic bus_we, bus_o,
     input logic alu_a_oe, alu_b_oe,
 
     inout wire [15:0] bus,
-    output wire [15:0] alu_a_bus,
-    output wire [15:0] alu_b_bus,
+    output wire [15:0] bus_alu_a,
+    output wire [15:0] bus_alu_b,
 
     output logic [15:0] data
-
+ 
     );
 
-    logic [15:0] data;
-
     assign bus = bus_oe ? data : 16'bz;
-    assign alu_a_bus = alu_a_oe ? data : 16'bz;
-    assign alu_b_bus = alu_b_oe ? data : 16'bz;
+    assign bus_alu_a = alu_a_oe ? data : 16'bz;
+    assign bus_alu_b = alu_b_oe ? data : 16'bz;
 
     always @(posedge clk) begin
         

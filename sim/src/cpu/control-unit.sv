@@ -6,18 +6,7 @@ module ControlUnit(
     input logic [15:0] instr,
     input logic [7:0] flags,
 
-    output logic [4:0] bus_src,
-    output logic [4:0] bus_dest,
-    output logic [3:0] bus_dest_special,
-
-    output logic [3:0] alu_op_sel__seg_sel,
-    output logic       alu__seg_pc,
-
-    output logic [3:0] alu_a_sel,
-    output logic [3:0] alu_b_sel,
-
-    output logic pc_e,
-    output logic flags_e
+    ControlSignals_if.control controlSignalsRaw // TODO: Change Names
 
 );
 

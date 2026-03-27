@@ -1,54 +1,55 @@
 `include "src/core.svh"
+
+`include "src/cpu/decoder.sv"
 `include "src/cpu/control-unit.sv"
 `include "src/cpu/register-unit.sv"
-`include "src/cpu/program-counter.sv"
+
+`include "src/cpu/registers/flags.sv"
+`include "src/cpu/registers/program-counter.sv"
+
+`include "src/exp-unit-manager.sv"
+`include "src/exp-units/memory.sv"
 
 module CPU(
     
     input logic clk, r,
-    inout wire [15:0] bus,
 
-    input [23:0] addro
+    inout wire [15:0] bus,
+    input wire [23:0] addr
 
     );
 
-    wire [15:0] alu_a_bus,
-    wire [15:0] alu_b_bus,
+    // BUS's
+    wire [15:0] bus_alu_a;
+    wire [15:0] bus_alu_b;
+    wire [7:0]  bus_flags;
 
     // Direct Registers
-    logic [15:0] instr;
-    logic [15:0] mem;
-
-    logic [7:0] flags;
+    logic [15:0] instr_direct;
+    logic [15:0] memory_direct;
+    logic [7:0]  flags_direct;
 
     // Control Signals
-    logic [4:0] bus_src,
-    logic [4:0] bus_dest,
-    logic [3:0] bus_dest_special,
-    
-    logic [31:0] bus_src_decoded;
-    logic [31:0] bus_dest_decoded;
-    logic [15:0] alu_a_decoded;
-    logic [15:0] alu_b_decoded;
-
-    logic [3:0] alu_op_sel__seg_sel,
-    logic       alu__seg_pc,
-
-    logic [3:0] alu_a_sel,
-    logic [3:0] alu_b_sel,
-
-    logic pc_e,
-    logic flags_e
+    ControlSignals_if controlSignalsRaw;    // ControlUnit -> Decoder ->
+    ControlSignals_if controlSignals;       // Decoder -> Units...
 
     // Units
-    ControlUnit cu(clk, r, instr, flags, bus_src, bus_dest, bus_dest_special, alu_op_sel__seg_sel, alu__seg_pc, alu_a_sel, alu_b_sel, pc_e, flags_e); // Finish Instruction Set
 
-    Decoder_CU decoder(clk, r, bus_src, bus_dest, bus_dest_special, bus_src_decoded, bus_dest_decoded, alu_a_decoded, alu_b_decoded);
+    Decoder decoder(controlSignalsRaw, controlSignals);
 
-    RegisterUnit ru(clk, r, bus, alu_a_bus, alu_b_bus, bus_src_decoded, bus_dest_decoded, alu_a_decoded, alu_b_decoded, alu_a_sel, alu_b_sel, instr, mem);
+    ControlUnit controlUnit(clk, r, instr, flags_direct, controlSignalsRaw); // TODO: Finish Instruction Set
 
-    ProgramCounter pc(clk, r, pc_e, bus, alu_a_bus, alu_b_bus, bus_src_decoded, bus_dest_decoded, alu_a_decoded, alu_b_decoded);
+    RegisterUnit registerUnit(clk, r, bus, bus_alu_a, bus_alu_b, instr_direct, memory_direct, controlSignals);
 
-    // + ALU + Extension Units
+    Flags flags(clk, r, bus_flags, flags_direct, controlSignals);
+    ProgramCounter programCounter(clk, r, bus, bus_alu_a, bus_alu_b, controlSignals);
+    // + ALU
+
+    // Expansion Units
+
+    ExpansionSignals_if memUnitSignals;
+    Memory memory(clk, r, bus, addr, memUnitSignals);
+
+    ExpansionUnitManager expUnitManger(clk, r, bus_src_decoded, bus_dest_decoded, memUnitSignals);
 
 endmodule

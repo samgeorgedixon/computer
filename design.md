@@ -45,6 +45,12 @@
 
 #### Extension Units
 
+- Interconnects
+	- clk, r
+	- we, oe
+	- bus - 16b
+	- addr - 24b
+
 1.  Memory (Internal)
 2. GPU (Internal?)
 3. Storage Drive
