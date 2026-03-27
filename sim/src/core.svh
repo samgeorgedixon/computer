@@ -122,6 +122,9 @@ endinterface
 
 // Registers
 
-`define REG16_FILL(i) clk, r, controlSignals.bus_dest[(i)], controlSignals.bus_src[(i)], controlSignals.alu_a_sel[(i)], controlSignals.alu_b_sel[(i)], bus, bus_alu_a, bus_alu_b
+`define REG16_FILL(i) \
+    .clk(clk), .r(r), \
+    .bus_we(controlSignals.bus_dest[(i)]), .bus_oe(controlSignals.bus_src[(i)]), .alu_a_oe(controlSignals.alu_a_sel[(i)]), .alu_b_oe(controlSignals.alu_b_sel[(i)]), \
+    .bus(bus), .bus_alu_a(bus_alu_a), .bus_alu_b(bus_alu_b)
 
 `endif

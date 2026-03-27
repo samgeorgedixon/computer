@@ -14,9 +14,9 @@ module ProgramCounter(
 
     logic [15:0] data;
 
-    assign bus = bus_oe ? data : 16'bz;
-    assign bus_alu_a = alu_a_oe ? data : 16'bz;
-    assign bus_alu_b = alu_b_oe ? data : 16'bz;
+    assign bus = controlSignals.bus_src[`CS_PC] ? data : 16'bz;
+    assign bus_alu_a = controlSignals.alu_a_sel[`CS_PC] ? data : 16'bz;
+    assign bus_alu_b = controlSignals.alu_b_sel[`CS_PC] ? data : 16'bz;
 
     always @(posedge clk) begin
         

@@ -22,8 +22,8 @@ module RegisterUnit(
     Register16b r4(`REG16_FILL(`CS_R4), .data());
 
     // CS_PC
-    Register16b mem(`REG16_FILL(`CS_MEM), mem);
-    Register16b instr(`REG16_FILL(`CS_INSTR), instr);
+    Register16b mem(`REG16_FILL(`CS_MEM), .data(memory_direct));
+    Register16b instr(`REG16_FILL(`CS_INSTR), .data(instr_direct));
 
     Register16b sp(`REG16_FILL(`CS_SP), .data());
     Register16b bp(`REG16_FILL(`CS_BP), .data());
@@ -34,8 +34,8 @@ module RegisterUnit(
     Register16b es(`REG16_FILL(`CS_ES), .data());
 
     // Zero `Register`
-    assign bus = bus_src_decoded[`CS_ZERO] ? 16'b0 : 16'bz;
-    assign alu_a_bus = alu_a_decoded[`CS_ZERO] ? 16'b0 : 16'bz;
-    assign alu_b_bus = alu_b_decoded[`CS_ZERO] ? 16'b0 : 16'bz;
+    assign bus = controlSignals.bus_src[`CS_ZERO] ? 16'b0 : 16'bz;
+    assign bus_alu_a = controlSignals.alu_a_sel[`CS_ZERO] ? 16'b0 : 16'bz;
+    assign bus_alu_b = controlSignals.alu_b_sel[`CS_ZERO] ? 16'b0 : 16'bz;
 
 endmodule

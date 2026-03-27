@@ -2,7 +2,7 @@ module Register16b(
 
     input logic clk, r,
 
-    input logic bus_we, bus_o,
+    input logic bus_we, bus_oe,
     input logic alu_a_oe, alu_b_oe,
 
     inout wire [15:0] bus,

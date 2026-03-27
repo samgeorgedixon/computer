@@ -10,7 +10,9 @@ module Computer();
     /* verilator lint_off UNOPTFLAT */
     wire [15:0] bus;
     /* verilator lint_on UNOPTFLAT */
-    wire [23:0] addro;
+    wire [23:0] addr;
+
+    CPU cpu(clk, r, bus, addr);
 
     initial begin
 

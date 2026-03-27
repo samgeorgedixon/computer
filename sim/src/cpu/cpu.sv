@@ -30,14 +30,14 @@ module CPU(
     logic [7:0]  flags_direct;
 
     // Control Signals
-    ControlSignals_if controlSignalsRaw;    // ControlUnit -> Decoder ->
-    ControlSignals_if controlSignals;       // Decoder -> Units...
+    ControlSignals_if controlSignalsRaw();    // ControlUnit -> Decoder ->
+    ControlSignals_if controlSignals();       // Decoder -> Units...
 
     // Units
 
     Decoder decoder(controlSignalsRaw, controlSignals);
 
-    ControlUnit controlUnit(clk, r, instr, flags_direct, controlSignalsRaw); // TODO: Finish Instruction Set
+    ControlUnit controlUnit(clk, r, instr_direct, flags_direct, controlSignalsRaw); // TODO: Finish Instruction Set
 
     RegisterUnit registerUnit(clk, r, bus, bus_alu_a, bus_alu_b, instr_direct, memory_direct, controlSignals);
 
@@ -47,9 +47,11 @@ module CPU(
 
     // Expansion Units
 
-    ExpansionSignals_if memUnitSignals;
+    ExpansionSignals_if memUnitSignals();
     Memory memory(clk, r, bus, addr, memUnitSignals);
 
-    ExpansionUnitManager expUnitManger(clk, r, bus_src_decoded, bus_dest_decoded, memUnitSignals);
+    ExpansionUnitManager expUnitManger(.clk(clk), .r(r),
+        .controlSignals(controlSignals),
+        .expUnit1(memUnitSignals));
 
 endmodule
