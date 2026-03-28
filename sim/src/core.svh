@@ -38,9 +38,11 @@ interface ControlSignals_if;
     logic [31:0]    bus_src;
     logic [31:0]    bus_dest;
 
-    logic [3:0]     seg_sel__alu_op_sel_raw;    // __ or
-    logic [15:0]    seg_sel__alu_op_sel;        // 0-3: Segment Select, 0-15: ALU OP Select
-    logic           seg__alu;                   // 0: Segment On / ALU Off, 1: Segment Off / ALU On
+    // No Memory use while using ALU
+    logic [3:0]     seg_sel__alu_op_sel_raw;    // __ or - [0]-[3]: Segment Select, 0-15: ALU OP Select
+    logic           alu_e_raw;                  // 0: Segment On / ALU Off, 1: Segment On / ALU On
+    logic [3:0]     seg_sel;                    // 0-3: Segment Select (No Decoded Needed)
+    logic [3:0]     alu_op_sel;                 // Not Decoded: For ALU CPLD
 
     logic [3:0]     alu_a_sel_raw;
     logic [3:0]     alu_b_sel_raw;
@@ -50,19 +52,27 @@ interface ControlSignals_if;
     logic           pc_e;
     logic           flags_e;
 
+    logic [2:0]     operand_0_raw; // (00: Off, 01: seg_sel, 10: bus_dest, 11: bus_src)
+    logic [2:0]     operand_1_raw; // (00: Off, 01: bus_dest, 10: bus_src, 01&alu_e_raw: alu-a-sel)
+    logic [1:0]     operand_2_raw; // (0: Off, 1&alu_e_raw: alu-b-sel, 1: bus_src)
+
     modport control (
         output bus_src_raw,
         output bus_dest_raw,
         output bus_dest_special_raw,
 
         output seg_sel__alu_op_sel_raw,
-        output seg__alu,
+        output alu_e_raw,
 
         output alu_a_sel_raw,
         output alu_b_sel_raw,
 
         output pc_e,
-        output flags_e
+        output flags_e,
+
+        output operand_0_raw,
+        output operand_1_raw,
+        output operand_2_raw
     );
 
     modport decoderIN (
@@ -77,15 +87,19 @@ interface ControlSignals_if;
         input alu_b_sel_raw,
 
         input pc_e,
-        input flags_e
+        input flags_e,
+
+        input operand_0_raw,
+        input operand_1_raw,
+        input operand_2_raw
     );
 
     modport decoderOUT (
         output bus_src,
         output bus_dest,
 
-        output seg_sel__alu_op_sel,
-        output seg__alu,
+        output seg_sel,
+        output alu_op_sel,
 
         output alu_a_sel,
         output alu_b_sel,
@@ -98,8 +112,8 @@ interface ControlSignals_if;
         input bus_src,
         input bus_dest,
 
-        input seg_sel__alu_op_sel,
-        input seg__alu,
+        input seg_sel,
+        input alu_op_sel,
 
         input alu_a_sel,
         input alu_b_sel,

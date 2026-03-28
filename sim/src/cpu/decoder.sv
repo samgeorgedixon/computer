@@ -2,21 +2,43 @@
 
 module Decoder(
 
+    input logic [1:0] operand_0,
+    input logic [3:0] operand_1,
+    input logic [3:0] operand_2,
+
     ControlSignals_if.decoderIN controlSignalsRaw, // TODO: Impliment Specials
     ControlSignals_if.decoderOUT controlSignals
 
     );
 
-    assign controlSignals.bus_src = 32'b1 << controlSignalsRaw.bus_src_raw;
-    assign controlSignals.bus_dest = 32'b1 << controlSignalsRaw.bus_dest_raw;
+    always_comb begin
+        controlSignals.bus_src      = 0;
+        controlSignals.bus_src      |= 32'b1 << controlSignalsRaw.bus_src_raw;
+        controlSignals.bus_src[3:0] |= controlSignalsRaw.operand_0_raw == 2'd3 ? 4'b1 << operand_0 : 4'b0;
+        controlSignals.bus_src[15:0] |= controlSignalsRaw.operand_1_raw == 2'd2 ? 16'b1 << operand_1 : 4'b0;
+        controlSignals.bus_src[15:0] |= controlSignalsRaw.operand_2_raw == 1'd1 && !controlSignalsRaw.alu_e_raw ? 16'b1 << operand_2 : 4'b0;
 
-    assign controlSignals.seg_sel__alu_op_sel = 16'b1 << controlSignalsRaw.seg_sel__alu_op_sel_raw;
-    assign controlSignals.seg__alu = controlSignalsRaw.seg__alu;
+        controlSignals.bus_dest      = 0;
+        controlSignals.bus_dest      |= 32'b1 << controlSignalsRaw.bus_dest_raw;
+        controlSignals.bus_dest[3:0] |= controlSignalsRaw.operand_0_raw == 2'd2 ? operand_0 : 4'b0;
+        controlSignals.bus_dest[3:0] |= controlSignalsRaw.operand_1_raw == 2'd1 && !controlSignalsRaw.alu_e_raw ? operand_1 : 4'b0;
 
-    assign controlSignals.alu_a_sel = 16'b1 << controlSignalsRaw.alu_a_sel_raw;
-    assign controlSignals.alu_b_sel = 16'b1 << controlSignalsRaw.alu_b_sel_raw;
+        controlSignals.seg_sel      = 0;
+        controlSignals.seg_sel      |= controlSignalsRaw.seg_sel__alu_op_sel_raw;
+        controlSignals.seg_sel      |= controlSignalsRaw.operand_0_raw == 2'd1 ? operand_0 : 4'b0;
 
-    assign controlSignals.pc_e = controlSignalsRaw.pc_e;
-    assign controlSignals.flags_e = controlSignalsRaw.flags_e;
+        controlSignals.alu_op_sel = controlSignalsRaw.alu_e_raw ? controlSignalsRaw.seg_sel__alu_op_sel_raw : 16'b0;
+
+        controlSignals.alu_a_sel = 0;
+        controlSignals.alu_a_sel |= 16'b1 << controlSignalsRaw.alu_a_sel_raw;
+        controlSignals.alu_a_sel |= controlSignalsRaw.operand_1_raw == 2'd1 && controlSignalsRaw.alu_e_raw ? operand_1 : 4'b0;
+
+        controlSignals.alu_b_sel = 0;
+        controlSignals.alu_b_sel |= 16'b1 << controlSignalsRaw.alu_b_sel_raw;
+        controlSignals.alu_b_sel |= controlSignalsRaw.operand_2_raw == 1'd1 && controlSignalsRaw.alu_e_raw ? operand_2 : 4'b0
+
+        controlSignals.pc_e = controlSignalsRaw.pc_e;
+        controlSignals.flags_e = controlSignalsRaw.flags_e;
+    end
 
 endmodule

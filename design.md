@@ -3,16 +3,16 @@
  -  16 Bit Bus
  -  24 Bit Address Bus (Segment 0xffff00) + (Address 0x00ffff)
  -  4 General Registers
- -  16 Extension Modules
+ -  16 Expansion Modules
 
-### Control Unit (CU) - Control Signals - 30b (CPLD / EEPROM)
+### Control Unit (CU) - Control Signals - 35b (CPLD / EEPROM)
 
- - bus-src - 5b (16 registers / 16 extensions, other)
- - bus-dest - 5b (16 registers / 16 extensions, other)
+ - bus-src - 5b (16 registers / 16 expansions, other)
+ - bus-dest - 5b (16 registers / 16 expansions, other)
  - bus-dest-special - 4b (16 register groups)
 
- - alu-op-sel / seg-sel - 4b (16 operations / 4 segments)
- - alu-or-seg-pc - 1b (alu-op-sel / seg-sel,  pc-e)
+ - seg_sel__alu_op_sel_raw - 4b (__ or - (0)-(3): Segment Select, 0-15: ALU OP Select)
+ - alu_e_raw - 1b (0: Segment On / ALU Off, 1: Segment On / ALU On)
 
  - alu-a-sel - 4b (16 registers)
  - alu-b-sel - 4b (16 registers)
@@ -20,7 +20,13 @@
 - pc-e - 1b (Program Counter Enable)
 - flags-e - 1b (Enable Flags)
 
-- + Operands
+- operand-0 - 2b (00: Off, 01: seg_sel, 10: bus_dest, 11: bus_src)
+- operand-1 - 2b (00: Off, 01: bus_dest, 10: bus_src, 01&alu_e_raw: alu-a-sel)
+- operand-2 - 1b (0: Off, 1&alu_e_raw: alu-b-sel, 1: bus_src)
+
+ -  (opcode, 6b)    (operand-0, 2b)   (operand-1, 4b)    (operand-2, 4b)    (imm, 16b)
+    ldw                  {seg}                     rs1                           [rs2                          {imm}]
+	.                       1 + 3o                  1 + 2o                     1 + 1o - src              1 + 1o - bus : ( + alu_e)
 
 - instr-end - 1b
 
@@ -51,11 +57,12 @@
 	- bus - 16b
 	- addr - 24b
 
-1.  Memory (Internal)
-2. GPU (Internal?)
-3. Storage Drive
-4. USB - Keyboard / Mouse
-5. Ethernet?
+1. ROM (Internal)
+2. RAM (Internal)
+3. Drive (Internal)
+4. GPU (Internal?)
+5. USB - Keyboard / Mouse
+6. Ethernet?
 
 #### ALU
 
@@ -65,8 +72,9 @@
  -  B Select - 4b
 
 ### Instruction Set
- -  (opcode, 6b)    (operand-rs, 2b)   (operand-rs1, 4b)    (operand-rs2, 4b)    (imm, 16b)
-    ldw             {seg}              rs1                  [rs2                 {imm}]
+ -  (opcode, 6b)    (operand-0, 2b)   (operand-1, 4b)    (operand-2, 4b)    (imm, 16b)
+    ldw                  {seg}                     rs1                           [rs2                          {imm}]
+	.                       1 + 3o                  1 + 2o                     1 + 1o - src                         : ( + alu_e)
 
  -  {} - optional
  -  [] - address

@@ -19,12 +19,10 @@ module AddrManager(
     always_comb begin
         addr_segment = 24'b0;
 
-        if (!controlSignals.seg__alu) begin
-            if      (controlSignals.seg_sel__alu_op_sel[0]) addr_segment[23:8] = cs_direct;
-            else if (controlSignals.seg_sel__alu_op_sel[1]) addr_segment[23:8] = ds_direct;
-            else if (controlSignals.seg_sel__alu_op_sel[2]) addr_segment[23:8] = ss_direct;
-            else if (controlSignals.seg_sel__alu_op_sel[3]) addr_segment[23:8] = es_direct;
-        end
+        if      (controlSignals.seg_sel[0]) addr_segment[23:8] = cs_direct;
+        else if (controlSignals.seg_sel[1]) addr_segment[23:8] = ds_direct;
+        else if (controlSignals.seg_sel[2]) addr_segment[23:8] = ss_direct;
+        else if (controlSignals.seg_sel[3]) addr_segment[23:8] = es_direct;
     end
 
     assign addr = addr_base_full + addr_segment;
