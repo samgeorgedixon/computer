@@ -9,8 +9,7 @@
 `include "src/cpu/registers/flags.sv"
 `include "src/cpu/registers/program-counter.sv"
 
-`include "src/exp-units/rom.sv"
-`include "src/exp-units/ram.sv"
+`include "src/exp-units/memory.sv"
 `include "src/exp-units/drive.sv"
 `include "src/exp-unit-manager.sv"
 
@@ -47,7 +46,7 @@ module CPU(
 
     // Units
 
-    Decoder decoder(controlSignalsRaw, controlSignals);
+    Decoder decoder(instr_direct, controlSignalsRaw, controlSignals);
 
     ControlUnit controlUnit(clk, r, instr_direct, flags_direct, controlSignalsRaw); // TODO: Finish Instruction Set
 
@@ -61,16 +60,13 @@ module CPU(
 
     // Expansion Units
 
-    ExpansionSignals_if romExpansionSignals();
-    ROM_8bx8b rom(clk, r, bus, addr, romExpansionSignals, romFilePath);
-
-    ExpansionSignals_if ramExpansionSignals();
-    RAM_8bx24b ram(clk, r, bus, addr, ramExpansionSignals);
+    ExpansionSignals_if memoryExpansionSignals();
+    Memory rom(clk, r, bus, addr, memoryExpansionSignals, romFilePath);
 
     ExpansionSignals_if driveExpansionSignals();
     Drive_8bx24b drive(clk, r, bus, addr, driveExpansionSignals, driveFilePath);
 
     ExpansionUnitManager expUnitManger(.controlSignals(controlSignals),
-        .expUnit1(romExpansionSignals), .expUnit2(ramExpansionSignals), .expUnit3(driveExpansionSignals));
+        .expUnit1(memoryExpansionSignals), .expUnit3(driveExpansionSignals));
 
 endmodule

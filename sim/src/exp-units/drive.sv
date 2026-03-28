@@ -1,3 +1,5 @@
+`include "src/core.svh"
+
 module Drive_8bx24b(
 
     input logic clk, r,

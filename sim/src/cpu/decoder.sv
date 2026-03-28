@@ -2,14 +2,20 @@
 
 module Decoder(
 
-    input logic [1:0] operand_0,
-    input logic [3:0] operand_1,
-    input logic [3:0] operand_2,
+    input logic [15:0] instr;
 
     ControlSignals_if.decoderIN controlSignalsRaw, // TODO: Impliment Specials
     ControlSignals_if.decoderOUT controlSignals
 
     );
+
+    logic [1:0] operand_0;
+    logic [3:0] operand_1;
+    logic [3:0] operand_2;
+
+    assign operand_0 = instr[9:8];
+    assign operand_1 = instr[7:4];
+    assign operand_2 = instr[3:0];
 
     always_comb begin
         controlSignals.bus_src      = 0;
