@@ -4,22 +4,18 @@
 
 module Computer();
 
-    reg clk = 0;
-    reg r = 0;
+    logic clk = 0;
+    logic r = 1;
 
-    /* verilator lint_off UNOPTFLAT */
     wire [15:0] bus;
-    /* verilator lint_on UNOPTFLAT */
-    wire [23:0] addr;
+    logic [23:0] addr;
 
-    CPU cpu(clk, r, bus, addr);
+    CPU cpu(clk, r, bus, addr, "", "");
 
     initial begin
 
         $display("---");
         $display("Computer Test Running...");
-
-        r = 1;
 
         #1.1
         r = 0;

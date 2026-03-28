@@ -10,8 +10,8 @@ module Decoder(
     assign controlSignals.bus_src = 32'b1 << controlSignalsRaw.bus_src_raw;
     assign controlSignals.bus_dest = 32'b1 << controlSignalsRaw.bus_dest_raw;
 
-    assign controlSignals.alu_op_sel__seg_sel = controlSignalsRaw.alu_op_sel__seg_sel;
-    assign controlSignals.alu__seg_pc = controlSignalsRaw.alu__seg_pc;
+    assign controlSignals.seg_sel__alu_op_sel = 16'b1 << controlSignalsRaw.seg_sel__alu_op_sel_raw;
+    assign controlSignals.seg__alu = controlSignalsRaw.seg__alu;
 
     assign controlSignals.alu_a_sel = 16'b1 << controlSignalsRaw.alu_a_sel_raw;
     assign controlSignals.alu_b_sel = 16'b1 << controlSignalsRaw.alu_b_sel_raw;

@@ -1,21 +1,28 @@
 `include "src/core.svh"
 
-`include "src/cpu/decoder.sv"
 `include "src/cpu/control-unit.sv"
 `include "src/cpu/register-unit.sv"
+
+`include "src/cpu/decoder.sv"
+`include "src/cpu/addr-manager.sv"
 
 `include "src/cpu/registers/flags.sv"
 `include "src/cpu/registers/program-counter.sv"
 
+`include "src/exp-units/rom.sv"
+`include "src/exp-units/ram.sv"
+`include "src/exp-units/drive.sv"
 `include "src/exp-unit-manager.sv"
-`include "src/exp-units/memory.sv"
 
 module CPU(
     
     input logic clk, r,
 
     inout wire [15:0] bus,
-    input wire [23:0] addr
+    inout logic [23:0] addr,
+
+    input string romFilePath,
+    input string driveFilePath
 
     );
 
@@ -29,6 +36,11 @@ module CPU(
     logic [15:0] memory_direct;
     logic [7:0]  flags_direct;
 
+    logic [15:0] cs_direct;
+    logic [15:0] ds_direct;
+    logic [15:0] ss_direct;
+    logic [15:0] es_direct;
+
     // Control Signals
     ControlSignals_if controlSignalsRaw();    // ControlUnit -> Decoder ->
     ControlSignals_if controlSignals();       // Decoder -> Units...
@@ -39,19 +51,26 @@ module CPU(
 
     ControlUnit controlUnit(clk, r, instr_direct, flags_direct, controlSignalsRaw); // TODO: Finish Instruction Set
 
-    RegisterUnit registerUnit(clk, r, bus, bus_alu_a, bus_alu_b, instr_direct, memory_direct, controlSignals);
+    RegisterUnit registerUnit(clk, r, bus, bus_alu_a, bus_alu_b, instr_direct, memory_direct, cs_direct, ds_direct, ss_direct, es_direct, controlSignals);
 
     Flags flags(clk, r, bus_flags, flags_direct, controlSignals);
     ProgramCounter programCounter(clk, r, bus, bus_alu_a, bus_alu_b, controlSignals);
     // + ALU
 
+    AddrManager addrManager(addr, memory_direct, cs_direct, ds_direct, ss_direct, es_direct, controlSignals);
+
     // Expansion Units
 
-    ExpansionSignals_if memUnitSignals();
-    Memory memory(clk, r, bus, addr, memUnitSignals);
+    ExpansionSignals_if romExpansionSignals();
+    ROM_8bx8b rom(clk, r, bus, addr, romExpansionSignals, romFilePath);
 
-    ExpansionUnitManager expUnitManger(.clk(clk), .r(r),
-        .controlSignals(controlSignals),
-        .expUnit1(memUnitSignals));
+    ExpansionSignals_if ramExpansionSignals();
+    RAM_8bx24b ram(clk, r, bus, addr, ramExpansionSignals);
+
+    ExpansionSignals_if driveExpansionSignals();
+    Drive_8bx24b drive(clk, r, bus, addr, driveExpansionSignals, driveFilePath);
+
+    ExpansionUnitManager expUnitManger(.controlSignals(controlSignals),
+        .expUnit1(romExpansionSignals), .expUnit2(ramExpansionSignals), .expUnit3(driveExpansionSignals));
 
 endmodule

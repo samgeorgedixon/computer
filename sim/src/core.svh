@@ -22,36 +22,41 @@
 `define CS_ES 13
 
 `define CS_ZERO 14
-// + Expansion Units (Memory)
 
+`define CS_EXP1 16 // ROM
+`define CS_EXP2 17 // RAM
+`define CS_EXP3 18
+`define CS_EXP4 19
+ 
 // Control Signals
 
 interface ControlSignals_if;
-    logic [4:0] bus_src_raw;
-    logic [4:0] bus_dest_raw;
-    logic [3:0] bus_dest_special_raw;
+    logic [4:0]     bus_src_raw;
+    logic [4:0]     bus_dest_raw;
+    logic [3:0]     bus_dest_special_raw;
 
-    logic [31:0] bus_src;
-    logic [31:0] bus_dest;
+    logic [31:0]    bus_src;
+    logic [31:0]    bus_dest;
 
-    logic [3:0] alu_op_sel__seg_sel;
-    logic       alu__seg_pc;
+    logic [3:0]     seg_sel__alu_op_sel_raw;    // __ or
+    logic [15:0]    seg_sel__alu_op_sel;        // 0-3: Segment Select, 0-15: ALU OP Select
+    logic           seg__alu;                   // 0: Segment On / ALU Off, 1: Segment Off / ALU On
 
-    logic [3:0] alu_a_sel_raw;
-    logic [3:0] alu_b_sel_raw;
-    logic [15:0] alu_a_sel;
-    logic [15:0] alu_b_sel;
+    logic [3:0]     alu_a_sel_raw;
+    logic [3:0]     alu_b_sel_raw;
+    logic [15:0]    alu_a_sel;
+    logic [15:0]    alu_b_sel;
 
-    logic pc_e;
-    logic flags_e;
+    logic           pc_e;
+    logic           flags_e;
 
     modport control (
         output bus_src_raw,
         output bus_dest_raw,
         output bus_dest_special_raw,
 
-        output alu_op_sel__seg_sel,
-        output alu__seg_pc,
+        output seg_sel__alu_op_sel_raw,
+        output seg__alu,
 
         output alu_a_sel_raw,
         output alu_b_sel_raw,
@@ -65,8 +70,8 @@ interface ControlSignals_if;
         input bus_dest_raw,
         input bus_dest_special_raw,
 
-        input alu_op_sel__seg_sel,
-        input alu__seg_pc,
+        input seg_sel__alu_op_sel_raw,
+        input seg__alu,
 
         input alu_a_sel_raw,
         input alu_b_sel_raw,
@@ -79,8 +84,8 @@ interface ControlSignals_if;
         output bus_src,
         output bus_dest,
 
-        output alu_op_sel__seg_sel,
-        output alu__seg_pc,
+        output seg_sel__alu_op_sel,
+        output seg__alu,
 
         output alu_a_sel,
         output alu_b_sel,
@@ -93,8 +98,8 @@ interface ControlSignals_if;
         input bus_src,
         input bus_dest,
 
-        input alu_op_sel__seg_sel,
-        input alu__seg_pc,
+        input seg_sel__alu_op_sel,
+        input seg__alu,
 
         input alu_a_sel,
         input alu_b_sel,
