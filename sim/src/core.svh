@@ -23,8 +23,8 @@
 
 `define CS_ZERO 14
 
-`define CS_EXP1 16 // ROM
-`define CS_EXP2 17 // RAM
+`define CS_EXP1 16 // RAM
+`define CS_EXP2 17 // Drive
 `define CS_EXP3 18
 `define CS_EXP4 19
 

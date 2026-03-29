@@ -15,7 +15,7 @@ module ROM_8bx8b(
 
     logic [7:0] rom [0:(2**8) - 1];
 
-    assign bus = oe ? { rom[addr[7:0]], rom[addr[7:0] + 1] } : 16'bz; // TODO: Need to Impliment Byte BUS
+    assign bus = oe ? { rom[addr], rom[addr + 1] } : 16'bz; // TODO: Need to Impliment Byte BUS
     
     import "DPI-C" function int LoadMemoryFile(input string filePath);
     import "DPI-C" function byte GetMemoryFileByte(input int index);
@@ -34,10 +34,10 @@ module ROM_8bx8b(
         end
         CloseMemoryFile();
 
-        //$display("Memory Array:");
-        //for (int i = 0; i < 2**4; i = i + 1) begin
-        //    $display("memory_array[%0d] = %b", i, rom[i]);
-        //end
+        $display("Memory Array:");
+        for (int i = 0; i < 2**8; i = i + 1) begin
+            $display("memory_array[%0d] = %b", i, rom[i]);
+        end
         
     end
 
@@ -93,8 +93,8 @@ module Memory (
     assign rom_we = addr[23:8] == 16'd0 ? memoryUnitSignals.we : 1'd0;
     assign rom_oe = addr[23:8] == 16'd0 ? memoryUnitSignals.oe : 1'd0;
 
-    assign rom_we = addr[23:8] != 16'd0 ? memoryUnitSignals.we : 1'd0;
-    assign rom_oe = addr[23:8] != 16'd0 ? memoryUnitSignals.oe : 1'd0;
+    assign ram_we = addr[23:8] != 16'd0 ? memoryUnitSignals.we : 1'd0;
+    assign ram_oe = addr[23:8] != 16'd0 ? memoryUnitSignals.oe : 1'd0;
 
     ROM_8bx8b   rom(.clk(clk), .r(r), .bus(bus), .addr(addr[7:0]), .we(rom_we), .oe(rom_oe), .romFilePath(romFilePath));
     RAM_8bx24b  ram(.clk(clk), .r(r), .bus(bus), .addr(addr)     , .we(ram_we), .oe(ram_oe));

@@ -6,8 +6,8 @@
 
 // Instructions for Cases
 `define INSTR_NOP       6'd0
-`define INSTR_MOV       6'd1 // Register
-`define INSTR_MOVI      6'd2 // Immediate
+`define INSTR_MOV       6'd1
+`define INSTR_LI        6'd2
 
 `define INSTR_MEMORY    `INSTR_LDW, `INSTR_STW, `INSTR_LDE, `INSTR_STE
 `define INSTR_LDW       6'd3
@@ -108,7 +108,7 @@ module ControlUnit(
         `SET_CS_RAW(operand_1_raw            , 2'd0);
         `SET_CS_RAW(operand_2_raw            , 1'd0);
 
-        instrEnd = 1'b0;
+        instrEnd = 1'd0;
 
         // Instruction Logic
 
@@ -117,15 +117,20 @@ module ControlUnit(
             `SET_CS_RAW(bus_src_raw  , 5'd`CS_PC);
             `SET_CS_RAW(bus_dest_raw , 5'd`CS_MEM);
         end else if (microCodeIndex == 4'd1) begin
+            `SET_CS_RAW(seg_sel__alu_op_sel_raw, `SEL_CS);
             `SET_CS_RAW(bus_src_raw  , 5'd`CS_EXP1); // Memory
             `SET_CS_RAW(bus_dest_raw , 5'd`CS_INSTR);
-            `SET_CS_RAW(pc_e         , 1'b1);
+            `SET_CS_RAW(pc_e         , 1'd1);
         end
 
         /* verilator lint_off CASEINCOMPLETE */
-        case (`OPCODE)
+        unique case (`OPCODE)
             `INSTR_NOP: begin
-                instrEnd = 1'b1;
+                unique case (microCodeIndex)
+                    4'd2: begin
+                        instrEnd = 1'b1;
+                    end
+                endcase
             end
             // Moving
             `INSTR_MOV: begin
@@ -137,7 +142,7 @@ module ControlUnit(
                     end
                 endcase
             end
-            `INSTR_MOVI: begin
+            `INSTR_LI: begin
                 unique case (microCodeIndex)
                     4'd2: begin
                         `SET_CS_RAW(bus_src_raw,  5'd`CS_PC);
@@ -196,13 +201,13 @@ module ControlUnit(
             end
             // Jump / Conditions
             `INSTR_JMPS: begin
-                if      (`OPCODE == `INSTR_JZ && !flags[`F_ZERO]) begin
-                    `SET_CS_RAW(pc_e,  1'd1); instrEnd = 1'b1; end
-                else if (`OPCODE == `INSTR_JC && !flags[`F_CARRY]) begin
-                    `SET_CS_RAW(pc_e,  1'd1); instrEnd = 1'b1; end
-
                 unique case (microCodeIndex)
                     4'd2: begin
+                        if      (`OPCODE == `INSTR_JZ && !flags[`F_ZERO]) begin
+                            `SET_CS_RAW(pc_e,  1'd1); instrEnd = 1'b1; end
+                        else if (`OPCODE == `INSTR_JC && !flags[`F_CARRY]) begin
+                            `SET_CS_RAW(pc_e,  1'd1); instrEnd = 1'b1; end
+
                         `SET_CS_RAW(bus_src_raw,  5'd`CS_PC);
                         `SET_CS_RAW(bus_dest_raw, 5'd`CS_MEM);
                     end
@@ -233,18 +238,23 @@ module ControlUnit(
             end
             // ALU
             `INSTR_ALU: begin // microCodeIndex = 4'd2
-                `SET_CS_RAW(alu_e_raw, 1'd1);
-                `SET_CS_RAW(operand_1_raw, `OP1_ALU_A_SEL);
-                `SET_CS_RAW(operand_2_raw, `OP2_ALU_B_SEL);
-                `SET_CS_RAW(flags_e, 1'd1);
+                unique case (microCodeIndex)
+                    4'd2: begin
+                        `SET_CS_RAW(alu_e_raw, 1'd1);
+                        `SET_CS_RAW(operand_1_raw, `OP1_ALU_A_SEL);
+                        `SET_CS_RAW(operand_2_raw, `OP2_ALU_B_SEL);
+                        `SET_CS_RAW(flags_e, 1'd1);
 
-                if (`OPCODE != `INSTR_CMP) `SET_CS_RAW(operand_0_raw, `OP0_BUS_DEST);
+                        if (`OPCODE != `INSTR_CMP) `SET_CS_RAW(operand_0_raw, `OP0_BUS_DEST);
 
-                /* verilator lint_off WIDTHEXPAND */ /* verilator lint_off WIDTHTRUNC */
-                `SET_CS_RAW(seg_sel__alu_op_sel_raw, (`OPCODE - `INSTR_ADD) + 4'd1);
-                /* verilator lint_on WIDTHEXPAND */ /* verilator lint_on WIDTHTRUNC */
+                        /* verilator lint_off WIDTHEXPAND */ /* verilator lint_off WIDTHTRUNC */
+                        `SET_CS_RAW(seg_sel__alu_op_sel_raw, (`OPCODE - `INSTR_ADD) + 4'd1);
+                        /* verilator lint_on WIDTHEXPAND */ /* verilator lint_on WIDTHTRUNC */
 
-                instrEnd = 1'b1;
+                        instrEnd = 1'b1;
+                    end
+                endcase
+                
             end
             // Stack / Functions
             `INSTR_PUSH_POP: begin
@@ -283,7 +293,6 @@ module ControlUnit(
                     end
                 endcase
             end
-            default: instrEnd = 1'b1;
         endcase
 
     end

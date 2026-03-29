@@ -46,6 +46,7 @@ int main(int argc, char* argv[]) {
     std::string line;
     std::vector<std::string> lines;
 
+    // Get / Trim Lines
     while(getline(srcFile, line)) {
         line = Trim(line);
 
@@ -59,6 +60,7 @@ int main(int argc, char* argv[]) {
 
     std::vector<char> program = AssembleLines(lines);
 
+    // Write Binary Program to File
     std::ofstream outFile(outPath, std::ios::out | std::ios::binary);
     outFile.write(&program[0], program.size() * sizeof(char));
     outFile.close();

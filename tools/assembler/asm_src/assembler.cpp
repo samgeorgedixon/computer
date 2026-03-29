@@ -15,13 +15,13 @@ int currentAddress = 0;
 
 enum InstrCode {
     NOP = 0, MOV, LI,
-    LDW, LDB, STW, STB, LDE, STE,
-    JMP, JMPF, CMP, JZ, JC,
-    ADD, SUB, INC, DEC, MULT, DIV, AND, OR,
-    PUSH, PUSHB, POP, POPB, CALL, CALLF, RET, RETF
+    LDW, STW, LDE, STE,
+    JMP, JMPF, JZ, JC,
+    ADD, SUB, CMP, INC, DEC, MUL, DIV, AND, OR,
+    PUSH, POP
 };
 enum ParameterIndex {
-    RS = 0, RS1, RS2, IMM
+    OP0 = 0, OP1, OP2, IMM
 };
 
 struct Instruction {
@@ -32,68 +32,64 @@ struct Instruction {
 
 std::unordered_map<std::string, Instruction> instructions {
     { "nop",   { NOP,   2, {} } },
-    { "mov",   { MOV,   2, { RS1, RS2 } } },
-    { "li",    { LI,    4, { RS1, IMM } } },
+    { "mov",   { MOV,   2, { OP1, OP2 } } },
+    { "li",    { LI,    4, { OP1, IMM } } },
 
-    { "ldw",   { LDW,   4, { RS, RS1, RS2, IMM } } },
-    { "ldb",   { LDB,   4, { RS, RS1, RS2, IMM } } },
-    { "stw",   { STW,   4, { RS, RS1, RS2, IMM } } },
-    { "stb",   { STB,   4, { RS, RS1, RS2, IMM } } },
-    { "lde",   { LDE,   4, { RS, RS1, RS2, IMM } } },
-    { "ste",   { STE,   4, { RS, RS1, RS2, IMM } } },
+    { "ldw",   { LDW,   4, { OP0, OP1, OP2, IMM } } },
+    { "stw",   { STW,   4, { OP0, OP1, OP2, IMM } } },
+    { "lde",   { LDE,   4, { OP0, OP1, OP2, IMM } } },
+    { "ste",   { STE,   4, { OP0, OP1, OP2, IMM } } },
     
-    { "jmp",   { JMP,   4, { RS2, IMM } } },
-    { "jmpf",  { JMPF,  4, { RS1, RS2, IMM } } },
-    { "cmp",   { CMP,   2, { RS1, RS2 } } },
-    { "jz",    { JZ,    4, { RS2, IMM } } },
-    { "jc",    { JC,    4, { RS2, IMM } } },
+    { "jmp",   { JMP,   4, { OP2, IMM } } },
+    { "jmpf",  { JMPF,  4, { OP1, OP2, IMM } } },
+    { "jz",    { JZ,    4, { OP2, IMM } } },
+    { "jc",    { JC,    4, { OP2, IMM } } },
 
-    { "add",   { ADD,   2, { RS, RS1, RS2 } } },
-    { "sub",   { SUB,   2, { RS, RS1, RS2 } } },
-    { "inc",   { INC,   2, { RS, RS1 } } },
-    { "dec",   { DEC,   2, { RS, RS1 } } },
-    { "mult",  { MULT,  2, { RS, RS1, RS2 } } },
-    { "div",   { DIV,   2, { RS, RS1, RS2 } } },
-    { "and",   { AND,   2, { RS, RS1, RS2 } } },
-    { "or",    { OR,    2, { RS, RS1, RS2 } } },
+    { "add",   { ADD,   2, { OP0, OP1, OP2 } } },
+    { "sub",   { SUB,   2, { OP0, OP1, OP2 } } },
+    { "cmp",   { CMP,   2, { OP1, OP2 } } },
+    { "inc",   { INC,   2, { OP0, OP1 } } },
+    { "dec",   { DEC,   2, { OP0, OP1 } } },
+    { "mul",  { MUL,  2, { OP0, OP1, OP2 } } },
+    { "div",   { DIV,   2, { OP0, OP1, OP2 } } },
+    { "and",   { AND,   2, { OP0, OP1, OP2 } } },
+    { "or",    { OR,    2, { OP0, OP1, OP2 } } },
 
-    { "push",  { PUSH,  2, { RS1 } } },
-    { "pushb", { PUSHB, 2, { RS1 } } },
-    { "pop",   { POP,   2, { RS1 } } },
-    { "popb",  { POPB,  2, { RS1 } } },
-    { "call",  { CALL,  4, { RS2, IMM } } },
-    { "callf", { CALLF, 4, { RS1, RS2, IMM } } },
-    { "ret",   { RET,   2, {} } },
-    { "retf",  { RETF,  2, {} } },
+    { "push",  { PUSH,  2, { OP1 } } },
+    { "pop",   { POP,   2, { OP1 } } },
 };
 
-// Register Index
-#define R1  1
-#define R2  2
-#define R3  3
-#define R4  4
+// Register Indexes
+#define R1 1
+#define R2 2
+#define R3 3
+#define R4 4
 
-#define SP  5
-#define BP  6
+#define PC 5
+#define MEM 6
+#define INSTR 7
 
-#define CS  7
-#define DS  8
-#define SS  9
-#define ES  10
+#define SP 8
+#define BP 9
 
-#define Z   11
+#define CS 10
+#define DS 11
+#define SS 12
+#define ES 13
+
+#define ZERO 14
+
+// Expansion Unit Indexes
+#define EXP0 0 // RAM
+#define EXP1 1 // Drive
+#define EXP2 2
+#define EXP3 3
 
 // Segment Indexes
 #define CSS  1
 #define DSS  2
 #define SSS  3
 #define ESS  4
-
-// Ext Port Indexes
-#define E1  1
-#define E2  2
-#define E3  3
-#define E4  4
 
 std::string TrimA(std::string str, std::string whitespace = " \t\r") {
     int strBegin = str.find_first_not_of(whitespace);
@@ -161,12 +157,12 @@ uint16_t ConvertInstrParam(std::string instrParamStr) {
         else if (instrParamStr == "ss")  { instrParam = SS; }
         else if (instrParamStr == "es")  { instrParam = ES; }
 
-        else if (instrParamStr == "z")   { instrParam = Z; }
+        else if (instrParamStr == "z")   { instrParam = ZERO; }
 
-        else if (instrParamStr == "e1")  { instrParam = E1; }
-        else if (instrParamStr == "e2")  { instrParam = E2; }
-        else if (instrParamStr == "e3")  { instrParam = E3; }
-        else if (instrParamStr == "e4")  { instrParam = E4; }
+        else if (instrParamStr == "exp0")  { instrParam = EXP0; }
+        else if (instrParamStr == "exp1")  { instrParam = EXP1; }
+        else if (instrParamStr == "exp2")  { instrParam = EXP2; }
+        else if (instrParamStr == "exp3")  { instrParam = EXP3; }
 
         else instrParam = labels[instrParamStr];
     }
@@ -294,13 +290,13 @@ int ConvertLineInstruction(std::string line) {
     bool extraParamOn = false;
 
     for (int i = 0; i < instructions[lineTokens[0]].parameters.size(); i++) {
-        if (instructions[lineTokens[0]].parameters[i] == ParameterIndex::RS) {
+        if (instructions[lineTokens[0]].parameters[i] == ParameterIndex::OP0) {
             instrParam |= ((ConvertInstrParam(lineTokens[i + 1]) & 0b11) - 1 << 8);
         }
-        else if (instructions[lineTokens[0]].parameters[i] == ParameterIndex::RS1) {
+        else if (instructions[lineTokens[0]].parameters[i] == ParameterIndex::OP1) {
             instrParam |= ((ConvertInstrParam(lineTokens[i + 1]) & 0b1111) << 4);
         }
-        else if (instructions[lineTokens[0]].parameters[i] == ParameterIndex::RS2) {
+        else if (instructions[lineTokens[0]].parameters[i] == ParameterIndex::OP2) {
             instrParam |= (ConvertInstrParam(lineTokens[i + 1]) & 0b1111);
         }
         else if (instructions[lineTokens[0]].parameters[i] == ParameterIndex::IMM) {
@@ -337,6 +333,8 @@ void CreateProgram(const std::vector<std::string>& lines) {
 }
 
 void PrintProgram() {
+    std::cout << "---" << "\n";
+
     int skipped = 0;
 
     for (int i = 0; i < program.size(); i += 2) {

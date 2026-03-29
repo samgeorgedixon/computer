@@ -3,8 +3,8 @@ BIN_DRIVES = ${BIN}\drives
 BIN_SOFTWARE = ${BIN}\software
 BIN_TOOLS = ${BIN}\tools
 
-CC = ${BIN_TOOLS}\compiler\release_windows_x86_64\compiler.exe
-ASM = ${BIN_TOOLS}\assembler-app\release_windows_x86_64\assembler-app.exe
+CC = ${BIN_TOOLS}\compiler\release-windows\compiler.exe
+ASM = ${BIN_TOOLS}\assembler-app\release-windows\assembler-app.exe
 
 ## C
 bootloader: bootloader\bootloader.c
@@ -25,3 +25,6 @@ bios: bootloader\bios.asm
 
 testa: tests\tester.asm
 	${ASM} tests\tester.asm -o ${BIN_SOFTWARE}\tester.bin
+
+new: tests\new.asm
+	${ASM} tests\new.asm -o ${BIN_SOFTWARE}\new.bin
