@@ -15,7 +15,7 @@ module ROM_8bx8b(
 
     logic [7:0] rom [0:(2**8) - 1];
 
-    assign bus = romUnitSignals.oe ? { rom[addr[7:0]], rom[addr[7:0] + 1] } : 16'bz; // TODO: Need to Impliment Byte BUS
+    assign bus = oe ? { rom[addr[7:0]], rom[addr[7:0] + 1] } : 16'bz; // TODO: Need to Impliment Byte BUS
     
     import "DPI-C" function int LoadMemoryFile(input string filePath);
     import "DPI-C" function byte GetMemoryFileByte(input int index);
@@ -56,7 +56,7 @@ module RAM_8bx24b(
 
     logic [7:0] ram [0:(2**24) - 1];
 
-    assign bus = ramUnitSignals.oe ? { ram[addr], ram[addr + 1] } : 16'bz; // TODO: Need to Impliment Byte BUS
+    assign bus = oe ? { ram[addr], ram[addr + 1] } : 16'bz; // TODO: Need to Impliment Byte BUS
 
     always @(posedge clk) begin
 
@@ -65,7 +65,7 @@ module RAM_8bx24b(
             for (i = 0; i < 2**24; i = i + 1) begin
                 ram[i] = 8'b0;
             end
-        end else if (ramUnitSignals.we) begin
+        end else if (we) begin
             ram[addr] <= bus[15:8];
             ram[addr + 1] <= bus[7:0];
         end
@@ -96,7 +96,7 @@ module Memory (
     assign rom_we = addr[23:8] != 16'd0 ? memoryUnitSignals.we : 1'd0;
     assign rom_oe = addr[23:8] != 16'd0 ? memoryUnitSignals.oe : 1'd0;
 
-    ROM_8bx8b   rom(.clk(clk), .r(r), .bus(bus), .addr(addr[7:0]), .we(rom_we), .oe(rom_oe));
-    RAM_8bx24b  ram(.clk(clk), .r(r), .bus(bus), .addr(addr), .we(ram_we), .oe(ram_oe), romFilePath);
+    ROM_8bx8b   rom(.clk(clk), .r(r), .bus(bus), .addr(addr[7:0]), .we(rom_we), .oe(rom_oe), .romFilePath(romFilePath));
+    RAM_8bx24b  ram(.clk(clk), .r(r), .bus(bus), .addr(addr)     , .we(ram_we), .oe(ram_oe));
     
 endmodule

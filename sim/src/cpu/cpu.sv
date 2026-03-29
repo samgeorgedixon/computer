@@ -67,6 +67,6 @@ module CPU(
     Drive_8bx24b drive(clk, r, bus, addr, driveExpansionSignals, driveFilePath);
 
     ExpansionUnitManager expUnitManger(.controlSignals(controlSignals),
-        .expUnit1(memoryExpansionSignals), .expUnit3(driveExpansionSignals));
+        .expUnit1(memoryExpansionSignals), .expUnit2(driveExpansionSignals));
 
 endmodule

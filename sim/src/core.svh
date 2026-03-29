@@ -27,13 +27,16 @@
 `define CS_EXP2 17 // RAM
 `define CS_EXP3 18
 `define CS_EXP4 19
+
+// bus_dest_special_raw
+`define SPECIAL_MEM_SP 1
  
 // Control Signals
 
 interface ControlSignals_if;
     logic [4:0]     bus_src_raw;
     logic [4:0]     bus_dest_raw;
-    logic [3:0]     bus_dest_special_raw;
+    logic [3:0]     bus_dest_special_raw; // TODO: Decrease to 1b / 2b
 
     logic [31:0]    bus_src;
     logic [31:0]    bus_dest;
@@ -52,9 +55,9 @@ interface ControlSignals_if;
     logic           pc_e;
     logic           flags_e;
 
-    logic [2:0]     operand_0_raw; // (00: Off, 01: seg_sel, 10: bus_dest, 11: bus_src)
-    logic [2:0]     operand_1_raw; // (00: Off, 01: bus_dest, 10: bus_src, 01&alu_e_raw: alu-a-sel)
-    logic [1:0]     operand_2_raw; // (0: Off, 1&alu_e_raw: alu-b-sel, 1: bus_src)
+    logic [1:0]     operand_0_raw; // (00: Off, 01: seg_sel, 10: bus_dest, 11: bus_src)
+    logic [1:0]     operand_1_raw; // (00: Off, 01: bus_dest, 10: bus_src, 01&alu_e_raw: alu-a-sel)
+    logic           operand_2_raw; // (0: Off, 1&alu_e_raw: alu-b-sel, 1: bus_src)
 
     modport control (
         output bus_src_raw,
@@ -81,7 +84,7 @@ interface ControlSignals_if;
         input bus_dest_special_raw,
 
         input seg_sel__alu_op_sel_raw,
-        input seg__alu,
+        input alu_e_raw,
 
         input alu_a_sel_raw,
         input alu_b_sel_raw,
