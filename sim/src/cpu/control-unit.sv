@@ -21,7 +21,7 @@
 `define INSTR_JZ        6'd9
 `define INSTR_JC        6'd10
 
-`define INSTR_ALU       `INSTR_ADD, `INSTR_SUB, `INSTR_CMP, `INSTR_INC, `INSTR_DEC, `INSTR_MUL, `INSTR_DIV, `INSTR_AND, `INSTR_OR   // ? 16
+`define INSTR_ALU       `INSTR_ADD, `INSTR_SUB, `INSTR_CMP, `INSTR_INC, `INSTR_INC2, `INSTR_DEC, `INSTR_DEC2, `INSTR_MUL, `INSTR_DIV, `INSTR_AND, `INSTR_OR   // ? 16
 `define INSTR_ADD       6'd11
 `define INSTR_SUB       6'd12
 `define INSTR_INC       6'd13
@@ -221,7 +221,7 @@ module ControlUnit(
 
                         `SET_CS_RAW(bus_dest_raw, 5'd`CS_PC);
 
-                        if (`OPCODE == `INSTR_JMP) begin
+                        if (`OPCODE != `INSTR_JMPF) begin
                             instrEnd = 1'b1;
                         end else if (microCodeIndex == 4'd5) begin
                             `SET_CS_RAW(operand_1_raw, `OP1_BUS_SRC);
@@ -241,16 +241,19 @@ module ControlUnit(
                         `SET_CS_RAW(operand_2_raw, `OP2_ALU_B_SEL);
                         `SET_CS_RAW(flags_e, 1'd1);
 
-                        if (`OPCODE != `INSTR_CMP) `SET_CS_RAW(operand_0_raw, `OP0_BUS_DEST);
+                        if (`OPCODE != `INSTR_CMP) begin
+                            `SET_CS_RAW(operand_0_raw, `OP0_BUS_DEST);
 
-                        /* verilator lint_off WIDTHEXPAND */ /* verilator lint_off WIDTHTRUNC */
-                        `SET_CS_RAW(seg_sel__alu_op_sel_raw, (`OPCODE - `INSTR_ADD) + 4'd1);
-                        /* verilator lint_on WIDTHEXPAND */ /* verilator lint_on WIDTHTRUNC */
+                            /* verilator lint_off WIDTHEXPAND */ /* verilator lint_off WIDTHTRUNC */
+                            `SET_CS_RAW(seg_sel__alu_op_sel_raw, (`OPCODE - `INSTR_ADD) + 4'd1);
+                            /* verilator lint_on WIDTHEXPAND */ /* verilator lint_on WIDTHTRUNC */
+                        end else begin
+                            `SET_CS_RAW(seg_sel__alu_op_sel_raw, `ALU_SUB);
+                        end
 
                         instrEnd = 1'b1;
                     end
                 endcase
-                
             end
             // Stack (sp points to current) / Functions
             `INSTR_PUSH: begin

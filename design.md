@@ -1,9 +1,10 @@
 # Computer Design
 
- -  16 Bit Bus
- -  24 Bit Address Bus (Segment 0xffff00) + (Address 0x00ffff)
- -  4 General Registers
- -  16 Expansion Modules
+ - 16 Bit Bus
+ - 24 Bit Address Bus (Segment 0xffff00) + (Address 0x00ffff)
+ - 4 General Registers
+ - 16 Expansion Modules
+ - Big Endian
 
 ### Control Unit (CU) - Control Signals - 35b (CPLD / EEPROM)
 
@@ -86,25 +87,25 @@
 6. ste dest exp [op2 imm]
 
 7. jmp [op2 imm]
-8. jmpf seg [op2 imm]
+8. jmpf op1 [op2 imm]
 9. jz [op2 imm]
 10. jc [op2 imm]
 
 11. add res op1 op2
 12. sub res op1 op2
-13. cmp res op1 op2
-14. inc res op1
-15. inc2 res op1
-16. dec res op1
-17. dec2 res op1
-18. mul res op1 op2
-19. div res op1 op2
-20. and res op1 op2
-21. or res op1 op2
+13. inc res op1
+14. inc2 res op1
+15. dec res op1
+16. dec2 res op1
+17. mul res op1 op2
+18. div res op1 op2
+19. and res op1 op2
+20. or res op1 op2
+21. cmp res op1 op2
 
 22. push src
 23. pop dest
 24. call [op2 imm]
-25. callf seg [op2 imm]
+25. callf op1 [op2 imm]
 26. ret
 27. retf

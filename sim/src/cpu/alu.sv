@@ -5,8 +5,8 @@ module ALU(
     input r,
 
     output wire [15:0] bus,
-    output wire [15:0] bus_alu_a,
-    output wire [15:0] bus_alu_b,
+    input wire [15:0] bus_alu_a,
+    input wire [15:0] bus_alu_b,
 
     output wire [7:0] bus_flags,
 

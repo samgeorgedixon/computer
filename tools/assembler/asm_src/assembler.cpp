@@ -17,8 +17,8 @@ enum InstrCode {
     NOP = 0, MOV, LI,
     LDW, STW, LDE, STE,
     JMP, JMPF, JZ, JC,
-    ADD, SUB, CMP, INC, DEC, MUL, DIV, AND, OR,
-    PUSH, POP
+    ADD, SUB, INC, INC2, DEC, DEC2, MUL, DIV, AND, OR, CMP,
+	PUSH, POP, CALL, CALLF, RET, RETF
 };
 enum ParameterIndex {
     OP0 = 0, OP1, OP2, IMM
@@ -47,16 +47,22 @@ std::unordered_map<std::string, Instruction> instructions {
 
     { "add",   { ADD,   2, { OP0, OP1, OP2 } } },
     { "sub",   { SUB,   2, { OP0, OP1, OP2 } } },
-    { "cmp",   { CMP,   2, { OP1, OP2 } } },
     { "inc",   { INC,   2, { OP0, OP1 } } },
+    { "inc2",  { INC2,  2, { OP0, OP1 } } },
     { "dec",   { DEC,   2, { OP0, OP1 } } },
-    { "mul",  { MUL,  2, { OP0, OP1, OP2 } } },
+    { "dec2",  { DEC2,  2, { OP0, OP1 } } },
+    { "mul",   { MUL,   2, { OP0, OP1, OP2 } } },
     { "div",   { DIV,   2, { OP0, OP1, OP2 } } },
     { "and",   { AND,   2, { OP0, OP1, OP2 } } },
     { "or",    { OR,    2, { OP0, OP1, OP2 } } },
+    { "cmp",   { CMP,   2, { OP1, OP2 } } },
 
     { "push",  { PUSH,  2, { OP1 } } },
     { "pop",   { POP,   2, { OP1 } } },
+    { "call",  { CALL,  4, { OP2, IMM } } },
+    { "callf", { CALLF, 4, { OP1, OP2, IMM } } },
+    { "ret",   { RET,   2, { } } },
+    { "retf",  { RETF,  2, { } } },
 };
 
 // Register Indexes

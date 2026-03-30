@@ -1,9 +1,15 @@
 %org 0x0
 %segment code
 
-ldw c r1 [z red]
+li ss 1
+li sp 0xff
+mov bp sp
 
-:red
-%dw 0b0111110000000000
-:green
-%dw 0b0000001111100000
+call [z boom]
+
+li r1 0x0f
+
+:boom
+li r1 0xf0
+ret
+li r1 0xf00

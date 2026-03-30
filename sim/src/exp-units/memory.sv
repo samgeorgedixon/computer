@@ -34,10 +34,10 @@ module ROM_8bx8b(
         end
         CloseMemoryFile();
 
-        $display("Memory Array:");
-        for (int i = 0; i < 2**8; i = i + 1) begin
-            $display("memory_array[%0d] = %b", i, rom[i]);
-        end
+        //$display("Memory Array:");
+        //for (int i = 0; i < 2**8; i = i + 1) begin
+        //    $display("memory_array[%0d] = %b", i, rom[i]);
+        //end
         
     end
 
