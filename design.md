@@ -49,7 +49,7 @@
 14. zero (not register - hardwire)
 -  f (not selectable)
 
-#### Extension Units
+#### Expansion Units
 
 - Interconnects
 	- clk, r
@@ -73,46 +73,38 @@
 
 ### Instruction Set
  -  (opcode, 6b)    (operand-0, 2b)   (operand-1, 4b)    (operand-2, 4b)    (imm, 16b)
-    ldw                  {seg}                     rs1                           [rs2                          {imm}]
-	.                       1 + 3o                  1 + 2o                     1 + 1o - src                         : ( + alu_e)
+ -  [op2 imm] - address = op2 + imm
 
- -  {} - optional
- -  [] - address
+0. nop
 
-1. General
-	 -  No Instr:          nop
-2.  Moving
-	 -  Move Reg:       mov rs1 rs2
-	 -  Load Imm:       li rs1 imm
-	
-	 -  Load Word:      ldw seg rs1 [rs2 imm]
-	 -  Load Byte:        ldb seg rs1 [rs2 imm]
-	
-	 -  Store Word:     stw seg rs1 [rs2 imm]
-	 -  Store Byte:       stb seg rs1 [rs2 imm]
-	
-	 -  Load Ext:          lde ext rs1 [rs2 imm]
-	 -  Store Ext:          ste ext rs1 [rs2 imm]
-3. Jump / Conditions
-	 -  Jump:                jmp      [rs2 imm]
-	 -  Jump Far:          jmpf rs1 [rs2 imm]
-	 -  Jump If Zero:    jz       [rs2 imm]
-	 -  Jump If Carry:   jc       [rs2 imm]
-	 -  Compare:         cmp rs1 rs2
-4. ALU
-	 -  Addition:          add res rs1 rs2
-	 -  Subtraction:     sub res rs1 rs2
-	 -  Increment:       inc res rs1
-	 -  Decrement:      dec res rs1
-	 -  Multiply:          mul res rs1 rs2
-	 -  Divide:             div res rs1 rs2
+1. mov dest src
+2. li dest imm
 
-	 -  AND:               and res rs1 rs2
-	 -  OR:                  or  res rs1 rs2
-5. Stack and Functions
-	 -  Push Reg:        push rs1
-	 -  Pop Into Reg:  pop rs1
-	 -  Function:          call [rs2 imm]
-	 -  Function Far:    callf rs1 [rs2 imm]
-	 -  Return:             ret
-	 -  Return Far:       retf
+3. ldw seg dest [op2 imm]
+4. stw seg dest [op2 imm]
+5. lde dest exp [op2 imm]
+6. ste dest exp [op2 imm]
+
+7. jmp [op2 imm]
+8. jmpf seg [op2 imm]
+9. jz [op2 imm]
+10. jc [op2 imm]
+
+11. add res op1 op2
+12. sub res op1 op2
+13. cmp res op1 op2
+14. inc res op1
+15. inc2 res op1
+16. dec res op1
+17. dec2 res op1
+18. mul res op1 op2
+19. div res op1 op2
+20. and res op1 op2
+21. or res op1 op2
+
+22. push src
+23. pop dest
+24. call [op2 imm]
+25. callf seg [op2 imm]
+26. ret
+27. retf

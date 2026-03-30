@@ -26,26 +26,35 @@
 `define INSTR_SUB       6'd12
 `define INSTR_CMP       6'd13
 `define INSTR_INC       6'd14
-`define INSTR_DEC       6'd15
-`define INSTR_MUL       6'd16
-`define INSTR_DIV       6'd17
-`define INSTR_AND       6'd18
-`define INSTR_OR        6'd19
+`define INSTR_INC2      6'd15
+`define INSTR_DEC       6'd16
+`define INSTR_DEC2      6'd17
+`define INSTR_MUL       6'd18
+`define INSTR_DIV       6'd19
+`define INSTR_AND       6'd20
+`define INSTR_OR        6'd21
 
-`define INSTR_PUSH_POP  `INSTR_PUSH, `INSTR_POP
-`define INSTR_PUSH      6'd20
-`define INSTR_POP       6'd21
+`define INSTR_POP_RET_F `INSTR_POP, `INSTR_RET, `INSTR_RETF
+`define INSTR_CALL_F    `INSTR_CALL, `INSTR_CALLF
+`define INSTR_PUSH      6'd22
+`define INSTR_POP       6'd23
+`define INSTR_CALL      6'd24
+`define INSTR_CALLF     6'd25
+`define INSTR_RET       6'd26
+`define INSTR_RETF      6'd27
 
 // ALU Operations
 `define ALU_ADD       4'd1
 `define ALU_SUB       4'd2
 `define ALU_CMP       4'd3
 `define ALU_INC       4'd4
-`define ALU_DEC       4'd5
-`define ALU_MUL       4'd6
-`define ALU_DIV       4'd7
-`define ALU_AND       4'd8
-`define ALU_OR        4'd9
+`define ALU_INC2      4'd5
+`define ALU_DEC       4'd6
+`define ALU_DEC2      4'd7
+`define ALU_MUL       4'd8
+`define ALU_DIV       4'd9
+`define ALU_AND       4'd10
+`define ALU_OR        4'd11
 
 // Operand Roles (Use Inside SET_CS_RAW)
 
@@ -256,14 +265,12 @@ module ControlUnit(
                 endcase
                 
             end
-            // Stack / Functions
-            `INSTR_PUSH_POP: begin
+            // Stack (sp points to current) / Functions
+            `INSTR_PUSH: begin
                 unique case (microCodeIndex)
                     4'd2: begin
                         `SET_CS_RAW(alu_e_raw, 1'd1);
-
-                        if (`OPCODE == `INSTR_PUSH) begin `SET_CS_RAW(seg_sel__alu_op_sel_raw, `ALU_DEC); end
-                        else begin `SET_CS_RAW(seg_sel__alu_op_sel_raw, `ALU_INC); end
+                        `SET_CS_RAW(seg_sel__alu_op_sel_raw, `ALU_DEC2);
 
                         `SET_CS_RAW(alu_a_sel_raw, 4'd`CS_SP);
                         `SET_CS_RAW(bus_dest_special_raw, 4'd`SPECIAL_MEM_SP);
@@ -271,27 +278,110 @@ module ControlUnit(
                     4'd3: begin
                         `SET_CS_RAW(seg_sel__alu_op_sel_raw, `SEL_SS);
 
-                        if (`OPCODE == `INSTR_PUSH) begin
-                            `SET_CS_RAW(bus_dest_raw, 5'd`CS_EXP1); // Memory
-                            `SET_CS_RAW(operand_1_raw, `OP1_BUS_SRC);
-                        end else begin
-                            `SET_CS_RAW(bus_src_raw, 5'd`CS_EXP1); // Memory
-                            `SET_CS_RAW(operand_1_raw, `OP1_BUS_DEST);
-                        end
+                        `SET_CS_RAW(bus_dest_raw, 5'd`CS_EXP1); // Memory
+                        `SET_CS_RAW(operand_1_raw, `OP1_BUS_SRC);
 
-                    end
-                    4'd4: begin
-                        `SET_CS_RAW(alu_e_raw, 1'd1);
-
-                        if (`OPCODE == `INSTR_PUSH) begin `SET_CS_RAW(seg_sel__alu_op_sel_raw, `ALU_DEC); end
-                        else begin `SET_CS_RAW(seg_sel__alu_op_sel_raw, `ALU_INC); end
-
-                        `SET_CS_RAW(alu_a_sel_raw, 4'd`CS_SP);
-                        `SET_CS_RAW(bus_dest_raw, 5'd`CS_SP);
-                        
                         instrEnd = 1'b1;
                     end
                 endcase
+            end
+            `INSTR_POP_RET_F: begin // retf: pop cs then pc
+                unique case (microCodeIndex)
+                    4'd2, 4'd5: begin
+                        `SET_CS_RAW(bus_src_raw, 5'd`CS_SP);
+                        `SET_CS_RAW(bus_dest_raw, 5'd`CS_MEM);
+                    end
+                    4'd3, 4'd6: begin
+                        `SET_CS_RAW(seg_sel__alu_op_sel_raw, `SEL_SS);
+
+                        `SET_CS_RAW(bus_src_raw, 5'd`CS_EXP1); // Memory
+
+                        if          (`OPCODE == `INSTR_POP) begin
+                            `SET_CS_RAW(operand_1_raw, `OP1_BUS_DEST);
+                        end else if (`OPCODE == `INSTR_RET || microCodeIndex == 4'd6) begin
+                            `SET_CS_RAW(bus_dest_raw, 5'd`CS_PC);
+                        end else if (`OPCODE == `INSTR_RETF) begin
+                            `SET_CS_RAW(bus_dest_raw, 5'd`CS_CS);
+                        end
+                    end
+                    4'd4, 4'd7: begin
+                        `SET_CS_RAW(alu_e_raw, 1'd1);
+                        `SET_CS_RAW(seg_sel__alu_op_sel_raw, `ALU_INC2);
+
+                        `SET_CS_RAW(alu_a_sel_raw, 4'd`CS_SP);
+                        `SET_CS_RAW(bus_dest_raw, 5'd`CS_SP);
+
+                        if (`OPCODE != `INSTR_RETF && microCodeIndex != 4'd7) instrEnd = 1'b1;
+                    end
+                endcase
+            end
+            `INSTR_CALL_F: begin // callf: push pc then cs
+                unique case (microCodeIndex)
+                    4'd2: begin
+                        // dec2 sp -> sp, mem / pc_e
+                        // ss ex1 = pc
+                        // dec2 pc -> mem
+                        // cs pc = ex1
+                        // add pc, op2 -> pc
+                            // dec2 sp -> sp, mem
+                            // ss ex1 = cs
+                            // cs = op1
+
+                        `SET_CS_RAW(alu_e_raw, 1'd1);
+                        `SET_CS_RAW(seg_sel__alu_op_sel_raw, `ALU_DEC2);
+
+                        `SET_CS_RAW(alu_a_sel_raw, 4'd`CS_SP);
+                        `SET_CS_RAW(bus_dest_special_raw, 4'd`SPECIAL_MEM_SP);
+                        `SET_CS_RAW(pc_e, 1'd1);
+                    end
+                    4'd3: begin
+                        `SET_CS_RAW(seg_sel__alu_op_sel_raw, `SEL_SS);
+
+                        `SET_CS_RAW(bus_dest_raw, 5'd`CS_EXP1); // Memory
+                        `SET_CS_RAW(bus_src_raw, 5'd`CS_PC);
+                    end
+                    4'd4: begin
+                        `SET_CS_RAW(alu_e_raw, 1'd1);
+                        `SET_CS_RAW(seg_sel__alu_op_sel_raw, `ALU_DEC2);
+
+                        `SET_CS_RAW(alu_a_sel_raw, 4'd`CS_PC);
+                        `SET_CS_RAW(bus_dest_raw, 5'd`CS_MEM);
+                    end
+                    4'd5: begin
+                        `SET_CS_RAW(seg_sel__alu_op_sel_raw, `SEL_CS);
+
+                        `SET_CS_RAW(bus_src_raw, 5'd`CS_EXP1); // Memory
+                        `SET_CS_RAW(bus_dest_raw, 5'd`CS_PC);
+                    end
+                    4'd6: begin
+                        `SET_CS_RAW(alu_e_raw, 1'd1);
+                        `SET_CS_RAW(seg_sel__alu_op_sel_raw, `ALU_ADD);
+
+                        `SET_CS_RAW(alu_a_sel_raw, 4'd`CS_PC);
+                        `SET_CS_RAW(operand_2_raw, `OP2_ALU_B_SEL);
+                        `SET_CS_RAW(bus_dest_raw, 5'd`CS_PC);
+
+                        if (`OPCODE == `INSTR_CALL) instrEnd = 1'b1;
+                    end
+                endcase
+
+                if          (`OPCODE == `INSTR_CALLF && microCodeIndex == 4'd7) begin
+                    `SET_CS_RAW(alu_e_raw, 1'd1);
+                    `SET_CS_RAW(seg_sel__alu_op_sel_raw, `ALU_DEC2);
+
+                    `SET_CS_RAW(alu_a_sel_raw, 4'd`CS_SP);
+                    `SET_CS_RAW(bus_dest_special_raw, 4'd`SPECIAL_MEM_SP);
+                end else if (`OPCODE == `INSTR_CALLF && microCodeIndex == 4'd8) begin
+                    `SET_CS_RAW(seg_sel__alu_op_sel_raw, `SEL_SS);
+
+                    `SET_CS_RAW(bus_dest_raw, 5'd`CS_EXP1); // Memory
+                    `SET_CS_RAW(bus_src_raw, 5'd`CS_CS);
+                end else if (`OPCODE == `INSTR_CALLF && microCodeIndex == 4'd9) begin
+                    `SET_CS_RAW(bus_dest_raw, 5'd`CS_CS);
+                    `SET_CS_RAW(operand_1_raw, `OP1_BUS_SRC);
+
+                    instrEnd = 1'b1;
+                end
             end
         endcase
 
