@@ -28,7 +28,7 @@ module RegisterUnit(
     Register16b sp(`REG16_FILL(`CS_SP), .data());
     Register16b bp(`REG16_FILL(`CS_BP), .data());
 
-    Register16b cs(`REG16_FILL(`CS_CS), .data(cs_direct)); // TODO: Direct Selections
+    Register16b cs(`REG16_FILL(`CS_CS), .data(cs_direct));
     Register16b ds(`REG16_FILL(`CS_DS), .data(ds_direct));
     Register16b ss(`REG16_FILL(`CS_SS), .data(ss_direct));
     Register16b es(`REG16_FILL(`CS_ES), .data(es_direct));

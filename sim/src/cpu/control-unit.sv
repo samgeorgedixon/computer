@@ -24,15 +24,15 @@
 `define INSTR_ALU       `INSTR_ADD, `INSTR_SUB, `INSTR_CMP, `INSTR_INC, `INSTR_DEC, `INSTR_MUL, `INSTR_DIV, `INSTR_AND, `INSTR_OR   // ? 16
 `define INSTR_ADD       6'd11
 `define INSTR_SUB       6'd12
-`define INSTR_CMP       6'd13
-`define INSTR_INC       6'd14
-`define INSTR_INC2      6'd15
-`define INSTR_DEC       6'd16
-`define INSTR_DEC2      6'd17
-`define INSTR_MUL       6'd18
-`define INSTR_DIV       6'd19
-`define INSTR_AND       6'd20
-`define INSTR_OR        6'd21
+`define INSTR_INC       6'd13
+`define INSTR_INC2      6'd14
+`define INSTR_DEC       6'd15
+`define INSTR_DEC2      6'd16
+`define INSTR_MUL       6'd17
+`define INSTR_DIV       6'd18
+`define INSTR_AND       6'd19
+`define INSTR_OR        6'd20
+`define INSTR_CMP       6'd21
 
 `define INSTR_POP_RET_F `INSTR_POP, `INSTR_RET, `INSTR_RETF
 `define INSTR_CALL_F    `INSTR_CALL, `INSTR_CALLF
@@ -42,19 +42,6 @@
 `define INSTR_CALLF     6'd25
 `define INSTR_RET       6'd26
 `define INSTR_RETF      6'd27
-
-// ALU Operations
-`define ALU_ADD       4'd1
-`define ALU_SUB       4'd2
-`define ALU_CMP       4'd3
-`define ALU_INC       4'd4
-`define ALU_INC2      4'd5
-`define ALU_DEC       4'd6
-`define ALU_DEC2      4'd7
-`define ALU_MUL       4'd8
-`define ALU_DIV       4'd9
-`define ALU_AND       4'd10
-`define ALU_OR        4'd11
 
 // Operand Roles (Use Inside SET_CS_RAW)
 

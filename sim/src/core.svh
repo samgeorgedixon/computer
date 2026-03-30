@@ -30,7 +30,19 @@
 
 // bus_dest_special_raw
 `define SPECIAL_MEM_SP 1
- 
+
+// ALU Operations
+`define ALU_ADD       4'd1
+`define ALU_SUB       4'd2
+`define ALU_INC       4'd3
+`define ALU_INC2      4'd4
+`define ALU_DEC       4'd5
+`define ALU_DEC2      4'd6
+`define ALU_MUL       4'd7
+`define ALU_DIV       4'd8
+`define ALU_AND       4'd9
+`define ALU_OR        4'd10
+
 // Control Signals
 
 interface ControlSignals_if;

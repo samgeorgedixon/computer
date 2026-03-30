@@ -2,6 +2,7 @@
 
 `include "src/cpu/control-unit.sv"
 `include "src/cpu/register-unit.sv"
+`include "src/cpu/alu.sv"
 
 `include "src/cpu/decoder.sv"
 `include "src/cpu/addr-manager.sv"
@@ -48,13 +49,14 @@ module CPU(
 
     Decoder decoder(instr_direct, controlSignalsRaw, controlSignals);
 
-    ControlUnit controlUnit(clk, r, instr_direct, flags_direct, controlSignalsRaw); // TODO: Finish Instruction Set
+    ControlUnit controlUnit(clk, r, instr_direct, flags_direct, controlSignalsRaw);
 
     RegisterUnit registerUnit(clk, r, bus, bus_alu_a, bus_alu_b, instr_direct, memory_direct, cs_direct, ds_direct, ss_direct, es_direct, controlSignals);
 
+    ALU alu(r, bus, bus_alu_a, bus_alu_b, bus_flags, controlSignals);
+
     Flags flags(clk, r, bus_flags, flags_direct, controlSignals);
     ProgramCounter programCounter(clk, r, bus, bus_alu_a, bus_alu_b, controlSignals);
-    // + ALU
 
     AddrManager addrManager(addr, memory_direct, cs_direct, ds_direct, ss_direct, es_direct, controlSignals);
 

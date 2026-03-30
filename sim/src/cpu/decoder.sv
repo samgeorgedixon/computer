@@ -4,7 +4,7 @@ module Decoder(
 
     input logic [15:0] instr,
 
-    ControlSignals_if.decoderIN controlSignalsRaw, // TODO: Impliment Specials
+    ControlSignals_if.decoderIN controlSignalsRaw,
     ControlSignals_if.decoderOUT controlSignals
 
     ); // TODO: Document Decodes
