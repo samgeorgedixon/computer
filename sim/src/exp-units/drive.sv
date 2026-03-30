@@ -19,12 +19,7 @@ module Drive_8bx24b(
 
     always @(posedge clk) begin
 
-        if (r) begin
-            integer i;
-            for (i = 0; i < 2**24; i = i + 1) begin
-                drive[i] = 8'b0;
-            end
-        end else if (driveUnitSignals.we) begin
+        if (driveUnitSignals.we) begin
             drive[addr] <= bus[15:8];
             drive[addr + 1] <= bus[7:0];
         end
@@ -48,10 +43,10 @@ module Drive_8bx24b(
         end
         CloseMemoryFile();
 
-        //$display("Memory Array:");
-        //for (int i = 0; i < 2**4; i = i + 1) begin
-        //    $display("memory_array[%0d] = %b", i, drive[i]);
-        //end
+        $display("Memory Array:");
+        for (int i = 256; i < 512; i = i + 1) begin
+            $display("memory_array[%0d] = %b", i, drive[i]);
+        end
         
     end
 

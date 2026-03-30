@@ -10,7 +10,7 @@ module Computer();
     wire [15:0] bus;
     logic [23:0] addr;
 
-    CPU cpu(clk, r, bus, addr, "../bin/software/new.bin", "");
+    CPU cpu(clk, r, bus, addr, "../bin/software/bios.bin", "../bin/software/gpu_test.bin");
 
     initial begin
 

@@ -5,7 +5,8 @@ module ExpansionUnitManager(
     ControlSignals_if.unit controlSignals,
 
     ExpansionSignals_if.manager expUnit1,
-    ExpansionSignals_if.manager expUnit2
+    ExpansionSignals_if.manager expUnit2,
+    ExpansionSignals_if.manager expUnit3
     // + Add More
 
     );
@@ -15,5 +16,8 @@ module ExpansionUnitManager(
 
     assign expUnit2.we = controlSignals.bus_dest[`CS_EXP2];
     assign expUnit2.oe = controlSignals.bus_src[`CS_EXP2];
+
+    assign expUnit3.we = controlSignals.bus_dest[`CS_EXP3];
+    assign expUnit3.oe = controlSignals.bus_src[`CS_EXP3];
 
 endmodule

@@ -1,4 +1,4 @@
-%org 0x0
+%org 0x100
 %segment code
 
 li ss 1

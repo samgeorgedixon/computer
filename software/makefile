@@ -13,9 +13,6 @@ bootloader: bootloader\bootloader.c
 testc: tests\test.c
 	${CC} tests\test.c -a tests\test.asm
 
-gpu_test: tests\gpu_test.c
-	${CC} tests\gpu_test.c -e ofst_data 1 -a tests\gpu_test.asm -o ${BIN_SOFTWARE}\gpu_test.bin
-
 kernel: kernel\kernel.c
 	${CC} kernel\kernel.c -e size_seg -a kernel\kernel.asm -o ${BIN_SOFTWARE}\kernel.bin
 
@@ -23,8 +20,12 @@ kernel: kernel\kernel.c
 bios: bootloader\bios.asm
 	${ASM} bootloader\bios.asm -o ${BIN_SOFTWARE}\bios.bin
 
+new: tests\new.asm
+	${ASM} tests\new.asm -o ${BIN_SOFTWARE}\new.bin
+
+gpu_test: tests\gpu_test.asm
+	${ASM} tests\gpu_test.asm -o ${BIN_SOFTWARE}\gpu_test.bin
+
 testa: tests\tester.asm
 	${ASM} tests\tester.asm -o ${BIN_SOFTWARE}\tester.bin
 
-new: tests\new.asm
-	${ASM} tests\new.asm -o ${BIN_SOFTWARE}\new.bin

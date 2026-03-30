@@ -17,15 +17,6 @@ static bool s_finished = false;
 
 void Setup() {
     SetupComputer();
-
-    displayPixels.reserve(256 * 256);
-
-    SDL_Init(SDL_INIT_VIDEO);
-	SDL_CreateWindowAndRenderer(256 * 2, 256 * 2, 0, &window, &renderer);
-	SDL_RenderSetVSync(renderer, 1);
-	SDL_RenderSetScale(renderer, 1, 1);
-
-    //ImGuiSetup(window, renderer);
 }
 
 void Close() {
@@ -56,7 +47,7 @@ void EndFrame() {
     SDL_RenderPresent(renderer);
 }
 
-extern "C" void WriteDisplayPixel(uint32_t pixelAddress, uint32_t colour, uint32_t reset) {
+extern "C" void WriteDisplayPixel_256x256px_5bxRGB(uint32_t pixelAddress, uint32_t colour, uint32_t reset) {
     if (reset) {
         std::fill(displayPixels.begin(), displayPixels.end(), 0);
         return;
@@ -71,9 +62,9 @@ void RenderDisplayPixels() {
     for (int i = 0; i < 256; i++) {
         for (int j = 0; j < 256; j++) {
             int pixel = displayPixels[(i * 256) + j];
-            int r = ((pixel & 0b0111110000000000) >> 10) * 8;
-            int g = ((pixel & 0b0000001111100000) >> 5) * 8;
-            int b = ((pixel & 0b0000000000011111)) * 8;
+            int r = (((pixel & 0b0111110000000000) >> 10) * 255) / 31;
+            int g = (((pixel & 0b0000001111100000) >> 5) * 255) / 31;
+            int b = (((pixel & 0b0000000000011111)) * 255) / 31;
 
             SDL_RenderSetScale(renderer, 2, 2);
 
@@ -86,6 +77,15 @@ void RenderDisplayPixels() {
 }
 
 void Rendering() {
+    displayPixels.resize(256 * 256, 0);
+
+    SDL_Init(SDL_INIT_VIDEO);
+	SDL_CreateWindowAndRenderer(256 * 2, 256 * 2, 0, &window, &renderer);
+	SDL_RenderSetVSync(renderer, 1);
+	SDL_RenderSetScale(renderer, 1, 1);
+
+    //ImGuiSetup(window, renderer);
+
     while (!s_finished) {
         StartFrame();
 

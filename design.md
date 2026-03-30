@@ -58,12 +58,11 @@
 	- bus - 16b
 	- addr - 24b
 
-1. ROM (Internal)
-2. RAM (Internal)
-3. Drive (Internal)
-4. GPU (Internal?)
-5. USB - Keyboard / Mouse
-6. Ethernet?
+1. Memory - ROM / RAM (Internal)
+2. Drive (Internal)
+3. GPU (Internal?)
+4. USB - Keyboard / Mouse
+5. Ethernet?
 
 #### ALU
 

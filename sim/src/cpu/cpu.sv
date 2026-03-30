@@ -12,6 +12,7 @@
 
 `include "src/exp-units/memory.sv"
 `include "src/exp-units/drive.sv"
+`include "src/exp-units/gpu.sv"
 `include "src/exp-unit-manager.sv"
 
 module CPU(
@@ -68,7 +69,10 @@ module CPU(
     ExpansionSignals_if driveExpansionSignals();
     Drive_8bx24b drive(clk, r, bus, addr, driveExpansionSignals, driveFilePath);
 
+    ExpansionSignals_if gpuExpansionSignals();
+    GPU gpu(clk, r, bus, addr, gpuExpansionSignals);
+
     ExpansionUnitManager expUnitManger(.controlSignals(controlSignals),
-        .expUnit1(memoryExpansionSignals), .expUnit2(driveExpansionSignals));
+        .expUnit1(memoryExpansionSignals), .expUnit2(driveExpansionSignals), .expUnit3(gpuExpansionSignals));
 
 endmodule

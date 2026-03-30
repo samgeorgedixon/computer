@@ -181,14 +181,22 @@ module ControlUnit(
                         endcase
 
                         unique case (`OPCODE)
-                            `INSTR_LDW, `INSTR_LDE: begin `SET_CS_RAW(bus_src_raw, 5'd`CS_EXP1); end // Memory
-                            `INSTR_STW, `INSTR_STE: begin `SET_CS_RAW(bus_dest_raw, 5'd`CS_EXP1); end // Memory
-                        endcase
-                        unique case (`OPCODE)
-                            `INSTR_LDW: begin `SET_CS_RAW(operand_1_raw, `OP1_BUS_DEST); end
-                            `INSTR_LDE: begin `SET_CS_RAW(operand_0_raw, `OP0_BUS_DEST); end
-                            `INSTR_STW: begin `SET_CS_RAW(operand_1_raw, `OP1_BUS_SRC); end
-                            `INSTR_STE: begin `SET_CS_RAW(operand_0_raw, `OP0_BUS_SRC); end
+                            `INSTR_LDW: begin
+                                `SET_CS_RAW(operand_1_raw, `OP1_BUS_DEST);
+                                `SET_CS_RAW(bus_src_raw, 5'd`CS_EXP1); // Memory
+                            end
+                            `INSTR_LDE: begin
+                                `SET_CS_RAW(operand_0_raw, `OP0_BUS_DEST);
+                                `SET_CS_RAW(operand_1_raw, `OP1_BUS_SRC);
+                            end
+                            `INSTR_STW: begin
+                                `SET_CS_RAW(operand_1_raw, `OP1_BUS_SRC);
+                                `SET_CS_RAW(bus_dest_raw, 5'd`CS_EXP1); // Memory
+                            end
+                            `INSTR_STE: begin
+                                `SET_CS_RAW(operand_0_raw, `OP0_BUS_SRC);
+                                `SET_CS_RAW(operand_1_raw, `OP1_BUS_DEST);
+                            end
                         endcase
 
                         instrEnd = 1'b1;
