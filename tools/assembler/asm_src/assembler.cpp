@@ -16,7 +16,7 @@ int currentAddress = 0;
 enum InstrCode {
     NOP = 0, MOV, LI,
     LDW, LDB, STW, STB, LDE, LDEB, STE, STEB,
-    JMP, JMPF, JZ, JC,
+    JMP, JMPF, BZ, BNZ, BC, BNC, BS, BNS, BO, BNO,
     ADD, SUB, INC, INC2, DEC, DEC2, NOT, AND, OR, XOR, SLL, SRL, SRA, NEG, CMP,
 	PUSH, PUSHB, POP, POPB, CALL, CALLF, RET, RETF
 };
@@ -46,8 +46,14 @@ std::unordered_map<std::string, Instruction> instructions {
     
     { "jmp",   { JMP,   4, { OP2, IMM } } },
     { "jmpf",  { JMPF,  4, { OP1, OP2, IMM } } },
-    { "jz",    { JZ,    4, { OP2, IMM } } },
-    { "jc",    { JC,    4, { OP2, IMM } } },
+    { "bz",    { BZ,    4, { OP2, IMM } } },
+    { "bnz",   { BNZ,   4, { OP2, IMM } } },
+    { "bc",    { BC,    4, { OP2, IMM } } },
+    { "bnc",   { BNC,   4, { OP2, IMM } } },
+    { "bs",    { BS,    4, { OP2, IMM } } },
+    { "bns",   { BNS,   4, { OP2, IMM } } },
+    { "bo",    { BO,    4, { OP2, IMM } } },
+    { "bno",   { BNO,   4, { OP2, IMM } } },
 
     { "add",   { ADD,   2, { OP0, OP1, OP2 } } },
     { "sub",   { SUB,   2, { OP0, OP1, OP2 } } },

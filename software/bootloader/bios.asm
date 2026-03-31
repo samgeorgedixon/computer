@@ -10,9 +10,7 @@ li r2 0x0200
     inc2 r1 r1
 
     cmp r1 r2
-    jz [z start]
-
-    jmp [z loop]
+    bnz [z loop]
 
 :start
     li ds 1

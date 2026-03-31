@@ -19,40 +19,46 @@
 `define INSTR_STE       6'd9
 `define INSTR_STEB      6'd10
 
-`define INSTR_JMPS      `INSTR_JMP, `INSTR_JMPF, `INSTR_JZ, `INSTR_JC
+`define INSTR_JMPS      `INSTR_JMP, `INSTR_JMPF, `INSTR_BZ, `INSTR_BNZ, `INSTR_BC, `INSTR_BNC, `INSTR_BS, `INSTR_BNS, `INSTR_BO, `INSTR_BNO
 `define INSTR_JMP       6'd11
 `define INSTR_JMPF      6'd12
-`define INSTR_JZ        6'd13
-`define INSTR_JC        6'd14
+`define INSTR_BZ        6'd13
+`define INSTR_BNZ       6'd14
+`define INSTR_BC        6'd15
+`define INSTR_BNC       6'd16
+`define INSTR_BS        6'd17
+`define INSTR_BNS       6'd18
+`define INSTR_BO        6'd19
+`define INSTR_BNO       6'd20
 
 `define INSTR_ALU       `INSTR_ADD, `INSTR_SUB, `INSTR_INC, `INSTR_INC2, `INSTR_DEC, `INSTR_DEC2, \
                         `INSTR_NOT, `INSTR_AND, `INSTR_OR, `INSTR_XOR, `INSTR_SLL, `INSTR_SRL, `INSTR_SRA, `INSTR_NEG, `INSTR_CMP
-`define INSTR_ADD       6'd15
-`define INSTR_SUB       6'd16
-`define INSTR_INC       6'd17
-`define INSTR_INC2      6'd18
-`define INSTR_DEC       6'd19
-`define INSTR_DEC2      6'd20
-`define INSTR_NOT       6'd21
-`define INSTR_AND       6'd22
-`define INSTR_OR        6'd23
-`define INSTR_XOR       6'd24
-`define INSTR_SLL       6'd25
-`define INSTR_SRL       6'd26
-`define INSTR_SRA       6'd27
-`define INSTR_NEG       6'd28
-`define INSTR_CMP       6'd29
+`define INSTR_ADD       6'd21
+`define INSTR_SUB       6'd22
+`define INSTR_INC       6'd23
+`define INSTR_INC2      6'd24
+`define INSTR_DEC       6'd25
+`define INSTR_DEC2      6'd26
+`define INSTR_NOT       6'd27
+`define INSTR_AND       6'd28
+`define INSTR_OR        6'd29
+`define INSTR_XOR       6'd30
+`define INSTR_SLL       6'd31
+`define INSTR_SRL       6'd32
+`define INSTR_SRA       6'd33
+`define INSTR_NEG       6'd34
+`define INSTR_CMP       6'd35
 
 `define INSTR_POP_B_RET_F `INSTR_POP, `INSTR_POPB, `INSTR_RET, `INSTR_RETF
 `define INSTR_CALL_F    `INSTR_CALL, `INSTR_CALLF
-`define INSTR_PUSH      6'd30
-`define INSTR_PUSHB     6'd31
-`define INSTR_POP       6'd32
-`define INSTR_POPB      6'd33
-`define INSTR_CALL      6'd34
-`define INSTR_CALLF     6'd35
-`define INSTR_RET       6'd36
-`define INSTR_RETF      6'd37
+`define INSTR_PUSH      6'd36
+`define INSTR_PUSHB     6'd37
+`define INSTR_POP       6'd38
+`define INSTR_POPB      6'd39
+`define INSTR_CALL      6'd40
+`define INSTR_CALLF     6'd41
+`define INSTR_RET       6'd42
+`define INSTR_RETF      6'd43
 
 // Operand Roles (Use Inside SET_CS_RAW)
 
@@ -219,11 +225,17 @@ module ControlUnit(
             `INSTR_JMPS: begin
                 unique case (microCodeIndex)
                     4'd2: begin
-                        if      (`OPCODE == `INSTR_JZ && !flags[`F_ZERO]) begin
-                            `SET_CS_RAW(pc_e,  1'd1); instrEnd = 1'b1; end
-                        else if (`OPCODE == `INSTR_JC && !flags[`F_CARRY]) begin
-                            `SET_CS_RAW(pc_e,  1'd1); instrEnd = 1'b1; end
-
+                        case (`OPCODE)
+                            `INSTR_BZ: begin if (!flags[`F_ZERO])       begin `SET_CS_RAW(pc_e,  1'd1); instrEnd = 1'd1; end end
+                            `INSTR_BNZ: begin if (flags[`F_ZERO])       begin `SET_CS_RAW(pc_e,  1'd1); instrEnd = 1'd1; end end
+                            `INSTR_BC: begin if (!flags[`F_CARRY])      begin `SET_CS_RAW(pc_e,  1'd1); instrEnd = 1'd1; end end
+                            `INSTR_BNC: begin if (flags[`F_CARRY])      begin `SET_CS_RAW(pc_e,  1'd1); instrEnd = 1'd1; end end
+                            `INSTR_BS: begin if (!flags[`F_SIGN])       begin `SET_CS_RAW(pc_e,  1'd1); instrEnd = 1'd1; end end
+                            `INSTR_BNS: begin if (flags[`F_SIGN])       begin `SET_CS_RAW(pc_e,  1'd1); instrEnd = 1'd1; end end
+                            `INSTR_BO: begin if (!flags[`F_OVERFLOW])   begin `SET_CS_RAW(pc_e,  1'd1); instrEnd = 1'd1; end end
+                            `INSTR_BNO: begin if (flags[`F_OVERFLOW])   begin `SET_CS_RAW(pc_e,  1'd1); instrEnd = 1'd1; end end
+                        endcase
+                        
                         `SET_CS_RAW(bus_src_raw,  5'd`CS_PC);
                         `SET_CS_RAW(bus_dest_raw, 5'd`CS_MEM);
                     end

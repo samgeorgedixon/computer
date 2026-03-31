@@ -16,8 +16,7 @@ ldw c r2 [z colour]
 
     inc r1 r1
 
-    jc [z end]
-    jmp [z loop]
+    bnc [z loop]
 
 :end
     jmp [z end]
