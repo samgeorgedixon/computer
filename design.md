@@ -100,7 +100,7 @@
 18. div res op1 op2
 19. and res op1 op2
 20. or res op1 op2
-21. cmp res op1 op2
+21. cmp op1 op2
 
 22. push src
 23. pop dest

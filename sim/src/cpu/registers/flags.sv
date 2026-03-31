@@ -4,7 +4,7 @@ module Flags(
 
     input logic clk, r,
 
-    input wire [7:0] bus_flags,
+    input logic [7:0] bus_flags,
     output logic [7:0] data,
 
     ControlSignals_if.unit controlSignals

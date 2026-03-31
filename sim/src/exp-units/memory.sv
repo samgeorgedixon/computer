@@ -2,7 +2,7 @@
 
 module ROM_8bx8b(
 
-    input logic clk, r,
+    input logic clk, r, byte_low,
 
     inout wire [15:0] bus,
     input logic [7:0] addr,
@@ -15,7 +15,7 @@ module ROM_8bx8b(
 
     logic [7:0] rom [0:(2**8) - 1];
 
-    assign bus = oe ? { rom[addr], rom[addr + 1] } : 16'bz; // TODO: Need to Impliment Byte BUS
+    assign bus = oe ? byte_low ? { 8'd0, rom[addr] } : { rom[addr], rom[addr + 1] } : 16'bz; // TODO: Need to Impliment Byte BUS
     
     import "DPI-C" function int LoadMemoryFile(input string filePath);
     import "DPI-C" function byte GetMemoryFileByte(input int index);
@@ -45,7 +45,7 @@ endmodule
 
 module RAM_8bx24b(
 
-    input logic clk, r,
+    input logic clk, r, byte_low,
 
     inout wire [15:0] bus,
     input logic [23:0] addr,
@@ -56,7 +56,7 @@ module RAM_8bx24b(
 
     logic [7:0] ram [0:(2**24) - 1];
 
-    assign bus = oe ? { ram[addr], ram[addr + 1] } : 16'bz; // TODO: Need to Impliment Byte BUS
+    assign bus = oe ? byte_low ? { 8'd0,  ram[addr] } : { ram[addr], ram[addr + 1] } : 16'bz; // TODO: Need to Impliment Byte BUS
 
     always @(posedge clk) begin
 
@@ -66,8 +66,12 @@ module RAM_8bx24b(
                 ram[i] = 8'b0;
             end
         end else if (we) begin
-            ram[addr] <= bus[15:8];
-            ram[addr + 1] <= bus[7:0];
+            if (byte_low) begin
+                ram[addr] <= bus[7:0];
+            end else begin
+                ram[addr] <= bus[15:8];
+                ram[addr + 1] <= bus[7:0];
+            end
         end
 
     end
@@ -76,7 +80,7 @@ endmodule
 
 module Memory (
 
-    input logic clk, r,
+    input logic clk, r, byte_low,
 
     inout wire [15:0] bus,
     input logic [23:0] addr,
@@ -96,7 +100,7 @@ module Memory (
     assign ram_we = addr[23:8] != 16'd0 ? memoryUnitSignals.we : 1'd0;
     assign ram_oe = addr[23:8] != 16'd0 ? memoryUnitSignals.oe : 1'd0;
 
-    ROM_8bx8b   rom(.clk(clk), .r(r), .bus(bus), .addr(addr[7:0]), .we(rom_we), .oe(rom_oe), .romFilePath(romFilePath));
-    RAM_8bx24b  ram(.clk(clk), .r(r), .bus(bus), .addr(addr)     , .we(ram_we), .oe(ram_oe));
+    ROM_8bx8b   rom(.clk(clk), .r(r), .byte_low(byte_low), .bus(bus), .addr(addr[7:0]), .we(rom_we), .oe(rom_oe), .romFilePath(romFilePath));
+    RAM_8bx24b  ram(.clk(clk), .r(r), .byte_low(byte_low), .bus(bus), .addr(addr)     , .we(ram_we), .oe(ram_oe));
     
 endmodule

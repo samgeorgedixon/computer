@@ -8,38 +8,105 @@ module ALU(
     input wire [15:0] bus_alu_a,
     input wire [15:0] bus_alu_b,
 
-    output wire [7:0] bus_flags,
+    output logic [7:0] bus_flags,
 
     ControlSignals_if.unit controlSignals
 
     );
 
-    logic [16:0] res;
+    logic [15:0] res;
+    logic [16:0] res_ext;
 
     assign bus = controlSignals.alu_op_sel != 4'd0 ? res[15:0] : 16'bz;
 
-    assign bus_flags[0] = res[15:0] == 16'd0 ? 1'd1 : 1'd0;     // Zero  Flag [0]
-    assign bus_flags[1] = res[16];                              // Carry Flag [1]
-
     always_comb begin
 
+        res = 16'd0;
+        res_ext = 17'd0;
+
+        bus_flags[`F_CARRY] = 1'd0;
+        bus_flags[`F_OVERFLOW] = 1'd0;
+
         /* verilator lint_off CASEINCOMPLETE */
-        case (controlSignals.alu_op_sel)
-            `ALU_ADD:    res = {1'd0, bus_alu_a} + {1'd0, bus_alu_b};
-            `ALU_SUB:    res = {1'd0, bus_alu_a} - {1'd0, bus_alu_b};
+        unique case (controlSignals.alu_op_sel)
+            4'd0: res = 16'd0;
+            `ALU_ADD: begin
+                res_ext = {1'd0, bus_alu_a} + {1'd0, bus_alu_b};
+                res = res_ext[15:0];
 
-            `ALU_INC:    res = {1'd0, bus_alu_a} + 1;
-            `ALU_INC2:   res = {1'd0, bus_alu_a} + 2;
-            `ALU_DEC:    res = {1'd0, bus_alu_a} - 1;
-            `ALU_DEC2:   res = {1'd0, bus_alu_a} - 2;
+                bus_flags[`F_CARRY] = res_ext[16];
+                bus_flags[`F_OVERFLOW] = (~(bus_alu_a[15] ^ bus_alu_b[15])) & (res[15] ^ bus_alu_a[15]);
+            end
+            `ALU_SUB: begin
+                res_ext = {1'd0, bus_alu_a} - {1'd0, bus_alu_b};
+                res = res_ext[15:0];
 
-            `ALU_MUL:    res = {1'd0, bus_alu_a} * {1'd0, bus_alu_b};
-            `ALU_DIV:    res = (bus_alu_b != 0) ? {1'd0, bus_alu_a} / {1'd0, bus_alu_b} : 17'd0;
+                bus_flags[`F_CARRY] = res_ext[16]; // 1 -> no borrow, 0 -> borrow
+                bus_flags[`F_OVERFLOW] = (bus_alu_a[15] ^ bus_alu_b[15]) & (res[15] ^ bus_alu_a[15]);
+            end
 
-            `ALU_AND:    res = {1'd0, bus_alu_a} & {1'd0, bus_alu_b};
-            `ALU_OR:     res = {1'd0, bus_alu_a} | {1'd0, bus_alu_b};
+            `ALU_INC: begin
+                res_ext = {1'd0, bus_alu_a} + 17'd1;
+                res = res_ext[15:0];
+
+                bus_flags[`F_CARRY] = res_ext[16];
+                bus_flags[`F_OVERFLOW] = (~(bus_alu_a[15] ^ 1'd0)) & (res[15] ^ bus_alu_a[15]);
+            end
+            `ALU_INC2: begin
+                res_ext = {1'd0, bus_alu_a} + 17'd2;
+                res = res_ext[15:0];
+
+                bus_flags[`F_CARRY] = res_ext[16];
+                bus_flags[`F_OVERFLOW] = (~(bus_alu_a[15] ^ 1'd0)) & (res[15] ^ bus_alu_a[15]);
+            end
+            `ALU_DEC: begin
+                res_ext = {1'd0, bus_alu_a} - 17'd1;
+                res = res_ext[15:0];
+
+                bus_flags[`F_CARRY] = res_ext[16]; // 1 -> no borrow, 0 -> borrow
+                bus_flags[`F_OVERFLOW] = (bus_alu_a[15] ^ 1'd0) & (res[15] ^ bus_alu_a[15]);
+            end
+            `ALU_DEC2: begin
+                res_ext = {1'd0, bus_alu_a} - 17'd2;
+                res = res_ext[15:0];
+
+                bus_flags[`F_CARRY] = res_ext[16]; // 1 -> no borrow, 0 -> borrow
+                bus_flags[`F_OVERFLOW] = (bus_alu_a[15] ^ 1'd0) & (res[15] ^ bus_alu_a[15]);
+            end
+
+            `ALU_NOT:    res = ~bus_alu_a;
+            `ALU_AND:    res = bus_alu_a & bus_alu_b;
+            `ALU_OR:     res = bus_alu_a | bus_alu_b;
+            `ALU_XOR:    res = bus_alu_a ^ bus_alu_b;
+
+            `ALU_SLL: begin
+                res_ext = {1'd0, bus_alu_a} << bus_alu_b[3:0];
+                res = res_ext[15:0];
+                bus_flags[`F_CARRY] = res_ext[16];
+            end
+            `ALU_SRL: begin
+                res_ext = {bus_alu_a, 1'd0} >> bus_alu_b[3:0];
+                res = res_ext[16:1];
+
+                bus_flags[`F_CARRY] = res_ext[0];
+            end
+            `ALU_SRA: begin
+                res_ext = $signed({bus_alu_a, 1'd0}) >>> bus_alu_b[3:0];
+                res = res_ext[16:1];
+                
+                bus_flags[`F_CARRY] = res_ext[0];
+            end
+            `ALU_NEG:    begin
+                res = ~bus_alu_a + 16'd1;
+
+                bus_flags[`F_CARRY] = (bus_alu_a == 16'd0);
+                bus_flags[`F_OVERFLOW] = (bus_alu_a == 16'h8000);
+            end
         endcase
         /* verilator lint_on CASEINCOMPLETE */
+
+        bus_flags[`F_ZERO] = (res == 16'd0);
+        bus_flags[`F_SIGN] = res[15];
 
     end
 

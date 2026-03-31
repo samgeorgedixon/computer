@@ -2,7 +2,7 @@
 
 module Drive_8bx24b(
 
-    input logic clk, r,
+    input logic clk, r, byte_low,
 
     inout wire [15:0] bus,
     input logic [23:0] addr,
@@ -15,13 +15,17 @@ module Drive_8bx24b(
 
     logic [7:0] drive [0:(2**24) - 1];
 
-    assign bus = driveUnitSignals.oe ? { drive[addr], drive[addr + 1] } : 16'bz; // TODO: Need to Impliment Byte BUS
+    assign bus = driveUnitSignals.oe ? byte_low ? { 8'd0, drive[addr] } : { drive[addr], drive[addr + 1] } : 16'bz; // TODO: Need to Impliment Byte BUS
 
     always @(posedge clk) begin
 
         if (driveUnitSignals.we) begin
-            drive[addr] <= bus[15:8];
-            drive[addr + 1] <= bus[7:0];
+            if (byte_low) begin
+                drive[addr] <= bus[7:0];
+            end else begin
+                drive[addr] <= bus[15:8];
+                drive[addr + 1] <= bus[7:0];
+            end
         end
 
     end

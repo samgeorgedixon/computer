@@ -2,7 +2,7 @@
 
 module GPU(
 
-    input logic clk, r,
+    input logic clk, r, byte_low,
 
     inout wire [15:0] bus,
     input logic [23:0] addr,

@@ -30,7 +30,7 @@ module CPU(
     // BUS's
     wire [15:0] bus_alu_a;
     wire [15:0] bus_alu_b;
-    wire [7:0]  bus_flags;
+    logic [7:0]  bus_flags;
 
     // Direct Registers
     logic [15:0] instr_direct;
@@ -64,13 +64,13 @@ module CPU(
     // Expansion Units
 
     ExpansionSignals_if memoryExpansionSignals();
-    Memory rom(clk, r, bus, addr, memoryExpansionSignals, romFilePath);
+    Memory          rom(clk, r, controlSignals.byte_low, bus, addr, memoryExpansionSignals, romFilePath);
 
     ExpansionSignals_if driveExpansionSignals();
-    Drive_8bx24b drive(clk, r, bus, addr, driveExpansionSignals, driveFilePath);
+    Drive_8bx24b    drive(clk, r, controlSignals.byte_low, bus, addr, driveExpansionSignals, driveFilePath);
 
     ExpansionSignals_if gpuExpansionSignals();
-    GPU gpu(clk, r, bus, addr, gpuExpansionSignals);
+    GPU             gpu(clk, r, controlSignals.byte_low, bus, addr, gpuExpansionSignals);
 
     ExpansionUnitManager expUnitManger(.controlSignals(controlSignals),
         .expUnit1(memoryExpansionSignals), .expUnit2(driveExpansionSignals), .expUnit3(gpuExpansionSignals));

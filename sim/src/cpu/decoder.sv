@@ -30,8 +30,8 @@ module Decoder(
         controlSignals.bus_dest[4:1] |= controlSignalsRaw.operand_0_raw == 2'd2 ? 4'b1 << operand_0 : 4'b0;
         controlSignals.bus_dest[15:0] |= controlSignalsRaw.operand_1_raw == 2'd1 && !controlSignalsRaw.alu_e_raw && !controlSignalsRaw.seg_sel__alu_op_sel_raw[3] ? 16'b1 << operand_1 : 16'b0;
         controlSignals.bus_dest[31:16] |= controlSignalsRaw.operand_1_raw == 2'd1 && !controlSignalsRaw.alu_e_raw && controlSignalsRaw.seg_sel__alu_op_sel_raw[3] ? 16'b1 << operand_1 : 16'b0;
-        controlSignals.bus_dest[`CS_MEM] |= controlSignalsRaw.bus_dest_special_raw == 4'd`SPECIAL_MEM_SP ? 1'd1 : 1'd0;
-        controlSignals.bus_dest[`CS_SP] |= controlSignalsRaw.bus_dest_special_raw == 4'd`SPECIAL_MEM_SP ? 1'd1 : 1'd0;
+        controlSignals.bus_dest[`CS_MEM] |= controlSignalsRaw.bus_dest_mem_sp_raw ? 1'd1 : 1'd0;
+        controlSignals.bus_dest[`CS_SP] |= controlSignalsRaw.bus_dest_mem_sp_raw ? 1'd1 : 1'd0;
 
         controlSignals.seg_sel      = 0;
         controlSignals.seg_sel      |= controlSignalsRaw.seg_sel__alu_op_sel_raw;
@@ -49,6 +49,7 @@ module Decoder(
 
         controlSignals.pc_e = controlSignalsRaw.pc_e;
         controlSignals.flags_e = controlSignalsRaw.flags_e;
+        controlSignals.byte_low = controlSignalsRaw.byte_low;
     end
 
 endmodule

@@ -28,27 +28,37 @@
 `define CS_EXP3 18
 `define CS_EXP4 19
 
-// bus_dest_special_raw
-`define SPECIAL_MEM_SP 1
-
 // ALU Operations
 `define ALU_ADD       4'd1
 `define ALU_SUB       4'd2
+
 `define ALU_INC       4'd3
 `define ALU_INC2      4'd4
 `define ALU_DEC       4'd5
 `define ALU_DEC2      4'd6
-`define ALU_MUL       4'd7
-`define ALU_DIV       4'd8
-`define ALU_AND       4'd9
-`define ALU_OR        4'd10
+
+`define ALU_NOT       4'd7
+`define ALU_AND       4'd8
+`define ALU_OR        4'd9
+`define ALU_XOR       4'd10
+
+`define ALU_SLL       4'd11
+`define ALU_SRL       4'd12
+`define ALU_SRA       4'd13
+`define ALU_NEG       4'd14
+
+// Flags (flags[index])
+`define F_ZERO          0 // Z
+`define F_CARRY         1 // C
+`define F_SIGN          2 // S
+`define F_OVERFLOW      3 // O
 
 // Control Signals
 
 interface ControlSignals_if;
     logic [4:0]     bus_src_raw;
     logic [4:0]     bus_dest_raw;
-    logic [3:0]     bus_dest_special_raw; // TODO: Decrease to 1b / 2b
+    logic           bus_dest_mem_sp_raw;
 
     logic [31:0]    bus_src;
     logic [31:0]    bus_dest;
@@ -66,6 +76,7 @@ interface ControlSignals_if;
 
     logic           pc_e;
     logic           flags_e;
+    logic           byte_low;
 
     logic [1:0]     operand_0_raw; // (00: Off, 01: seg_sel, 10: bus_dest, 11: bus_src)
     logic [1:0]     operand_1_raw; // (00: Off, 01: bus_dest, 10: bus_src, 01&alu_e_raw: alu-a-sel)
@@ -74,7 +85,7 @@ interface ControlSignals_if;
     modport control (
         output bus_src_raw,
         output bus_dest_raw,
-        output bus_dest_special_raw,
+        output bus_dest_mem_sp_raw,
 
         output seg_sel__alu_op_sel_raw,
         output alu_e_raw,
@@ -84,6 +95,7 @@ interface ControlSignals_if;
 
         output pc_e,
         output flags_e,
+        output byte_low,
 
         output operand_0_raw,
         output operand_1_raw,
@@ -93,7 +105,7 @@ interface ControlSignals_if;
     modport decoderIN (
         input bus_src_raw,
         input bus_dest_raw,
-        input bus_dest_special_raw,
+        input bus_dest_mem_sp_raw,
 
         input seg_sel__alu_op_sel_raw,
         input alu_e_raw,
@@ -103,6 +115,7 @@ interface ControlSignals_if;
 
         input pc_e,
         input flags_e,
+        input byte_low,
 
         input operand_0_raw,
         input operand_1_raw,
@@ -120,7 +133,8 @@ interface ControlSignals_if;
         output alu_b_sel,
 
         output pc_e,
-        output flags_e
+        output flags_e,
+        output byte_low
     );
 
     modport unit (
@@ -134,7 +148,8 @@ interface ControlSignals_if;
         input alu_b_sel,
 
         input pc_e,
-        input flags_e
+        input flags_e,
+        output byte_low
     );
 
 endinterface

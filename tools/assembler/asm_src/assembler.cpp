@@ -15,10 +15,10 @@ int currentAddress = 0;
 
 enum InstrCode {
     NOP = 0, MOV, LI,
-    LDW, STW, LDE, STE,
+    LDW, LDB, STW, STB, LDE, LDEB, STE, STEB,
     JMP, JMPF, JZ, JC,
-    ADD, SUB, INC, INC2, DEC, DEC2, MUL, DIV, AND, OR, CMP,
-	PUSH, POP, CALL, CALLF, RET, RETF
+    ADD, SUB, INC, INC2, DEC, DEC2, NOT, AND, OR, XOR, SLL, SRL, SRA, NEG, CMP,
+	PUSH, PUSHB, POP, POPB, CALL, CALLF, RET, RETF
 };
 enum ParameterIndex {
     OP0 = 0, OP1, OP2, IMM
@@ -36,9 +36,13 @@ std::unordered_map<std::string, Instruction> instructions {
     { "li",    { LI,    4, { OP1, IMM } } },
 
     { "ldw",   { LDW,   4, { OP0, OP1, OP2, IMM } } },
+    { "ldwb",  { LDW,   4, { OP0, OP1, OP2, IMM } } },
     { "stw",   { STW,   4, { OP0, OP1, OP2, IMM } } },
+    { "stwb",  { STW,   4, { OP0, OP1, OP2, IMM } } },
     { "lde",   { LDE,   4, { OP0, OP1, OP2, IMM } } },
+    { "ldeb",  { LDE,   4, { OP0, OP1, OP2, IMM } } },
     { "ste",   { STE,   4, { OP0, OP1, OP2, IMM } } },
+    { "steb",  { STE,   4, { OP0, OP1, OP2, IMM } } },
     
     { "jmp",   { JMP,   4, { OP2, IMM } } },
     { "jmpf",  { JMPF,  4, { OP1, OP2, IMM } } },
@@ -51,14 +55,20 @@ std::unordered_map<std::string, Instruction> instructions {
     { "inc2",  { INC2,  2, { OP0, OP1 } } },
     { "dec",   { DEC,   2, { OP0, OP1 } } },
     { "dec2",  { DEC2,  2, { OP0, OP1 } } },
-    { "mul",   { MUL,   2, { OP0, OP1, OP2 } } },
-    { "div",   { DIV,   2, { OP0, OP1, OP2 } } },
+    { "not",   { NOT,   2, { OP0, OP1, OP2 } } },
     { "and",   { AND,   2, { OP0, OP1, OP2 } } },
     { "or",    { OR,    2, { OP0, OP1, OP2 } } },
+    { "xor",   { XOR,    2, { OP0, OP1, OP2 } } },
+    { "sll",   { SLL,    2, { OP0, OP1, OP2 } } },
+    { "srl",   { SRL,    2, { OP0, OP1, OP2 } } },
+    { "sra",   { SRA,    2, { OP0, OP1, OP2 } } },
+    { "neg",   { NEG,    2, { OP0, OP1, OP2 } } },
     { "cmp",   { CMP,   2, { OP1, OP2 } } },
 
     { "push",  { PUSH,  2, { OP1 } } },
+    { "pushb", { PUSH,  2, { OP1 } } },
     { "pop",   { POP,   2, { OP1 } } },
+    { "popb",  { POP,   2, { OP1 } } },
     { "call",  { CALL,  4, { OP2, IMM } } },
     { "callf", { CALLF, 4, { OP1, OP2, IMM } } },
     { "ret",   { RET,   2, { } } },
