@@ -8,56 +8,73 @@
 
 ### ISA (Instruction Set Architecture)
 
-| Index | Instr (6b) | op0 (2b) | op1 (4b)  | op2 (4b)   | imm (16b) | Notes                                                                                |
-| :---: | :--------- | :------- | :-------- | :--------- | :-------- | ------------------------------------------------------------------------------------ |
-|   0   | nop        |          |           |            |           | No Operation                                                                         |
-|   1   | mov        |          | dest      | src        |           | Copy Register dest <- src                                                            |
-|   2   | li         |          | dest      |            | value     | Load dest <- imm                                                                     |
-|  ---  |            |          |           |            |           |                                                                                      |
-|   3   | ldw        | seg      |           | [src-addr, | offset]   | Load Word from Memory                                                                |
-|   4   | ldb        | seg      |           | [src-addr, | offset]   | Load Byte from Memory                                                                |
-|   5   | stw        | seg      |           | [src-addr, | offset]   | Store Word to Memory                                                                 |
-|   6   | stb        | seg      |           | [src-addr, | offset]   | Store Byte to Memory                                                                 |
-|   7   | lde        | dest     | exp       | [src-addr, | offset]   | Load Word from Expansion Unit                                                        |
-|   8   | ldeb       | dest     | exp       | [src-addr, | offset]   | Load Byte from Expansion Unit                                                        |
-|   9   | ste        | src      | exp       | [src-addr, | offset]   | Store Word from Expansion Unit                                                       |
-|  10   | steb       | src      | exp       | [src-addr, | offset]   | Store Word from Expansion Unit                                                       |
-|  ---  |            |          |           |            |           |                                                                                      |
-|  11   | jmp        |          |           | [src-addr, | offset]   | Jump to Address                                                                      |
-|  12   | jmpf       |          | src-seg   | [src-addr, | offset]   | Jump to Address & Set Code Segment                                                   |
-|  13   | bz         |          |           | [src-addr, | offset]   | Branch to Address if Zero Flag                                                       |
-|  14   | bnz        |          |           | [src-addr, | offset]   | Branch to Address if Not Zero Flag                                                   |
-|  15   | bc         |          |           | [src-addr, | offset]   | Branch to Address if Carry Flag                                                      |
-|  16   | bnc        |          |           | [src-addr, | offset]   | Branch to Address if Not Carry Flag                                                  |
-|  17   | bs         |          |           | [src-addr, | offset]   | Branch to Address if Sign Flag                                                       |
-|  18   | bns        |          |           | [src-addr, | offset]   | Branch to Address if Not Sign Flag                                                   |
-|  19   | bo         |          |           | [src-addr, | offset]   | Branch to Address if Overflow Flag                                                   |
-|  20   | bno        |          |           | [src-addr, | offset]   | Branch to Address if Not Overflow Flag                                               |
-|  ---  |            |          |           |            |           |                                                                                      |
-|  21   | add        | res      | src-alu-a | src-alu-b  |           | Add & Set Flags                                                                      |
-|  22   | sub        | res      | src-alu-a | src-alu-b  |           | Subtract & Set Flags                                                                 |
-|  23   | inc        | res      | src-alu-a |            |           | Increment by 1 & Set Flags                                                           |
-|  24   | inc2       | res      | src-alu-a |            |           | Incrementby 2 & Set Flags                                                            |
-|  25   | dec        | res      | src-alu-a |            |           | Decrement by 1 & Set Flags                                                           |
-|  26   | dec2       | res      | src-alu-a |            |           | Decrement by 2 & Set Flags                                                           |
-|  27   | not        | res      | src-alu-a |            |           | Logical NOT & Set Flags                                                              |
-|  28   | and        | res      | src-alu-a | src-alu-b  |           | Logical AND & Set Flags                                                              |
-|  29   | or         | res      | src-alu-a | src-alu-b  |           | Logical OR & Set Flags                                                               |
-|  30   | xor        | res      | src-alu-a | src-alu-b  |           | Logical XOR & Set Flags                                                              |
-|  31   | sll        | res      | src-alu-a | src-alu-b  |           | Logical Shift Left by src-alu-b & Set Flags                                          |
-|  32   | srl        | res      | src-alu-a | src-alu-b  |           | Logical Shift Right by src-alu-b & Set Flags                                         |
-|  33   | sra        | res      | src-alu-a | src-alu-b  |           | Arithmetic Shift Right by src-alu-b & Set Flags                                      |
-|  34   | neg        | res      | src-alu-a |            |           | Negate & Set Flags                                                                   |
-|  35   | cmp        | res      | src-alu-a | src-alu-b  |           | Compare by Subtraction & Set Flags                                                   |
-|  ---  |            |          |           |            |           |                                                                                      |
-|  36   | push       |          | src       |            |           | Push to Stack                                                                        |
-|  37   | pushb      |          | src       |            |           | Push Byte to Stack                                                                   |
-|  38   | pop        |          | dest      |            |           | Pop from Stack                                                                       |
-|  39   | popb       |          | dest      |            |           | Pop Byte from Stack                                                                  |
-|  40   | call       |          |           | [src-addr, | offset]   | Push Program Counter to Stack & Jump to Address                                      |
-|  41   | callf      |          | src-seg   | [src-addr, | offset]   | Push Code Segment then Program Counter to Stack & Jump to Address & Set Code Segment |
-|  42   | ret        |          |           |            |           | Pop Program Counter                                                                  |
-|  43   | retf       |          |           |            |           | Pop Code Segment then Program Counter                                                |
+| Index | Instr (6b) | op0 (2b) | op1 (4b)  | op2 (4b)   | imm (16b) | Notes                                                                                | Clock Cycles (Fetch = 2) |
+| :---: | :--------- | :------- | :-------- | :--------- | :-------- | ------------------------------------------------------------------------------------ | ------------------------ |
+|   0   | nop        |          |           |            |           | No Operation                                                                         | 3                        |
+|   1   | mov        |          | dest      | src        |           | Copy Register: dest <- src                                                           | 3                        |
+|   2   | mov        |          | dest-1    | {dest-2}   | value     | Load Immediate: dest-1, {optional dest-2} <- imm                                     | 4                        |
+|   3   | lea        |          | dest      | [src-addr, | offset]   | Load Effective Address: dest <-src-addr + offset                                     | 5                        |
+|  ---  |            |          |           |            |           |                                                                                      |                          |
+|   4   | ldw        | seg      | dest      | [src-addr, | offset]   | Load Word from Memory at src-addr + offset                                           | 6                        |
+|   5   | ldw        | seg      | dest      | src-addr   |           | Load Word from Memory at src-addr                                                    | 4                        |
+|       | ldw+       | seg      | dest      | src-addr   |           | Load Word from Memory at src-addr & Post Increment src-addr by 2                     |                          |
+|   6   | ldb        | seg      | dest      | [src-addr, | offset]   | Load Byte from Memory at src-addr + offset                                           | 6                        |
+|   7   | ldb        | seg      | dest      | src-addr   |           | Load Byte from Memory at src-addr                                                    |                          |
+|       | ldb+       | seg      | dest      | src-addr   |           | Load Byte from Memory at src-addr & Post Increment src-addr by 1                     |                          |
+|   8   | stw        | seg      | src       | [src-addr, | offset]   | Store Word to Memory at src-addr + offset                                            | 6                        |
+|   9   | stw        | seg      | src       | src-addr   |           | Store Word to Memory at src-addr                                                     |                          |
+|       | stw+       | seg      | src       | src-addr   |           | Store Word to Memory at src-addr & Post Increment src-addr by 2                      |                          |
+|  10   | stb        | seg      | src       | [src-addr, | offset]   | Store Byte to Memory at src-addr + offset                                            | 6                        |
+|  11   | stb        | seg      | src       | src-addr   |           | Store Byte to Memory at src-addr                                                     |                          |
+|       | stb+       | seg      | src       | src-addr   |           | Store Byte to Memory at src-addr & Post Increment src-addr by 1                      |                          |
+|  12   | ldew       | dest     | exp       | [src-addr, | offset]   | Load Word from Expansion Unit at src-addr + offset                                   | 6                        |
+|  13   | ldew       | dest     | exp       | src-addr   |           | Load Word from Expansion Unit at src-addr                                            |                          |
+|       | ldew+      | dest     | exp       | src-addr   |           | Load Word from Expansion Unit at src-addr & Post Increment src-addr by 2             |                          |
+|  14   | ldeb       | dest     | exp       | [src-addr, | offset]   | Load Byte from Expansion Unit at src-addr + offset                                   | 6                        |
+|  15   | ldeb       | dest     | exp       | src-addr   |           | Load Byte from Expansion Unit at src-addr                                            |                          |
+|       | ldeb+      | dest     | exp       | src-addr   |           | Load Byte from Expansion Unit at src-addr & Post Increment src-addr by 1             |                          |
+|  16   | stew       | src      | exp       | [src-addr, | offset]   | Store Word to Expansion Unit at src-addr + offset                                    | 6                        |
+|  17   | stew       | src      | exp       | src-addr   |           | Store Word to Expansion Unit at src-addr                                             |                          |
+|       | stew+      | src      | exp       | src-addr   |           | Store Word to Expansion Unit at src-addr & Post Increment src-addr by 2              |                          |
+|  18   | steb       | src      | exp       | [src-addr, | offset]   | Store Byte to Expansion Unit at src-addr + offset                                    | 6                        |
+|       | steb       | src      | exp       | src-addr   |           | Store Byte to Expansion Unit at src-addr                                             |                          |
+|       | steb+      | src      | exp       | src-addr   |           | Store Byte to Expansion Unit at src-addr & Post Increment src-addr by 1              |                          |
+|  ---  |            |          |           |            |           |                                                                                      |                          |
+|  11   | jmp        |          |           | [src-addr, | offset]   | Jump to Address                                                                      | 5                        |
+|  12   | jmpf       |          | src-seg   | [src-addr, | offset]   | Jump to Address & Set Code Segment                                                   | 6                        |
+|  13   | bz         |          |           | [src-addr, | offset]   | Branch to Address if Zero Flag                                                       | 5 ( / 3)                 |
+|  14   | bnz        |          |           | [src-addr, | offset]   | Branch to Address if Not Zero Flag                                                   | 5 ( / 3)                 |
+|  15   | bc         |          |           | [src-addr, | offset]   | Branch to Address if Carry Flag                                                      | 5 ( / 3)                 |
+|  16   | bnc        |          |           | [src-addr, | offset]   | Branch to Address if Not Carry Flag                                                  | 5 ( / 3)                 |
+|  17   | bs         |          |           | [src-addr, | offset]   | Branch to Address if Sign Flag                                                       | 5 ( / 3)                 |
+|  18   | bns        |          |           | [src-addr, | offset]   | Branch to Address if Not Sign Flag                                                   | 5 ( / 3)                 |
+|  19   | bo         |          |           | [src-addr, | offset]   | Branch to Address if Overflow Flag                                                   | 5 ( / 3)                 |
+|  20   | bno        |          |           | [src-addr, | offset]   | Branch to Address if Not Overflow Flag                                               | 5 ( / 3)                 |
+|  ---  |            |          |           |            |           |                                                                                      |                          |
+|  21   | add        | res      | src-alu-a | src-alu-b  |           | Add & Set Flags                                                                      | 3                        |
+|  22   | sub        | res      | src-alu-a | src-alu-b  |           | Subtract & Set Flags                                                                 | 3                        |
+|  23   | inc        | res      | src-alu-a |            |           | Increment by 1 & Set Flags                                                           | 3                        |
+|  24   | inc2       | res      | src-alu-a |            |           | Incrementby 2 & Set Flags                                                            | 3                        |
+|  25   | dec        | res      | src-alu-a |            |           | Decrement by 1 & Set Flags                                                           | 3                        |
+|  26   | dec2       | res      | src-alu-a |            |           | Decrement by 2 & Set Flags                                                           | 3                        |
+|  27   | not        | res      | src-alu-a |            |           | Logical NOT & Set Flags                                                              | 3                        |
+|  28   | and        | res      | src-alu-a | src-alu-b  |           | Logical AND & Set Flags                                                              | 3                        |
+|  29   | or         | res      | src-alu-a | src-alu-b  |           | Logical OR & Set Flags                                                               | 3                        |
+|  30   | xor        | res      | src-alu-a | src-alu-b  |           | Logical XOR & Set Flags                                                              | 3                        |
+|  31   | sll        | res      | src-alu-a | src-alu-b  |           | Logical Shift Left by src-alu-b & Set Flags                                          | 3                        |
+|  32   | srl        | res      | src-alu-a | src-alu-b  |           | Logical Shift Right by src-alu-b & Set Flags                                         | 3                        |
+|  33   | sra        | res      | src-alu-a | src-alu-b  |           | Arithmetic Shift Right by src-alu-b & Set Flags                                      | 3                        |
+|  34   | neg        | res      | src-alu-a |            |           | Negate & Set Flags                                                                   | 3                        |
+|  35   | cmp        | res      | src-alu-a | src-alu-b  |           | Compare by Subtraction & Set Flags                                                   | 3                        |
+|  ---  |            |          |           |            |           |                                                                                      |                          |
+|  36   | push       |          | src       |            |           | Push to Stack                                                                        | 4                        |
+|  37   | pushb      |          | src       |            |           | Push Byte to Stack                                                                   | 4                        |
+|  38   | pop        |          | dest      |            |           | Pop from Stack                                                                       | 5                        |
+|  39   | popb       |          | dest      |            |           | Pop Byte from Stack                                                                  | 5                        |
+|  40   | call       |          |           | [src-addr, | offset]   | Push Program Counter to Stack & Jump to Address                                      | 7                        |
+|  41   | callf      |          | src-seg   | [src-addr, | offset]   | Push Code Segment then Program Counter to Stack & Jump to Address & Set Code Segment | 10                       |
+|  42   | ret        |          |           |            |           | Pop Program Counter                                                                  | 5                        |
+|  43   | retf       |          |           |            |           | Pop Code Segment then Program Counter                                                | 8                        |
 
 #### Registers (13 + zero, f)
 
@@ -100,7 +117,6 @@
  -  B Select - 4b
 
 ### Control Unit (CU) - Control Signals - 35b (CPLD / EEPROM)
-
 
  - bus-src - 5b (16 registers / 16 expansions, other)
  - bus-dest - 5b (16 registers / 16 expansions, other)
