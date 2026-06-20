@@ -1,0 +1,10 @@
+[workspace]
+
+members = [
+    "asm_rs",
+]
+
+resolver = "3"
+
+[workspace.metadata]
+name = "computer_tools"
