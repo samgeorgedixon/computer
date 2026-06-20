@@ -10,9 +10,9 @@
 `define INSTR_MOVI      6'd2
 `define INSTR_LEA       6'd3
 
-`define INSTR_MEMORY    `INSTR_LDW, `INSTR_STW, `INSTR_LDE, `INSTR_STE
-`define INSTR_MEMORYR   `INSTR_LDWR, `INSTR_STWR, `INSTR_LDER, `INSTR_STER
-`define INSTR_MEMORYP   `INSTR_LDWP, `INSTR_STWP, `INSTR_LDEP, `INSTR_STEP
+`define INSTR_MEMORY    `INSTR_LDW, `INSTR_STW, `INSTR_LDE, `INSTR_STE      // [src-addr, offset]
+`define INSTR_MEMORYR   `INSTR_LDWR, `INSTR_STWR, `INSTR_LDER, `INSTR_STER  // [src-addr]
+`define INSTR_MEMORYP   `INSTR_LDWP, `INSTR_STWP, `INSTR_LDEP, `INSTR_STEP  // [src-addr] + Post Increment
 `define INSTR_LDW       6'd4
 `define INSTR_LDWR      6'd5
 `define INSTR_LDWP      6'd6
@@ -408,9 +408,9 @@ module ControlUnit(
                     4'd2: begin
                         // dec2 sp -> sp, mem / pc_e
                         // ss ex1 = pc
-                        // dec2 pc -> mem
-                        // cs pc = ex1
-                        // add pc, op2 -> pc
+                                    // dec2 pc -> mem
+                                    // cs pc = ex1
+                        // mov op2 -> pc
                             // dec2 sp -> sp, mem
                             // ss ex1 = cs
                             // cs = op1
@@ -428,25 +428,21 @@ module ControlUnit(
                         `SET_CS_RAW(bus_dest_raw, 5'd`CS_EXP1); // Memory
                         `SET_CS_RAW(bus_src_raw, 5'd`CS_PC);
                     end
+                        //4'd4: begin
+                        //    `SET_CS_RAW(alu_e_raw, 1'd1);
+                        //    `SET_CS_RAW(seg_sel__alu_op_sel_raw, `ALU_DEC2);
+
+                        //    `SET_CS_RAW(alu_a_sel_raw, 4'd`CS_PC);
+                        //    `SET_CS_RAW(bus_dest_raw, 5'd`CS_MEM);
+                        //end
+                        //4'd5: begin
+                        //    `SET_CS_RAW(seg_sel__alu_op_sel_raw, `SEL_CS);
+
+                        //    `SET_CS_RAW(bus_src_raw, 5'd`CS_EXP1); // Memory
+                        //    `SET_CS_RAW(bus_dest_raw, 5'd`CS_PC);
+                        //end
                     4'd4: begin
-                        `SET_CS_RAW(alu_e_raw, 1'd1);
-                        `SET_CS_RAW(seg_sel__alu_op_sel_raw, `ALU_DEC2);
-
-                        `SET_CS_RAW(alu_a_sel_raw, 4'd`CS_PC);
-                        `SET_CS_RAW(bus_dest_raw, 5'd`CS_MEM);
-                    end
-                    4'd5: begin
-                        `SET_CS_RAW(seg_sel__alu_op_sel_raw, `SEL_CS);
-
-                        `SET_CS_RAW(bus_src_raw, 5'd`CS_EXP1); // Memory
-                        `SET_CS_RAW(bus_dest_raw, 5'd`CS_PC);
-                    end
-                    4'd6: begin
-                        `SET_CS_RAW(alu_e_raw, 1'd1);
-                        `SET_CS_RAW(seg_sel__alu_op_sel_raw, `ALU_ADD);
-
-                        `SET_CS_RAW(alu_a_sel_raw, 4'd`CS_PC);
-                        `SET_CS_RAW(operand_2_raw, `OP2_ALU_B_SEL);
+                        `SET_CS_RAW(operand_2_raw, `OP2_BUS_SRC);
                         `SET_CS_RAW(bus_dest_raw, 5'd`CS_PC);
 
                         if (`OPCODE == `INSTR_CALL) instrEnd = 1'd1;
