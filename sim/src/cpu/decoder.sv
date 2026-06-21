@@ -20,18 +20,18 @@ module Decoder(
     always_comb begin
         controlSignals.bus_src      = 0;
         controlSignals.bus_src      |= 32'b1 << controlSignalsRaw.bus_src_raw;
-        controlSignals.bus_src[4:1] |= controlSignalsRaw.operand_0_raw == 2'd3 ? 4'b1 << operand_0 : 4'b0;
+        controlSignals.bus_src[`R_R4:`R_R1] |= controlSignalsRaw.operand_0_raw == 2'd3 ? 4'b1 << operand_0 : 4'b0;
         controlSignals.bus_src[15:0] |= controlSignalsRaw.operand_1_raw == 2'd2 && !controlSignalsRaw.seg_sel__alu_op_sel_raw[3] ? 16'b1 << operand_1 : 16'b0; // ES
         controlSignals.bus_src[31:16] |= controlSignalsRaw.operand_1_raw == 2'd2 && controlSignalsRaw.seg_sel__alu_op_sel_raw[3] ? 16'b1 << operand_1 : 16'b0;
         controlSignals.bus_src[15:0] |= controlSignalsRaw.operand_2_raw == 1'd1 && !controlSignalsRaw.alu_e_raw ? 16'b1 << operand_2 : 16'b0;
 
         controlSignals.bus_dest      = 0;
         controlSignals.bus_dest      |= 32'b1 << controlSignalsRaw.bus_dest_raw;
-        controlSignals.bus_dest[4:1] |= controlSignalsRaw.operand_0_raw == 2'd2 ? 4'b1 << operand_0 : 4'b0;
+        controlSignals.bus_dest[`R_R4:`R_R1] |= controlSignalsRaw.operand_0_raw == 2'd2 ? 4'b1 << operand_0 : 4'b0;
         controlSignals.bus_dest[15:0] |= controlSignalsRaw.operand_1_raw == 2'd1 && !controlSignalsRaw.alu_e_raw && !controlSignalsRaw.seg_sel__alu_op_sel_raw[3] ? 16'b1 << operand_1 : 16'b0;
         controlSignals.bus_dest[31:16] |= controlSignalsRaw.operand_1_raw == 2'd1 && !controlSignalsRaw.alu_e_raw && controlSignalsRaw.seg_sel__alu_op_sel_raw[3] ? 16'b1 << operand_1 : 16'b0;
-        controlSignals.bus_dest[`CS_MEM] |= controlSignalsRaw.bus_dest_mem_sp_raw ? 1'd1 : 1'd0;
-        controlSignals.bus_dest[`CS_SP] |= controlSignalsRaw.bus_dest_mem_sp_raw ? 1'd1 : 1'd0;
+        controlSignals.bus_dest[`R_MEM] |= controlSignalsRaw.bus_dest_mem_sp_raw ? 1'd1 : 1'd0;
+        controlSignals.bus_dest[`R_SP] |= controlSignalsRaw.bus_dest_mem_sp_raw ? 1'd1 : 1'd0;
 
         controlSignals.seg_sel      = 0;
         controlSignals.seg_sel      |= controlSignalsRaw.seg_sel__alu_op_sel_raw;

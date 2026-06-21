@@ -11,13 +11,13 @@ module ExpansionUnitManager(
 
     );
     
-    assign expUnit1.we = controlSignals.bus_dest[`CS_EXP1];
-    assign expUnit1.oe = controlSignals.bus_src[`CS_EXP1];
+    assign expUnit1.we = controlSignals.bus_dest[`R_EXP1];
+    assign expUnit1.oe = controlSignals.bus_src[`R_EXP1];
 
-    assign expUnit2.we = controlSignals.bus_dest[`CS_EXP2];
-    assign expUnit2.oe = controlSignals.bus_src[`CS_EXP2];
+    assign expUnit2.we = controlSignals.bus_dest[`R_EXP2];
+    assign expUnit2.oe = controlSignals.bus_src[`R_EXP2];
 
-    assign expUnit3.we = controlSignals.bus_dest[`CS_EXP3];
-    assign expUnit3.oe = controlSignals.bus_src[`CS_EXP3];
+    assign expUnit3.we = controlSignals.bus_dest[`R_EXP3];
+    assign expUnit3.oe = controlSignals.bus_src[`R_EXP3];
 
 endmodule

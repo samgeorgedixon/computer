@@ -1,57 +1,7 @@
 `ifndef CORE_SVH
 `define CORE_SVH
 
-// Decodes of Control Signals
-
-// bus_src_decoded / bus_dest_decoded (0 - 32b), alu_a_decoded / alu_b_decoded (0 - 16b)
-`define CS_R1 1
-`define CS_R2 2
-`define CS_R3 3
-`define CS_R4 4
-
-`define CS_PC 5
-`define CS_MEM 6
-`define CS_INSTR 7
-
-`define CS_SP 8
-`define CS_BP 9
-
-`define CS_CS 10
-`define CS_DS 11
-`define CS_SS 12
-`define CS_ES 13
-
-`define CS_ZERO 14
-
-`define CS_EXP1 16 // RAM
-`define CS_EXP2 17 // Drive
-`define CS_EXP3 18
-`define CS_EXP4 19
-
-// ALU Operations
-`define ALU_ADD       4'd1
-`define ALU_SUB       4'd2
-
-`define ALU_INC       4'd3
-`define ALU_INC2      4'd4
-`define ALU_DEC       4'd5
-`define ALU_DEC2      4'd6
-
-`define ALU_NOT       4'd7
-`define ALU_AND       4'd8
-`define ALU_OR        4'd9
-`define ALU_XOR       4'd10
-
-`define ALU_SLL       4'd11
-`define ALU_SRL       4'd12
-`define ALU_SRA       4'd13
-`define ALU_NEG       4'd14
-
-// Flags (flags[index])
-`define F_ZERO          0 // Z
-`define F_CARRY         1 // C
-`define F_SIGN          2 // S
-`define F_OVERFLOW      3 // O
+`include "src/indexes.svh"
 
 // Control Signals
 
