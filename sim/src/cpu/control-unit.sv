@@ -84,7 +84,7 @@
 // TODO: Impliment Decodes for New Operands
 // (00: Off, 01: seg_sel, 10: bus_dest_raw, 11: bus_src_raw)
 // (00: Off, 01: bus_dest_raw, 10: bus_src_raw, 01&alu_e_raw: alu-a-sel, 11: bus_dest_raw&alu-a-sel)
-// (00: Off, 01: bus_dest_raw, 10: bus_src_raw, 01&alu_e_raw: alu-b-sel)
+// (00: Off, 01: bus_dest_raw, 10: bus_src_raw, 01&alu_e_raw: alu-b-sel, 11&alu_e_raw: alu-a-sel)
 
 `define OP0_SEG_SEL     2'b01
 `define OP0_BUS_DEST    2'b10
@@ -98,6 +98,7 @@
 `define OP2_BUS_DEST    2'b01
 `define OP2_ALU_B_SEL   2'b01 // Use with alu_e_raw Enabled
 `define OP2_BUS_SRC     2'b10
+`define OP2_ALU_A_SEL   2'b11 // Use with alu_e_raw Enabled
 
 // Segments
 `define SEL_CS          4'b0001
@@ -122,6 +123,7 @@ module ControlUnit(
     always_comb begin
 
         // Defaults
+        // TODO : Check Defaults
         `SET_CS_RAW(bus_src_raw              , 5'd0);
         `SET_CS_RAW(bus_dest_raw             , 5'd0);
         `SET_CS_RAW(bus_dest_mem_sp_raw      , 1'd0);
@@ -145,6 +147,10 @@ module ControlUnit(
         // Instruction Logic
 
         // Fetch
+
+            // 0: mov pc -> mem
+            // 1: ld cs (exp1) -> instr / pc_e
+
         if          (microCodeIndex == 4'd0) begin
             `SET_CS_RAW(bus_src_raw  , 5'd`CS_PC);
             `SET_CS_RAW(bus_dest_raw , 5'd`CS_MEM);
@@ -164,7 +170,16 @@ module ControlUnit(
                     end
                 endcase
             end
+
             // Moving
+
+            // mov / movi / lea
+                // 2: mov op2 -> op1
+            // movi / lea
+                // 2: mov pc -> mem
+                // 3: ld cs (exp1) -> op1 / pc_e
+            // lea
+                // 4: add op1, op2 -> op1, mem / alu_e
             `INSTR_MOV: begin
                 unique case (microCodeIndex)
                     4'd2: begin
@@ -181,8 +196,8 @@ module ControlUnit(
                         `SET_CS_RAW(bus_dest_raw, 5'd`CS_MEM);
                     end
                     4'd3: begin
-                        `SET_CS_RAW(operand_1_raw, `OP1_BUS_DEST);
                         `SET_CS_RAW(seg_sel__alu_op_sel_raw, `SEL_CS);
+                        `SET_CS_RAW(operand_1_raw, `OP1_BUS_DEST);
                         `SET_CS_RAW(bus_src_raw, 5'd`CS_EXP1); // Memory
                         `SET_CS_RAW(pc_e, 1'd1);
 
@@ -204,37 +219,49 @@ module ControlUnit(
                     end
                 endcase
             end
+
+            // Memory
+
+            // memory (ld(w/b/e) / st(w/b/e))
+                // 2: mov pc -> mem
+                // 3: ld cs (exp1) -> mem / pc_e
+                // 4: add mem, op2 -> mem / alu_e
+                // 5: ld/st (op0 / es) (exp1 / op1) <-> (op1 / op0) / (b -> byte_low)
+            // memoryr (register only)
+                // 2: mov op2 -> mem
+                // 3: ld/st (op0 / es) (exp1 / op1) <-> (op1 / op0) / (b -> byte_low)
+            // memoryp (register / post increment)
+                // 4: inc(2) mem -> op2
             `INSTR_MEMORY, `INSTR_MEMORYR, `INSTR_MEMORYP: begin
-                if          (microCodeIndex == 4'd2) begin
-                    case (`OPCODE)
-                        `INSTR_MEMORY: begin
+                if (`OPCODE == `INSTR_MEMORY && microCodeIndex != 4'd5) begin
+                    unique case (microCodeIndex)
+                        4'd2: begin
                             `SET_CS_RAW(bus_src_raw,  5'd`CS_PC);
                             `SET_CS_RAW(bus_dest_raw, 5'd`CS_MEM);
                         end
-                        `INSTR_MEMORYR, `INSTR_MEMORYP: begin
-                            `SET_CS_RAW(operand_2_raw, `OP2_BUS_SRC);
-
-                            `SET_CS_RAW(bus_dest_raw, 5'd`CS_MEM);
-                        end
-                    endcase
-                end else if (microCodeIndex == 4'd3 && `OPCODE == ) begin
-                    case (`OPCODE)
-                        `INSTR_MEMORY: begin
+                        4'd3: begin
+                            `SET_CS_RAW(seg_sel__alu_op_sel_raw, `SEL_CS);
                             `SET_CS_RAW(bus_src_raw, 5'd`CS_EXP1); // Memory
                             `SET_CS_RAW(bus_dest_raw, 5'd`CS_MEM);
+                            
                             `SET_CS_RAW(pc_e, 1'd1);
-                            `SET_CS_RAW(seg_sel__alu_op_sel_raw, `SEL_CS);
+                        end
+                        4'd4: begin
+                            `SET_CS_RAW(alu_e_raw, 1'd1);
+                            `SET_CS_RAW(seg_sel__alu_op_sel_raw, `ALU_ADD);
+
+                            `SET_CS_RAW(alu_a_sel_raw, 4'd`CS_MEM);
+                            `SET_CS_RAW(operand_2_raw, `OP2_ALU_B_SEL);
+
+                            `SET_CS_RAW(bus_dest_raw, 5'd`CS_MEM);
                         end
                     endcase
-                end else if (microCodeIndex == 4'd4 && `OPCODE == `INSTR_MEMORY) begin
-                    `SET_CS_RAW(alu_e_raw, 1'd1);
-                    `SET_CS_RAW(seg_sel__alu_op_sel_raw, `ALU_ADD);
-
-                    `SET_CS_RAW(alu_a_sel_raw, 4'd`CS_MEM);
-                    `SET_CS_RAW(operand_2_raw, `OP2_ALU_B_SEL);
-
+                end
+                else if (microCodeIndex == 4'd2) begin
+                    `SET_CS_RAW(operand_2_raw, `OP2_BUS_SRC);
                     `SET_CS_RAW(bus_dest_raw, 5'd`CS_MEM);
-                end else if (microCodeIndex == 4'd5 || microCodeIndex == 4'd3) begin
+                end
+                else if (microCodeIndex == 4'd3 || microCodeIndex == 4'd5) begin
                     unique case (`OPCODE)
                         `INSTR_LDW, `INSTR_STW, `INSTR_LDB, `INSTR_STB:   begin `SET_CS_RAW(operand_0_raw, `OP0_SEG_SEL); end
                         `INSTR_LDE, `INSTR_STE, `INSTR_LDEB, `INSTR_STEB: begin `SET_CS_RAW(seg_sel__alu_op_sel_raw, `SEL_ES); end
@@ -263,14 +290,20 @@ module ControlUnit(
                         end
                     endcase
 
-                    if (`OPCODE != `INSTR_MEMORYP) instrEnd = 1'd1;
-                end else if (microCodeIndex == 4'd4 && `OPCODE == `INSTR_MEMORYP) begin
+                    unique case (`OPCODE) 
+                        `INSTR_MEMORY, `INSTR_MEMORYR: begin instrEnd = 1'd1; end
+                        `INSTR_MEMORYP: begin end
+                    endcase
+                end
+                else if (microCodeIndex == 4'd4) begin
                     `SET_CS_RAW(alu_e_raw, 1'd1);
-                    `SET_CS_RAW(seg_sel__alu_op_sel_raw, `ALU_INC);
 
-                    `SET_CS_RAW(operand_1_raw, `OP1);
-                    `SET_CS_RAW(operand_2_raw, `OP2_ALU_B_SEL);
+                    unique case (`OPCODE) 
+                        `INSTR_LDBP, `INSTR_STBP, `INSTR_LDEBP, `INSTR_STEBP: begin `SET_CS_RAW(seg_sel__alu_op_sel_raw, `ALU_INC); end
+                        `INSTR_LDWP, `INSTR_STWP, `INSTR_LDEWP, `INSTR_STEWP: begin `SET_CS_RAW(seg_sel__alu_op_sel_raw, `ALU_INC2); end
+                    endcase
 
+                    `SET_CS_RAW(operand_2_raw, `OP2_ALU_A_SEL);
                     `SET_CS_RAW(bus_dest_raw, 5'd`CS_MEM);
                 end
             end
