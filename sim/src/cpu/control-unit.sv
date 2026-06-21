@@ -123,7 +123,6 @@ module ControlUnit(
     always_comb begin
 
         // Defaults
-        // TODO : Check Defaults
         `SET_CS_RAW(bus_src_raw              , 5'd0);
         `SET_CS_RAW(bus_dest_raw             , 5'd0);
         `SET_CS_RAW(bus_dest_mem_sp_raw      , 1'd0);
@@ -147,10 +146,8 @@ module ControlUnit(
         // Instruction Logic
 
         // Fetch
-
             // 0: mov pc -> mem
             // 1: ld cs (exp1) -> instr / pc_e
-
         if          (microCodeIndex == 4'd0) begin
             `SET_CS_RAW(bus_src_raw  , 5'd`CS_PC);
             `SET_CS_RAW(bus_dest_raw , 5'd`CS_MEM);
@@ -307,7 +304,17 @@ module ControlUnit(
                     `SET_CS_RAW(bus_dest_raw, 5'd`CS_MEM);
                 end
             end
-            // Jump / Conditions
+
+            // Jump / Branch Conditionss
+            
+            // b...
+                // 2: if not flag -> instrEnd
+            // jmp / jmpf / b...
+                // 2: mov pc -> mem
+                // 3: ld cs (exp1) -> pc
+                // 4: add pc, op2 -> pc / alu_e
+            // jmpf
+                // 5: 
             `INSTR_JMPS: begin
                 unique case (microCodeIndex)
                     4'd2: begin
@@ -326,11 +333,12 @@ module ControlUnit(
                         `SET_CS_RAW(bus_dest_raw, 5'd`CS_MEM);
                     end
                     4'd3: begin
+                        `SET_CS_RAW(seg_sel__alu_op_sel_raw, `SEL_CS);
+
                         `SET_CS_RAW(bus_src_raw, 5'd`CS_EXP1); // Memory
                         `SET_CS_RAW(bus_dest_raw, 5'd`CS_PC);
-                        `SET_CS_RAW(seg_sel__alu_op_sel_raw, `SEL_CS);
                     end
-                    4'd4, 4'd5: begin
+                    4'd4: begin
                         `SET_CS_RAW(alu_e_raw, 1'd1);
                         `SET_CS_RAW(seg_sel__alu_op_sel_raw, `ALU_ADD);
 
@@ -341,12 +349,13 @@ module ControlUnit(
 
                         if (`OPCODE != `INSTR_JMPF) begin
                             instrEnd = 1'd1;
-                        end else if (microCodeIndex == 4'd5) begin
-                            `SET_CS_RAW(operand_1_raw, `OP1_BUS_SRC);
-                            `SET_CS_RAW(bus_dest_raw, 5'd`CS_CS);
-                            
-                            instrEnd = 1'd1;
                         end
+                    end
+                    4'd5: begin
+                        `SET_CS_RAW(operand_1_raw, `OP1_BUS_SRC);
+                        `SET_CS_RAW(bus_dest_raw, 5'd`CS_CS);
+                        
+                        instrEnd = 1'd1; 
                     end
                 endcase
             end
@@ -373,7 +382,32 @@ module ControlUnit(
                     end
                 endcase
             end
+
             // Stack (sp points to current) / Functions
+            
+            // push / pushb
+                // 2: dec(2) sp -> mem, sp / alu_e
+                // 3: st ss (exp1) <- op1
+
+            // pop/popb / ret/retf
+                // 2: mov sp -> mem
+                // 3: ld ss (exp1) -> (op1 / (ret -> pc) / (retf -> cs)) / b -> byte_low
+                // 4: inc(2) sp -> sp, mem
+            // retf
+                // 5: ld ss (exp1) -> pc
+                // 6: inc(2) sp -> sp, mem
+            
+            // call / callf
+                // 2: dec2 sp -> sp, mem / pc_e
+                // 3: st ss (exp1) <- pc
+                // 4: dec2 pc -> mem
+                // 5: ld cs (exp1) -> pc
+                // 6: add pc, op2 -> pc
+            // callf
+                // 7: dec2 sp -> sp, mem
+                // 8: st ss (exp1) <- cs
+                // 9: mov op1 -> cs
+
             `INSTR_PUSH, `INSTR_PUSHB: begin
                 unique case (microCodeIndex)
                     4'd2: begin
@@ -401,11 +435,11 @@ module ControlUnit(
             end
             `INSTR_POP_B_RET_F: begin // retf: pop cs then pc
                 unique case (microCodeIndex)
-                    4'd2, 4'd5: begin
+                    4'd2: begin
                         `SET_CS_RAW(bus_src_raw, 5'd`CS_SP);
                         `SET_CS_RAW(bus_dest_raw, 5'd`CS_MEM);
                     end
-                    4'd3, 4'd6: begin
+                    4'd3, 4'd5: begin
                         `SET_CS_RAW(seg_sel__alu_op_sel_raw, `SEL_SS);
 
                         `SET_CS_RAW(bus_src_raw, 5'd`CS_EXP1); // Memory
@@ -415,13 +449,13 @@ module ControlUnit(
                         end else if          (`OPCODE == `INSTR_POPB) begin
                             `SET_CS_RAW(operand_1_raw, `OP1_BUS_DEST);
                             `SET_CS_RAW(byte_low, 1'd1);
-                        end else if (`OPCODE == `INSTR_RET || microCodeIndex == 4'd6) begin
+                        end else if (`OPCODE == `INSTR_RET || microCodeIndex == 4'd5) begin
                             `SET_CS_RAW(bus_dest_raw, 5'd`CS_PC);
                         end else if (`OPCODE == `INSTR_RETF) begin
                             `SET_CS_RAW(bus_dest_raw, 5'd`CS_CS);
                         end
                     end
-                    4'd4, 4'd7: begin
+                    4'd4, 4'd6: begin
                         `SET_CS_RAW(alu_e_raw, 1'd1);
 
                         unique case (`OPCODE)
@@ -430,22 +464,12 @@ module ControlUnit(
                         endcase
 
                         `SET_CS_RAW(alu_a_sel_raw, 4'd`CS_SP);
-                        `SET_CS_RAW(bus_dest_raw, 5'd`CS_SP);
+                        `SET_CS_RAW(bus_dest_mem_sp_raw, 5'd`CS_SP);
 
                         if (`OPCODE != `INSTR_RETF && microCodeIndex != 4'd7) instrEnd = 1'd1;
                     end
                 endcase
             end
-            // call / callf
-                // dec2 sp -> sp, mem / pc_e
-                // ss ex1 = pc
-                // dec2 pc -> mem
-                // cs pc = ex1
-                // add pc, op2 -> pc
-            // callf
-                // dec2 sp -> sp, mem
-                // ss ex1 = cs
-                // cs = op1
             `INSTR_CALL_F: begin // callf: push pc then cs
                 unique case (microCodeIndex)
                     4'd2: begin
