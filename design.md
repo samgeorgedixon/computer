@@ -71,8 +71,8 @@
 |  54   | pushb      |          | src       |            |           | Push Byte to Stack                                                                   | 4                        |
 |  55   | pop        |          | dest      |            |           | Pop from Stack                                                                       | 5                        |
 |  56   | popb       |          | dest      |            |           | Pop Byte from Stack                                                                  | 5                        |
-|  57   | call       |          |           | src-addr   |           | Push Program Counter to Stack & Jump to Address                                      | 5                        |
-|  58   | callf      |          | src-seg   | src-addr   |           | Push Code Segment then Program Counter to Stack & Jump to Address & Set Code Segment | 8                        |
+|  57   | call       |          |           | [src-addr, | offset]   | Push Program Counter to Stack & Jump to Address                                      | 7                        |
+|  58   | callf      |          | src-seg   | [src-addr, | offset]   | Push Code Segment then Program Counter to Stack & Jump to Address & Set Code Segment | 10                       |
 |  59   | ret        |          |           |            |           | Pop Program Counter                                                                  | 5                        |
 |  60   | retf       |          |           |            |           | Pop Code Segment then Program Counter                                                | 8                        |
 
