@@ -28,9 +28,9 @@ interface ControlSignals_if;
     logic           flags_e;
     logic           byte_low;
 
-    logic [1:0]     operand_0_raw; // (00: Off, 01: seg_sel, 10: bus_dest, 11: bus_src)
-    logic [1:0]     operand_1_raw; // (00: Off, 01: bus_dest, 10: bus_src, 01&alu_e_raw: alu-a-sel)
-    logic [1:0]     operand_2_raw; // (00: Off, 01: bus_dest_raw, 10: bus_src_raw, 01&alu_e_raw: alu-b-sel, 11&alu_e_raw: alu-a-sel)
+    logic [1:0]     operand_0_raw;
+    logic [1:0]     operand_1_raw;
+    logic [1:0]     operand_2_raw;
 
     modport control (
         output bus_src_raw,

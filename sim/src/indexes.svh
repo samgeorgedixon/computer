@@ -105,7 +105,7 @@
 `define R_DS       11
 `define R_SS       12
 `define R_ES       13
-
+    
 `define R_ZERO     14
 
 `define R_EXP1     16 // RAM
@@ -118,5 +118,25 @@
 `define F_CARRY         1 // C
 `define F_SIGN          2 // S
 `define F_OVERFLOW      3 // O
+
+// Segment Selects
+`define SEL_CS          4'b0001
+`define SEL_DS          4'b0010
+`define SEL_SS          4'b0100
+`define SEL_ES          4'b1000
+
+// TODO: Impliment Decodes for New Operands
+// Operand Roles (Use Inside SET_CS_RAW)
+`define OP0_BUS_DEST                2'd1
+`define OP0_BUS_SRC                 2'd2
+`define OP0_SEG_SEL                 2'd3
+
+`define OP1_BUS_DEST                2'd1 // or R_ExpansionUnit
+`define OP1_BUS_SRC_OR_ALU_A_SEL    2'd2 // or R_ExpansionUnit
+`define OP1_BUS_DEST_AND_ALU_A_SEL  2'd3
+
+`define OP2_BUS_DEST                2'd1
+`define OP2_BUS_SRC_OR_ALU_B_SEL    2'd2
+`define OP2_ALU_A_SEL               2'd3
 
 `endif
