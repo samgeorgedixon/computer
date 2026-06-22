@@ -1,12 +1,35 @@
-# Computer Design
 
- - 16 Bit Bus
- - 24 Bit Address Bus (Segment 0xffff00) + (Address 0x00ffff)
- - 4 General Registers
- - 16 Expansion Modules
- - Big Endian
+---
+## Overview
 
-### ISA (Instruction Set Architecture)
+This is a proof of concept 16b CPU with an experimental architecture. This document describes how a user can interact with this architecture.
+
+### Key Characteristics
+
+| Property          | Value  | Description                                                        |
+| ----------------- | ------ | ------------------------------------------------------------------ |
+| Word Size (Bus)   | 16b    |                                                                    |
+| Address Size      | 24b    | Segmented: (Segment of 16b: 0xffff00) + (Address of 16b: 0x00ffff) |
+| Endianness        | Big    |                                                                    |
+| General Registers | 4      |                                                                    |
+| Expansion Units   | 16     | Interrupt Based with lde/ste to Communicate                        |
+| Instruction Count | 6b: 64 |                                                                    |
+
+---
+
+<div style="page-break-before: always;"></div>
+
+## Contents
+---
+
+
+
+---
+
+<div style="page-break-before: always;"></div>
+
+## Instruction Set Architecture (ISA)
+---
 
 | Index | Instr (6b) | op0 (2b) | op1 (4b)  | op2 (4b)   | imm (16b) | Notes                                                                                | Clock Cycles (Fetch = 2) |
 | :---: | :--------- | :------- | :-------- | :--------- | :-------- | ------------------------------------------------------------------------------------ | ------------------------ |
@@ -76,68 +99,44 @@
 |  59   | ret        |          |           |            |           | Pop Program Counter                                                                  | 5                        |
 |  60   | retf       |          |           |            |           | Pop Code Segment then Program Counter                                                | 8                        |
 
-#### Registers (13 + zero, f)
+---
 
-0. n/a
-1.  r1
-2.  r2
-3.  r3
-4.  r4
-5. pc
-6. mem
-7. instr
-8.  sp
-9. bp
-10. cs - Segments (code, data, stack, extra)
-11. ds
-12. ss
-13. es
-14. zero (not register - hardwire)
--  f (not selectable)
+<div style="page-break-before: always;"></div>
 
-#### Expansion Units
+## Registers / Expansion Units
+---
 
-- Interconnects
-	- clk, r, byte_low
-	- we, oe
-	- bus - 16b
-	- addr - 24b
+Registers are indexed from 0-15 with a separate flags register used by the CPU and ALU but not indexable. Then expansion units take up the rest of the registers indexes from 16-31 allowing a total of 16 expansion units to be used.
 
-1. Memory - ROM / RAM (Internal)
-2. Drive (Internal)
-3. GPU (Internal?)
-4. USB - Keyboard / Mouse
-5. Ethernet?
+However expansion units do not act like registers (with mov or movi...) and instead act like a part of memory where you use lde or ste which allows you to take advantage of the 24b address as well as the 16b bus to communicate with the expansion units. In fact this has meant RAM can act as expansion unit 1 (exp1) and means drives can be accesses in the same simple way as RAM.
 
-#### ALU
+| Index   | ID          | Width             | Role                                             |
+| ------- | ----------- | ----------------- | ------------------------------------------------ |
+| 0       | N/A         | 16b               | Nothing                                          |
+| 1       | r1          | 16b               | 1st General Purpose                              |
+| 2       | r2          | 16b               | 2nd General Purpose                              |
+| 3       | r3          | 16b               | 3rd General Purpose                              |
+| 4       | r4          | 16b16b16b         | 4th General Purpose                              |
+| 5       | pc          | 16b               | Program Counter                                  |
+| 6       | mem         | 16b               | Current Memory Address                           |
+| 7       | instr       | 16b               | Current Instruction                              |
+| 8       | sp          | 16b               | Stack Pointer                                    |
+| 9       | bp          | 16b               | Base Pointer                                     |
+| 10      | cs          | 16b               | Code Segment Address                             |
+| 1       | ds          | 16b               | Data Segment Address                             |
+| 12      | ss          | 16b               | Stack Segment Address                            |
+| 13      | es          | 16b               | Extra Segment Address (+ Expansion Unit Address) |
+| 14      | z           | 16b               | Zero                                             |
+| 15      |             |                   |                                                  |
+|         | f           | 8b                | Flags (Not Indexable)                            |
+| 16 - 31 | exp(1...16) | 16b bus, 24b addr | Expansion Unit Indexes (lde / ste)               |
 
- -  Direct BUS Output
- -  Operation Select - 4b
- -  A Select - 4b
- -  B Select - 4b
+#### Example Expansion Units
 
-### Control Unit (CU) - Control Signals - 35b (CPLD / EEPROM)
-
- - bus-src - 5b (16 registers / 16 expansions, other)
- - bus-dest - 5b (16 registers / 16 expansions, other)
- - bus-dest-special - 4b (16 register groups)
-
- - seg_sel__alu_op_sel_raw - 4b (__ or - (0)-(3): Segment Select, 0-15: ALU OP Select)
- - alu_e_raw - 1b (0: Segment On / ALU Off, 1: Segment On / ALU On)
-
- - alu-a-sel - 4b (16 registers)
- - alu-b-sel - 4b (16 registers)
-
-- pc-e - 1b (Program Counter Enable)
-- flags-e - 1b (Enable Flags)
-- byte_ - 1b (Enable Flags)
-
-- operand-0 - 2b (00: Off, 01: seg_sel, 10: bus_dest, 11: bus_src)
-- operand-1 - 2b (00: Off, 01: bus_dest, 10: bus_src, 01&alu_e_raw: alu-a-sel)
-- operand-2 - 1b (0: Off, 1&alu_e_raw: alu-b-sel, 1: bus_src)
-
- -  (opcode, 6b)    (operand-0, 2b)   (operand-1, 4b)    (operand-2, 4b)    (imm, 16b)
-    ldw                  {seg}                     rs1                           [rs2                          {imm}]
-	.                       1 + 3o                  1 + 2o                     1 + 1o - src              1 + 1o - bus : ( + alu_e)
-
-- instr-end - 1b
+| ID   | Expansion Unit         | Type                |
+| ---- | ---------------------- | ------------------- |
+| exp1 | Memory (ROM / RAM)     | Internal            |
+| exp2 | Drive                  | Internal            |
+| exp3 | GPU                    | Internal / External |
+| exp4 | USB (Keyboard / Mouse) | External            |
+| exp5 | Ethernet               | External            |
