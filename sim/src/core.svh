@@ -8,13 +8,13 @@
 interface ControlSignals_if;
     logic [4:0]     bus_src_raw;
     logic [4:0]     bus_dest_raw;
-    logic           bus_dest_mem_sp_raw;
+    logic           bus_dest_ar_and_sp;
 
     logic [31:0]    bus_src;
     logic [31:0]    bus_dest;
 
     // No Memory use while using ALU
-    logic [3:0]     seg_sel__alu_op_sel_raw;    // __ or - [0]-[3]: Segment Select, 0-15: ALU OP Select
+    logic [3:0]     seg_sel_or_alu_op_sel;    // __ or - [0]-[3]: Segment Select, 0-15: ALU OP Select
     logic           alu_e_raw;                  // 0: Segment On / ALU Off, 1: Segment On / ALU On
     logic [3:0]     seg_sel;                    // 0-3: Segment Select (No Decoded Needed)
     logic [3:0]     alu_op_sel;                 // Not Decoded: For ALU CPLD
@@ -24,52 +24,52 @@ interface ControlSignals_if;
     logic [15:0]    alu_a_sel;
     logic [15:0]    alu_b_sel;
 
-    logic           pc_e;
+    logic           ip_e;
     logic           flags_e;
     logic           byte_low;
 
-    logic [1:0]     operand_0_raw;
-    logic [1:0]     operand_1_raw;
-    logic [1:0]     operand_2_raw;
+    logic [1:0]     operand_0;
+    logic [1:0]     operand_1;
+    logic [1:0]     operand_2;
 
     modport control (
         output bus_src_raw,
         output bus_dest_raw,
-        output bus_dest_mem_sp_raw,
+        output bus_dest_ar_and_sp,
 
-        output seg_sel__alu_op_sel_raw,
+        output seg_sel_or_alu_op_sel,
         output alu_e_raw,
 
         output alu_a_sel_raw,
         output alu_b_sel_raw,
 
-        output pc_e,
+        output ip_e,
         output flags_e,
         output byte_low,
 
-        output operand_0_raw,
-        output operand_1_raw,
-        output operand_2_raw
+        output operand_0,
+        output operand_1,
+        output operand_2
     );
 
     modport decoderIN (
         input bus_src_raw,
         input bus_dest_raw,
-        input bus_dest_mem_sp_raw,
+        input bus_dest_ar_and_sp,
 
-        input seg_sel__alu_op_sel_raw,
+        input seg_sel_or_alu_op_sel,
         input alu_e_raw,
 
         input alu_a_sel_raw,
         input alu_b_sel_raw,
 
-        input pc_e,
+        input ip_e,
         input flags_e,
         input byte_low,
 
-        input operand_0_raw,
-        input operand_1_raw,
-        input operand_2_raw
+        input operand_0,
+        input operand_1,
+        input operand_2
     );
 
     modport decoderOUT (
@@ -82,7 +82,7 @@ interface ControlSignals_if;
         output alu_a_sel,
         output alu_b_sel,
 
-        output pc_e,
+        output ip_e,
         output flags_e,
         output byte_low
     );
@@ -97,7 +97,7 @@ interface ControlSignals_if;
         input alu_a_sel,
         input alu_b_sel,
 
-        input pc_e,
+        input ip_e,
         input flags_e,
         output byte_low
     );

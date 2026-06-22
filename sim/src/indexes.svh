@@ -20,18 +20,18 @@
 `define INSTR_STB   13
 `define INSTR_STBR  14
 `define INSTR_STBP  15
-`define INSTR_LDE   16
-`define INSTR_LDER  17
-`define INSTR_LDEP  18
-`define INSTR_LDEB  19
-`define INSTR_LDEBR 20
-`define INSTR_LDEBP 21
-`define INSTR_STE   22
-`define INSTR_STER  23
-`define INSTR_STEP  24
-`define INSTR_STEB  25
-`define INSTR_STEBR 26
-`define INSTR_STEBP 27
+`define INSTR_LDXW  16
+`define INSTR_LDXWR 17
+`define INSTR_LDXWP 18
+`define INSTR_LDXB  19
+`define INSTR_LDXBR 20
+`define INSTR_LDXBP 21
+`define INSTR_STXW  22
+`define INSTR_STXWR 23
+`define INSTR_STXWP 24
+`define INSTR_STXB  25
+`define INSTR_STXBR 26
+`define INSTR_STXBP 27
 
 `define INSTR_JMP   28
 `define INSTR_JMPF  29
@@ -89,29 +89,29 @@
 `define ALU_NEG     14
 
 // Registers (1 - 15), Expansion Units (16 - 31), 0 (Nothing)
-`define R_R1       1
-`define R_R2       2
-`define R_R3       3
-`define R_R4       4
+`define R_R1    1
+`define R_R2    2
+`define R_R3    3
+`define R_R4    4
 
-`define R_PC       5
-`define R_MEM      6
-`define R_INSTR    7
+`define R_SP    5
+`define R_BP    6
 
-`define R_SP       8
-`define R_BP       9
+`define R_CS    7
+`define R_DS    8
+`define R_SS    9
+`define R_ES    10
 
-`define R_CS       10
-`define R_DS       11
-`define R_SS       12
-`define R_ES       13
-    
-`define R_ZERO     14
+`define R_ZERO  11
 
-`define R_EXP1     16 // RAM
-`define R_EXP2     17 // Drive
-`define R_EXP3     18
-`define R_EXP4     19
+`define R_IP    12
+`define R_IR    13
+`define R_AR   14
+
+`define R_XU1   16 // Memory
+`define R_XU2   17 // Drive
+`define R_XU3   18
+`define R_XU4   19
 
 // Flags (flags[index])
 `define F_ZERO          0 // Z
@@ -125,7 +125,6 @@
 `define SEL_SS          4'b0100
 `define SEL_ES          4'b1000
 
-// TODO: Impliment Decodes for New Operands
 // Operand Roles (Use Inside SET_CS_RAW)
 `define OP0_BUS_DEST                2'd1
 `define OP0_BUS_SRC                 2'd2

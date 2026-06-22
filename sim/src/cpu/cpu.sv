@@ -8,12 +8,12 @@
 `include "src/cpu/addr-manager.sv"
 
 `include "src/cpu/registers/flags.sv"
-`include "src/cpu/registers/program-counter.sv"
+`include "src/cpu/registers/instruction-pointer-unit.sv"
 
-`include "src/exp-units/memory.sv"
-`include "src/exp-units/drive.sv"
-`include "src/exp-units/gpu.sv"
-`include "src/exp-unit-manager.sv"
+`include "src/expansion-units/memory.sv"
+`include "src/expansion-units/drive.sv"
+`include "src/expansion-units/gpu.sv"
+`include "src/expansion-unit-manager.sv"
 
 module CPU(
     
@@ -33,8 +33,8 @@ module CPU(
     logic [7:0]  bus_flags;
 
     // Direct Registers
-    logic [15:0] instr_direct;
-    logic [15:0] memory_direct;
+    logic [15:0] ir_direct;
+    logic [15:0] ar_direct;
     logic [7:0]  flags_direct;
 
     logic [15:0] cs_direct;
@@ -48,18 +48,18 @@ module CPU(
 
     // Units
 
-    Decoder decoder(instr_direct, controlSignalsRaw, controlSignals);
+    ControlUnit controlUnit(clk, r, ir_direct, flags_direct, controlSignalsRaw);
 
-    ControlUnit controlUnit(clk, r, instr_direct, flags_direct, controlSignalsRaw);
-
-    RegisterUnit registerUnit(clk, r, bus, bus_alu_a, bus_alu_b, instr_direct, memory_direct, cs_direct, ds_direct, ss_direct, es_direct, controlSignals);
+    RegisterUnit registerUnit(clk, r, bus, bus_alu_a, bus_alu_b, ir_direct, ar_direct, cs_direct, ds_direct, ss_direct, es_direct, controlSignals);
 
     ALU alu(r, bus, bus_alu_a, bus_alu_b, bus_flags, controlSignals);
 
-    Flags flags(clk, r, bus_flags, flags_direct, controlSignals);
-    ProgramCounter programCounter(clk, r, bus, bus_alu_a, bus_alu_b, controlSignals);
+    InstructionPointerUnit programCounter(clk, r, bus, bus_alu_a, bus_alu_b, controlSignals);
+    
+    AddrManager addrManager(addr, ar_direct, cs_direct, ds_direct, ss_direct, es_direct, controlSignals);
+    Decoder decoder(ir_direct, controlSignalsRaw, controlSignals);
 
-    AddrManager addrManager(addr, memory_direct, cs_direct, ds_direct, ss_direct, es_direct, controlSignals);
+    Flags flags(clk, r, bus_flags, flags_direct, controlSignals);
 
     // Expansion Units
 
@@ -73,6 +73,6 @@ module CPU(
     GPU             gpu(clk, r, controlSignals.byte_low, bus, addr, gpuExpansionSignals);
 
     ExpansionUnitManager expUnitManger(.controlSignals(controlSignals),
-        .expUnit1(memoryExpansionSignals), .expUnit2(driveExpansionSignals), .expUnit3(gpuExpansionSignals));
+        .xu1(memoryExpansionSignals), .xu2(driveExpansionSignals), .xu3(gpuExpansionSignals));
 
 endmodule

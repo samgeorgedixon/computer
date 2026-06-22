@@ -15,7 +15,7 @@ module ROM_8bx8b(
 
     logic [7:0] rom [0:(2**8) - 1];
 
-    assign bus = oe ? byte_low ? { 8'd0, rom[addr] } : { rom[addr], rom[addr + 1] } : 16'bz; // TODO: Need to Impliment Byte BUS
+    assign bus = oe ? byte_low ? { 8'd0, rom[addr] } : { rom[addr], rom[addr + 1] } : 16'bz;
     
     import "DPI-C" function int LoadMemoryFile(input string filePath);
     import "DPI-C" function byte GetMemoryFileByte(input int index);
@@ -56,7 +56,7 @@ module RAM_8bx24b(
 
     logic [7:0] ram [0:(2**24) - 1];
 
-    assign bus = oe ? byte_low ? { 8'd0,  ram[addr] } : { ram[addr], ram[addr + 1] } : 16'bz; // TODO: Need to Impliment Byte BUS
+    assign bus = oe ? byte_low ? { 8'd0,  ram[addr] } : { ram[addr], ram[addr + 1] } : 16'bz;
 
     always @(posedge clk) begin
 

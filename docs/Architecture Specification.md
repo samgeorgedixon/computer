@@ -54,26 +54,26 @@ Registers are indexed from 0-15 with a separate flags register used by the CPU a
 
 However expansion units do not act like registers (with mov or movi...) and instead act like a part of memory where you use lde or ste which allows you to take advantage of the 24b address as well as the 16b bus to communicate with the expansion units. In fact this has meant RAM can act as expansion unit 1 (exp1) and means drives can be accesses in the same simple way as RAM.
 
-| Index   | ID          | Width             | Role                                             |
-| ------- | ----------- | ----------------- | ------------------------------------------------ |
-| 0       | N/A         | 16b               | Nothing                                          |
-| 1       | r1          | 16b               | 1st General Purpose                              |
-| 2       | r2          | 16b               | 2nd General Purpose                              |
-| 3       | r3          | 16b               | 3rd General Purpose                              |
-| 4       | r4          | 16b               | 4th General Purpose                              |
-| 5       | pc          | 16b               | Program Counter                                  |
-| 6       | mem         | 16b               | Current Memory Address                           |
-| 7       | instr       | 16b               | Current Instruction                              |
-| 8       | sp          | 16b               | Stack Pointer                                    |
-| 9       | bp          | 16b               | Base Pointer                                     |
-| 10      | cs          | 16b               | Code Segment Address                             |
-| 1       | ds          | 16b               | Data Segment Address                             |
-| 12      | ss          | 16b               | Stack Segment Address                            |
-| 13      | es          | 16b               | Extra Segment Address (+ Expansion Unit Address) |
-| 14      | z           | 16b               | Zero                                             |
-| 15      |             |                   |                                                  |
-|         | f           | 8b                | Flags (Not Indexable)                            |
-| 16 - 31 | exp(1...16) | 16b bus, 24b addr | Expansion Unit Indexes (lde / ste)               |
+| Index   | ID         | Width             | Role                                             |
+| ------- | ---------- | ----------------- | ------------------------------------------------ |
+| 0       | N/A        | 16b               | Nothing                                          |
+| 1       | r1         | 16b               | 1st General Purpose                              |
+| 2       | r2         | 16b               | 2nd General Purpose                              |
+| 3       | r3         | 16b               | 3rd General Purpose                              |
+| 4       | r4         | 16b               | 4th General Purpose                              |
+| 5       | sp         | 16b               | Stack Pointer                                    |
+| 6       | bp         | 16b               | Base Pointer                                     |
+| 7       | cs         | 16b               | Code Segment Address                             |
+| 8       | ds         | 16b               | Data Segment Address                             |
+| 9       | ss         | 16b               | Stack Segment Address                            |
+| 10      | es         | 16b               | Extra Segment Address (+ Expansion Unit Address) |
+| 11      | z          | 16b               | Zero                                             |
+| 12      | ip         | 16b               | Instruction Pointer                              |
+| 13      | ir         | 16b               | Current Instruction                              |
+| 14      | ar         | 16b               | Current Address                                  |
+| 15      |            |                   |                                                  |
+|         | f          | 8b                | Flags (Not Indexable)                            |
+| 16 - 31 | xu(1...16) | 16b bus, 24b addr | Expansion Unit Indexes (lde / ste)               |
 
 ---
 
@@ -91,26 +91,26 @@ However expansion units do not act like registers (with mov or movi...) and inst
 
 #### Control Signals
 
-| Control Signal ID       | Width | Role                                                                                |
-| ----------------------- | ----- | ----------------------------------------------------------------------------------- |
-| bus_src_raw             | 5b    | Selects what outputs to the bus (Register / Expansion unit Index based)             |
-| bus_dest_raw            | 5b    | Selects what takes an input from the bus (Register / Expansion unit Index based)    |
-| bus_dest_mem_sp_raw     | 1b    | Select memory and stack pointer registers to take an input from the bus.            |
-|                         |       |                                                                                     |
-| alu_e_raw               | 1b    | 1: ALU On / 0: Segment Selection and ALU Off (so No Memory use while using the ALU) |
-| seg_sel__alu_op_sel_raw | 4b    | Selection of Segment or ALU opcode                                                  |
-|                         |       |                                                                                     |
-| alu_op_sel              | 4b    |                                                                                     |
-| alu_a_sel_raw           | 4b    |                                                                                     |
-| alu_b_sel_raw           | 4b    |                                                                                     |
-|                         |       |                                                                                     |
-| pc_e                    | 1b    |                                                                                     |
-| flags_e                 | 1b    |                                                                                     |
-| byte_low                | 1b    |                                                                                     |
-|                         |       |                                                                                     |
-| operand_0_raw           | 2b    |                                                                                     |
-| operand_1_raw           | 2b    |                                                                                     |
-| operand_2_raw           | 2b    |                                                                                     |
+| Control Signal ID     | Width | Role                                                                                |
+| --------------------- | ----- | ----------------------------------------------------------------------------------- |
+| bus_src_raw           | 5b    | Selects what outputs to the bus (Register / Expansion unit Index based)             |
+| bus_dest_raw          | 5b    | Selects what takes an input from the bus (Register / Expansion unit Index based)    |
+| bus_dest_ar_and_sp    | 1b    | Select memory and stack pointer registers to take an input from the bus.            |
+|                       |       |                                                                                     |
+| alu_e_raw             | 1b    | 1: ALU On / 0: Segment Selection and ALU Off (so No Memory use while using the ALU) |
+| seg_sel_or_alu_op_sel | 4b    | Selection of Segment or ALU opcode                                                  |
+|                       |       |                                                                                     |
+| alu_op_sel            | 4b    |                                                                                     |
+| alu_a_sel_raw         | 4b    |                                                                                     |
+| alu_b_sel_raw         | 4b    |                                                                                     |
+|                       |       |                                                                                     |
+| ip_e                  | 1b    |                                                                                     |
+| flags_e               | 1b    |                                                                                     |
+| byte_low              | 1b    |                                                                                     |
+|                       |       |                                                                                     |
+| operand_0             | 2b    |                                                                                     |
+| operand_1             | 2b    |                                                                                     |
+| operand_2             | 2b    |                                                                                     |
 
 #### Decodes of the Outbound Control Signals
 

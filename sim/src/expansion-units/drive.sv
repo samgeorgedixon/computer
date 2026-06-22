@@ -15,7 +15,7 @@ module Drive_8bx24b(
 
     logic [7:0] drive [0:(2**24) - 1];
 
-    assign bus = driveUnitSignals.oe ? byte_low ? { 8'd0, drive[addr] } : { drive[addr], drive[addr + 1] } : 16'bz; // TODO: Need to Impliment Byte BUS
+    assign bus = driveUnitSignals.oe ? byte_low ? { 8'd0, drive[addr] } : { drive[addr], drive[addr + 1] } : 16'bz;
 
     always @(posedge clk) begin
 

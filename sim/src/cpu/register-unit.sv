@@ -9,7 +9,7 @@ module RegisterUnit(
     output wire [15:0] bus_alu_a,
     output wire [15:0] bus_alu_b,
 
-    output logic [15:0] instr_direct, memory_direct,
+    output logic [15:0] ir_direct, ar_direct,
     output logic [15:0] cs_direct, ds_direct, ss_direct, es_direct,
 
     ControlSignals_if.unit controlSignals
@@ -21,10 +21,6 @@ module RegisterUnit(
     Register16b r3(`REG16_FILL(`R_R3), .data());
     Register16b r4(`REG16_FILL(`R_R4), .data());
 
-    // CS_PC
-    Register16b mem(`REG16_FILL(`R_MEM), .data(memory_direct));
-    Register16b instr(`REG16_FILL(`R_INSTR), .data(instr_direct));
-
     Register16b sp(`REG16_FILL(`R_SP), .data());
     Register16b bp(`REG16_FILL(`R_BP), .data());
 
@@ -32,6 +28,10 @@ module RegisterUnit(
     Register16b ds(`REG16_FILL(`R_DS), .data(ds_direct));
     Register16b ss(`REG16_FILL(`R_SS), .data(ss_direct));
     Register16b es(`REG16_FILL(`R_ES), .data(es_direct));
+
+    // R_IP
+    Register16b ir(`REG16_FILL(`R_IR), .data(ir_direct));
+    Register16b ar(`REG16_FILL(`R_AR), .data(ar_direct));
 
     // Zero `Register`
     assign bus = controlSignals.bus_src[`R_ZERO] ? 16'b0 : 16'bz;

@@ -35,7 +35,7 @@ This is a proof of concept 16b CPU with an experimental architecture. This docum
 | :---: | :--------- | :------- | :-------- | :--------- | :-------- | ------------------------------------------------------------------------------------ | ------------------------ |
 |   0   | nop        |          |           |            |           | No Operation                                                                         | 3                        |
 |   1   | mov        |          | dest      | src        |           | Copy Register: dest <- src                                                           | 3                        |
-|   2   | mov        |          | dest-1    | {dest-2}   | value     | Load Immediate: dest-1, {optional dest-2} <- imm                                     | 4                        |
+|   2   | mov        |          | dest      |            | value     | Load Immediate: dest <- imm                                                          | 4                        |
 |   3   | lea        |          | dest      | [src-addr, | offset]   | Load Effective Address: dest <-src-addr + offset                                     | 5                        |
 |  ---  |            |          |           |            |           |                                                                                      |                          |
 |   4   | ldw        | seg      | dest      | [src-addr, | offset]   | Load Word from Memory at src-addr + offset                                           | 6                        |
@@ -50,18 +50,18 @@ This is a proof of concept 16b CPU with an experimental architecture. This docum
 |  13   | stb        | seg      | src       | [src-addr, | offset]   | Store Byte to Memory at src-addr + offset                                            | 6                        |
 |  14   | stb        | seg      | src       | src-addr   |           | Store Byte to Memory at src-addr                                                     | 4                        |
 |  15   | stb+       | seg      | src       | src-addr   |           | Store Byte to Memory at src-addr & Post Increment src-addr by 1                      | 5                        |
-|  16   | ldew       | dest     | exp       | [src-addr, | offset]   | Load Word from Expansion Unit at src-addr + offset                                   | 6                        |
-|  17   | ldew       | dest     | exp       | src-addr   |           | Load Word from Expansion Unit at src-addr                                            | 4                        |
-|  18   | ldew+      | dest     | exp       | src-addr   |           | Load Word from Expansion Unit at src-addr & Post Increment src-addr by 2             | 5                        |
-|  19   | ldeb       | dest     | exp       | [src-addr, | offset]   | Load Byte from Expansion Unit at src-addr + offset                                   | 6                        |
-|  20   | ldeb       | dest     | exp       | src-addr   |           | Load Byte from Expansion Unit at src-addr                                            | 4                        |
-|  21   | ldeb+      | dest     | exp       | src-addr   |           | Load Byte from Expansion Unit at src-addr & Post Increment src-addr by 1             | 5                        |
-|  22   | stew       | src      | exp       | [src-addr, | offset]   | Store Word to Expansion Unit at src-addr + offset                                    | 6                        |
-|  23   | stew       | src      | exp       | src-addr   |           | Store Word to Expansion Unit at src-addr                                             | 4                        |
-|  24   | stew+      | src      | exp       | src-addr   |           | Store Word to Expansion Unit at src-addr & Post Increment src-addr by 2              | 5                        |
-|  25   | steb       | src      | exp       | [src-addr, | offset]   | Store Byte to Expansion Unit at src-addr + offset                                    | 6                        |
-|  26   | steb       | src      | exp       | src-addr   |           | Store Byte to Expansion Unit at src-addr                                             | 4                        |
-|  27   | steb+      | src      | exp       | src-addr   |           | Store Byte to Expansion Unit at src-addr & Post Increment src-addr by 1              | 5                        |
+|  16   | ldxw       | dest     | xu        | [src-addr, | offset]   | Load Word from Expansion Unit at src-addr + offset                                   | 6                        |
+|  17   | ldxw       | dest     | xu        | src-addr   |           | Load Word from Expansion Unit at src-addr                                            | 4                        |
+|  18   | ldxw+      | dest     | xu        | src-addr   |           | Load Word from Expansion Unit at src-addr & Post Increment src-addr by 2             | 5                        |
+|  19   | ldxb       | dest     | xu        | [src-addr, | offset]   | Load Byte from Expansion Unit at src-addr + offset                                   | 6                        |
+|  20   | ldxb       | dest     | xu        | src-addr   |           | Load Byte from Expansion Unit at src-addr                                            | 4                        |
+|  21   | ldxb+      | dest     | xu        | src-addr   |           | Load Byte from Expansion Unit at src-addr & Post Increment src-addr by 1             | 5                        |
+|  22   | stxw       | src      | xu        | [src-addr, | offset]   | Store Word to Expansion Unit at src-addr + offset                                    | 6                        |
+|  23   | stxw       | src      | xu        | src-addr   |           | Store Word to Expansion Unit at src-addr                                             | 4                        |
+|  24   | stxw+      | src      | xu        | src-addr   |           | Store Word to Expansion Unit at src-addr & Post Increment src-addr by 2              | 5                        |
+|  25   | stxb       | src      | xu        | [src-addr, | offset]   | Store Byte to Expansion Unit at src-addr + offset                                    | 6                        |
+|  26   | stxb       | src      | xu        | src-addr   |           | Store Byte to Expansion Unit at src-addr                                             | 4                        |
+|  27   | stxb+      | src      | xu        | src-addr   |           | Store Byte to Expansion Unit at src-addr & Post Increment src-addr by 1              | 5                        |
 |  ---  |            |          |           |            |           |                                                                                      |                          |
 |  28   | jmp        |          |           | [src-addr, | offset]   | Jump to Address                                                                      | 5                        |
 |  29   | jmpf       |          | src-seg   | [src-addr, | offset]   | Jump to Address & Set Code Segment                                                   | 6                        |
@@ -108,35 +108,34 @@ This is a proof of concept 16b CPU with an experimental architecture. This docum
 
 Registers are indexed from 0-15 with a separate flags register used by the CPU and ALU but not indexable. Then expansion units take up the rest of the registers indexes from 16-31 allowing a total of 16 expansion units to be used.
 
-However expansion units do not act like registers (with mov or movi...) and instead act like a part of memory where you use lde or ste which allows you to take advantage of the 24b address as well as the 16b bus to communicate with the expansion units. In fact this has meant RAM can act as expansion unit 1 (exp1) and means drives can be accesses in the same simple way as RAM.
+However expansion units do not act like registers (with mov or movi...) and instead act like a part of memory where you use lde or ste which allows you to take advantage of the 24b address as well as the 16b bus to communicate with the expansion units. In fact this has meant RAM can act as expansion unit 1 (xu1) and means drives can be accesses in the same simple way as RAM.
 
-| Index   | ID          | Width             | Role                                             |
-| ------- | ----------- | ----------------- | ------------------------------------------------ |
-| 0       | N/A         | 16b               | Nothing                                          |
-| 1       | r1          | 16b               | 1st General Purpose                              |
-| 2       | r2          | 16b               | 2nd General Purpose                              |
-| 3       | r3          | 16b               | 3rd General Purpose                              |
-| 4       | r4          | 16b16b16b         | 4th General Purpose                              |
-| 5       | pc          | 16b               | Program Counter                                  |
-| 6       | mem         | 16b               | Current Memory Address                           |
-| 7       | instr       | 16b               | Current Instruction                              |
-| 8       | sp          | 16b               | Stack Pointer                                    |
-| 9       | bp          | 16b               | Base Pointer                                     |
-| 10      | cs          | 16b               | Code Segment Address                             |
-| 1       | ds          | 16b               | Data Segment Address                             |
-| 12      | ss          | 16b               | Stack Segment Address                            |
-| 13      | es          | 16b               | Extra Segment Address (+ Expansion Unit Address) |
-| 14      | z           | 16b               | Zero                                             |
-| 15      |             |                   |                                                  |
-|         | f           | 8b                | Flags (Not Indexable)                            |
-| 16 - 31 | exp(1...16) | 16b bus, 24b addr | Expansion Unit Indexes (lde / ste)               |
-
+| Index   | ID         | Width             | Role                                             |
+| ------- | ---------- | ----------------- | ------------------------------------------------ |
+| 0       | N/A        | 16b               | Nothing                                          |
+| 1       | r1         | 16b               | 1st General Purpose                              |
+| 2       | r2         | 16b               | 2nd General Purpose                              |
+| 3       | r3         | 16b               | 3rd General Purpose                              |
+| 4       | r4         | 16b               | 4th General Purpose                              |
+| 5       | sp         | 16b               | Stack Pointer                                    |
+| 6       | bp         | 16b               | Base Pointer                                     |
+| 7       | cs         | 16b               | Code Segment Address                             |
+| 8       | ds         | 16b               | Data Segment Address                             |
+| 9       | ss         | 16b               | Stack Segment Address                            |
+| 10      | es         | 16b               | Extra Segment Address (+ Expansion Unit Address) |
+| 11      | z          | 16b               | Zero                                             |
+| 12      | ip         | 16b               | Instruction Pointer                              |
+| 13      | ir         | 16b               | Current Instruction                              |
+| 14      | ar         | 16b               | Current Address                                  |
+| 15      |            |                   |                                                  |
+|         | f          | 8b                | Flags (Not Indexable)                            |
+| 16 - 31 | xu(1...16) | 16b bus, 24b addr | Expansion Unit Indexes (lde / ste)               |
 #### Example Expansion Units
 
-| ID   | Expansion Unit         | Type                |
-| ---- | ---------------------- | ------------------- |
-| exp1 | Memory (ROM / RAM)     | Internal            |
-| exp2 | Drive                  | Internal            |
-| exp3 | GPU                    | Internal / External |
-| exp4 | USB (Keyboard / Mouse) | External            |
-| exp5 | Ethernet               | External            |
+| ID  | Expansion Unit         | Type                |
+| --- | ---------------------- | ------------------- |
+| xu1 | Memory (ROM / RAM)     | Internal            |
+| xu2 | Drive                  | Internal            |
+| xu3 | GPU                    | Internal / External |
+| xu4 | USB (Keyboard / Mouse) | External            |
+| xu5 | Ethernet               | External            |
