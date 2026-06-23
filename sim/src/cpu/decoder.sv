@@ -31,14 +31,14 @@ module Decoder(
             `OP0_BUS_SRC: controlSignals.bus_src[`R_R4:`R_R1] |= 4'b1 << operand_0;
             `OP0_SEG_SEL: controlSignals.seg_sel = controlSignalsRaw.seg_sel_or_alu_op_sel;
         endcase
-        unique case (controlSignalsRaw.operand_1) // TODO: Check SEL_ES in regard to ip_e
+        unique case (controlSignalsRaw.operand_1)
             `OP1_BUS_DEST: begin
-                if (controlSignalsRaw.seg_sel_or_alu_op_sel == `SEL_ES)   controlSignals.bus_dest[31:16] |= 16'b1 << operand_1;
+                if (controlSignalsRaw.seg_sel_or_alu_op_sel == `SEL_ES && !controlSignalsRaw.alu_e_raw)   controlSignals.bus_dest[31:16] |= 16'b1 << operand_1;
                 else                                                        controlSignals.bus_dest[15:0] |= 16'b1 << operand_1;
             end
             `OP1_BUS_SRC_OR_ALU_A_SEL: begin
-                if (controlSignalsRaw.seg_sel_or_alu_op_sel == `SEL_ES)   controlSignals.bus_src[31:16] |= 16'b1 << operand_1;
-                else if (controlSignalsRaw.alu_e_raw)                       controlSignals.alu_a_sel |= 16'b1 << operand_1;
+                if (controlSignalsRaw.alu_e_raw)                       controlSignals.alu_a_sel |= 16'b1 << operand_1;
+                else if (controlSignalsRaw.seg_sel_or_alu_op_sel == `SEL_ES)   controlSignals.bus_src[31:16] |= 16'b1 << operand_1;
                 else                                                        controlSignals.bus_src[15:0] |= 16'b1 << operand_1;
             end
             `OP1_BUS_DEST_AND_ALU_A_SEL: begin

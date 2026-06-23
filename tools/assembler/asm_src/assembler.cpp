@@ -13,12 +13,12 @@ std::vector<char> program;
 std::unordered_map<std::string, unsigned int> labels;
 int currentAddress = 0;
 
-enum InstrCode {
-    NOP = 0, MOV, LI,
-    LDW, LDB, STW, STB, LDE, LDEB, STE, STEB,
+enum OpCode {
+    NOP = 0, MOV, MOVI, LEA,
+    LDW, LDWR, LDWP, LDB, LDBR, LDBP, STW, STWR, STWP, STB, STBR, STBP, LDXW, LDXWR, LDXWP, LDXB, LDXBR, LDXBP, STXW, STXWR, STXWP, STXB, STXBR, STXBP,
     JMP, JMPF, BZ, BNZ, BC, BNC, BS, BNS, BO, BNO,
     ADD, SUB, INC, INC2, DEC, DEC2, NOT, AND, OR, XOR, SLL, SRL, SRA, NEG, CMP,
-	PUSH, PUSHB, POP, POPB, CALL, CALLF, RET, RETF
+    PUSH, PUSHB, POP, POPB, CALL, CALLF, RET, RETF
 };
 enum ParameterIndex {
     OP0 = 0, OP1, OP2, IMM
@@ -30,19 +30,39 @@ struct Instruction {
     std::vector<ParameterIndex> parameters;
 };
 
+enum Register {
+    R1 = 1, R2, R3, R4, SP, BP, CS, DS, SS, ES, ZERO, IP, IR, AR
+};
+enum ExpansionUnit { // XU1: Memory, XU2: Drive
+	XU1 = 0, XU2, XU3, XU4, XU5, XU6, XU7, XU8, XU9, XU10, XU11, XU12, XU13, XU14, XU15, XU16
+};
+enum SegmentIndex {
+	CSS = 1, DSS, SSS, ESS
+};
+
 std::unordered_map<std::string, Instruction> instructions {
     { "nop",   { NOP,   2, {} } },
     { "mov",   { MOV,   2, { OP1, OP2 } } },
-    { "li",    { LI,    4, { OP1, IMM } } },
+    { "movi",  { MOVI,  4, { OP1, IMM } } },
+    { "lea",   { LEA,   4, { OP1, OP2, IMM } } },
 
     { "ldw",   { LDW,   4, { OP0, OP1, OP2, IMM } } },
+    { "ldw+",  { LDW,   2, { OP0, OP1, OP2 } } },
     { "ldwb",  { LDW,   4, { OP0, OP1, OP2, IMM } } },
+    { "ldwb+", { LDW,   2, { OP0, OP1, OP2 } } },
     { "stw",   { STW,   4, { OP0, OP1, OP2, IMM } } },
+    { "stw+",  { STW,   2, { OP0, OP1, OP2 } } },
     { "stwb",  { STW,   4, { OP0, OP1, OP2, IMM } } },
-    { "lde",   { LDE,   4, { OP0, OP1, OP2, IMM } } },
-    { "ldeb",  { LDE,   4, { OP0, OP1, OP2, IMM } } },
-    { "ste",   { STE,   4, { OP0, OP1, OP2, IMM } } },
-    { "steb",  { STE,   4, { OP0, OP1, OP2, IMM } } },
+    { "stwb+", { STW,   2, { OP0, OP1, OP2 } } },
+
+    { "ldxw",  { LDXW,  4, { OP0, OP1, OP2, IMM } } },
+    { "ldxw+", { LDXW,  2, { OP0, OP1, OP2 } } },
+    { "ldxb",  { LDXW,  4, { OP0, OP1, OP2, IMM } } },
+    { "ldxb+", { LDXW,  2, { OP0, OP1, OP2 } } },
+    { "stxw",  { STXW,  4, { OP0, OP1, OP2, IMM } } },
+    { "stxw+", { STXW,  2, { OP0, OP1, OP2 } } },
+    { "stxb",  { STXW,  4, { OP0, OP1, OP2, IMM } } },
+    { "stxb+", { STXW,  2, { OP0, OP1, OP2 } } },
     
     { "jmp",   { JMP,   4, { OP2, IMM } } },
     { "jmpf",  { JMPF,  4, { OP1, OP2, IMM } } },
@@ -64,11 +84,11 @@ std::unordered_map<std::string, Instruction> instructions {
     { "not",   { NOT,   2, { OP0, OP1, OP2 } } },
     { "and",   { AND,   2, { OP0, OP1, OP2 } } },
     { "or",    { OR,    2, { OP0, OP1, OP2 } } },
-    { "xor",   { XOR,    2, { OP0, OP1, OP2 } } },
-    { "sll",   { SLL,    2, { OP0, OP1, OP2 } } },
-    { "srl",   { SRL,    2, { OP0, OP1, OP2 } } },
-    { "sra",   { SRA,    2, { OP0, OP1, OP2 } } },
-    { "neg",   { NEG,    2, { OP0, OP1, OP2 } } },
+    { "xor",   { XOR,   2, { OP0, OP1, OP2 } } },
+    { "sll",   { SLL,   2, { OP0, OP1, OP2 } } },
+    { "srl",   { SRL,   2, { OP0, OP1, OP2 } } },
+    { "sra",   { SRA,   2, { OP0, OP1, OP2 } } },
+    { "neg",   { NEG,   2, { OP0, OP1, OP2 } } },
     { "cmp",   { CMP,   2, { OP1, OP2 } } },
 
     { "push",  { PUSH,  2, { OP1 } } },
@@ -81,37 +101,48 @@ std::unordered_map<std::string, Instruction> instructions {
     { "retf",  { RETF,  2, { } } },
 };
 
-// Register Indexes
-#define R1 1
-#define R2 2
-#define R3 3
-#define R4 4
+std::unordered_map<std::string, int> instrParamConv {
+    {"r1", R1},
+    {"r2", R2},
+    {"r3", R3},
+    {"r4", R4},
 
-#define PC 5
-#define MEM 6
-#define INSTR 7
+    {"sp", SP},
+    {"bp", BP},
 
-#define SP 8
-#define BP 9
+    {"cs", CS},
+    {"ds", DS},
+    {"ss", SS},
+    {"es", ES},
 
-#define CS 10
-#define DS 11
-#define SS 12
-#define ES 13
+	{"z", ZERO},
 
-#define ZERO 14
+    {"ip", IP},
+    {"ir", IR},
+	{"ar", AR},
 
-// Expansion Unit Indexes
-#define EXP0 0 // RAM
-#define EXP1 1 // Drive
-#define EXP2 2
-#define EXP3 3
+	{"xu1", XU1},
+    {"xu2", XU2},
+    {"xu3", XU3},
+    {"xu4", XU4},
+    {"xu5", XU5},
+    {"xu6", XU6},
+    {"xu7", XU7},
+    {"xu8", XU8},
+    {"xu9", XU9},
+    {"xu10", XU10},
+    {"xu11", XU11},
+    {"xu12", XU12},
+    {"xu13", XU13},
+    {"xu14", XU14},
+    {"xu15", XU15},
+	{"xu16", XU16},
 
-// Segment Indexes
-#define CSS  1
-#define DSS  2
-#define SSS  3
-#define ESS  4
+    {"c", CSS},
+    {"d", DSS},
+    {"s", SSS},
+    {"e", ESS}
+};
 
 std::string TrimA(std::string str, std::string whitespace = " \t\r") {
     int strBegin = str.find_first_not_of(whitespace);
@@ -161,32 +192,14 @@ uint16_t ConvertInstrParam(std::string instrParamStr) {
         instrParam = std::stoi(instrParamStr.substr(2), nullptr, 2);
     }
     else if (IsStrAlphaA(instrParamStr)) {
-        if      (instrParamStr == "c") { instrParam = CSS; }
-        else if (instrParamStr == "d") { instrParam = DSS; }
-        else if (instrParamStr == "s") { instrParam = SSS; }
-        else if (instrParamStr == "e") { instrParam = ESS; }
+        auto it = instrParamConv.find(instrParamStr);
 
-        else if (instrParamStr == "r1") { instrParam = R1; }
-        else if (instrParamStr == "r2") { instrParam = R2; }
-        else if (instrParamStr == "r3") { instrParam = R3; }
-        else if (instrParamStr == "r4") { instrParam = R4; }
-
-        else if (instrParamStr == "sp") { instrParam = SP; }
-        else if (instrParamStr == "bp") { instrParam = BP; }
-
-        else if (instrParamStr == "cs")  { instrParam = CS; }
-        else if (instrParamStr == "ds")  { instrParam = DS; }
-        else if (instrParamStr == "ss")  { instrParam = SS; }
-        else if (instrParamStr == "es")  { instrParam = ES; }
-
-        else if (instrParamStr == "z")   { instrParam = ZERO; }
-
-        else if (instrParamStr == "exp0")  { instrParam = EXP0; }
-        else if (instrParamStr == "exp1")  { instrParam = EXP1; }
-        else if (instrParamStr == "exp2")  { instrParam = EXP2; }
-        else if (instrParamStr == "exp3")  { instrParam = EXP3; }
-
-        else instrParam = labels[instrParamStr];
+        if (it != instrParamConv.end()) { // Contains Key
+            instrParam = instrParamConv[instrParamStr];
+        }
+        else {
+            instrParam = labels[instrParamStr];
+        }
     }
     else {
         instrParam = std::stoi(instrParamStr);
@@ -228,7 +241,15 @@ int CheckLine(std::string line) {
         return 0;
     }
 
-    return instructions[lineTokens[0]].byteSize;
+    auto it = instructions.find(lineTokens[0]);
+
+    if (it != instructions.end()) { // Contains Key
+        return instructions[lineTokens[0]].byteSize;
+    }
+    else {
+        std::cout << "Error: Invalid Instruction Opcode: " << lineTokens[0] << ", " << line << "\n";
+        return 0;
+    }
 }
 
 void SetLabels(const std::vector<std::string>& lines) {
@@ -254,6 +275,7 @@ int ConvertLineInstruction(std::string line) {
         }
         else if (line[i] == ']') {
             lineTokens.push_back(str);
+            str = "";
             break;
         }
         else {
@@ -305,23 +327,61 @@ int ConvertLineInstruction(std::string line) {
         return 0;
     }
 
-    uint8_t instr = instructions[lineTokens[0]].index;
+    std::string instrToken = lineTokens[0];
+
+    uint8_t instr;
+    auto it = instructions.find(instrToken);
+
+    if (it != instructions.end()) { // Contains Key
+        instr = instructions[instrToken].index;
+    }
+    else {
+        std::cout << "Error: Invalid Instruction Opcode: " << instrToken << ", " << line << "\n";
+        return 0;
+    }
     uint16_t instrParam = 0;
 
     uint16_t extraParam = 0;
     bool extraParamOn = false;
 
-    for (int i = 0; i < instructions[lineTokens[0]].parameters.size(); i++) {
-        if (instructions[lineTokens[0]].parameters[i] == ParameterIndex::OP0) {
+    if (lineTokens.size() - 1 != instructions[instrToken].parameters.size()) {
+        switch (instr) {
+        case LDW:
+        case LDB:
+        case STW:
+        case STB:
+        case LDXW:
+        case LDXB:
+        case STXW:
+        case STXB:
+        case MOV:
+            instr++;
+
+            if (instr == MOVI) {
+                instrToken = "movi";
+            }
+            else {
+                instrToken = "ldw+";
+            }
+            break;
+
+        default:
+            std::cout << "Error: Less Tokens than Required for Instruction: " << lineTokens[0] << ", " << line << "\n";
+            return 0;
+        }
+    }
+
+    for (int i = 0; i < instructions[instrToken].parameters.size(); i++) {
+        if (instructions[instrToken].parameters[i] == ParameterIndex::OP0) {
             instrParam |= ((ConvertInstrParam(lineTokens[i + 1]) & 0b11) - 1 << 8);
         }
-        else if (instructions[lineTokens[0]].parameters[i] == ParameterIndex::OP1) {
+        else if (instructions[instrToken].parameters[i] == ParameterIndex::OP1) {
             instrParam |= ((ConvertInstrParam(lineTokens[i + 1]) & 0b1111) << 4);
         }
-        else if (instructions[lineTokens[0]].parameters[i] == ParameterIndex::OP2) {
+        else if (instructions[instrToken].parameters[i] == ParameterIndex::OP2) {
             instrParam |= (ConvertInstrParam(lineTokens[i + 1]) & 0b1111);
         }
-        else if (instructions[lineTokens[0]].parameters[i] == ParameterIndex::IMM) {
+        else if (instructions[instrToken].parameters[i] == ParameterIndex::IMM) {
             extraParam = ConvertInstrParam(lineTokens[i + 1]);
             extraParamOn = true;
         }
