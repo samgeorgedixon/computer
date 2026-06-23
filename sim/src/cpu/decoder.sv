@@ -22,14 +22,17 @@ module Decoder(
         controlSignals.bus_dest = 32'b1 << controlSignalsRaw.bus_dest_raw;
         
         controlSignals.alu_op_sel = controlSignalsRaw.alu_e_raw ? controlSignalsRaw.seg_sel_or_alu_op_sel : 4'b0;
+        controlSignals.seg_sel = !controlSignalsRaw.alu_e_raw ? controlSignalsRaw.seg_sel_or_alu_op_sel : 4'b0;
+
         controlSignals.alu_a_sel = 16'b1 << controlSignalsRaw.alu_a_sel_raw;
         controlSignals.alu_b_sel = 16'b1 << controlSignalsRaw.alu_b_sel_raw;
+
 
         /* verilator lint_off CASEINCOMPLETE */
         unique case (controlSignalsRaw.operand_0)
             `OP0_BUS_DEST: controlSignals.bus_dest[`R_R4:`R_R1] |= 4'b1 << operand_0;
             `OP0_BUS_SRC: controlSignals.bus_src[`R_R4:`R_R1] |= 4'b1 << operand_0;
-            `OP0_SEG_SEL: controlSignals.seg_sel = controlSignalsRaw.seg_sel_or_alu_op_sel;
+            `OP0_SEG_SEL: controlSignals.seg_sel |= 4'b1 << operand_0;
         endcase
         unique case (controlSignalsRaw.operand_1)
             `OP1_BUS_DEST: begin

@@ -47,22 +47,22 @@ std::unordered_map<std::string, Instruction> instructions {
     { "lea",   { LEA,   4, { OP1, OP2, IMM } } },
 
     { "ldw",   { LDW,   4, { OP0, OP1, OP2, IMM } } },
-    { "ldw+",  { LDW,   2, { OP0, OP1, OP2 } } },
+    { "ldw+",  { LDWP,  2, { OP0, OP1, OP2 } } },
     { "ldwb",  { LDW,   4, { OP0, OP1, OP2, IMM } } },
-    { "ldwb+", { LDW,   2, { OP0, OP1, OP2 } } },
+    { "ldwb+", { LDWP,  2, { OP0, OP1, OP2 } } },
     { "stw",   { STW,   4, { OP0, OP1, OP2, IMM } } },
-    { "stw+",  { STW,   2, { OP0, OP1, OP2 } } },
+    { "stw+",  { STWP,  2, { OP0, OP1, OP2 } } },
     { "stwb",  { STW,   4, { OP0, OP1, OP2, IMM } } },
-    { "stwb+", { STW,   2, { OP0, OP1, OP2 } } },
+    { "stwb+", { STWP,  2, { OP0, OP1, OP2 } } },
 
     { "ldxw",  { LDXW,  4, { OP0, OP1, OP2, IMM } } },
-    { "ldxw+", { LDXW,  2, { OP0, OP1, OP2 } } },
+    { "ldxw+", { LDXWP, 2, { OP0, OP1, OP2 } } },
     { "ldxb",  { LDXW,  4, { OP0, OP1, OP2, IMM } } },
-    { "ldxb+", { LDXW,  2, { OP0, OP1, OP2 } } },
+    { "ldxb+", { LDXWP, 2, { OP0, OP1, OP2 } } },
     { "stxw",  { STXW,  4, { OP0, OP1, OP2, IMM } } },
-    { "stxw+", { STXW,  2, { OP0, OP1, OP2 } } },
+    { "stxw+", { STXWP, 2, { OP0, OP1, OP2 } } },
     { "stxb",  { STXW,  4, { OP0, OP1, OP2, IMM } } },
-    { "stxb+", { STXW,  2, { OP0, OP1, OP2 } } },
+    { "stxb+", { STXWP, 2, { OP0, OP1, OP2 } } },
     
     { "jmp",   { JMP,   4, { OP2, IMM } } },
     { "jmpf",  { JMPF,  4, { OP1, OP2, IMM } } },
@@ -244,6 +244,45 @@ int CheckLine(std::string line) {
     auto it = instructions.find(lineTokens[0]);
 
     if (it != instructions.end()) { // Contains Key
+
+        if (lineTokens.size() - 1 != instructions[lineTokens[0]].parameters.size() || instructions[lineTokens[0]].index == MOV) { // For Non Imm Versions or Imm Versions like LDWR or MOVI
+            switch (instructions[lineTokens[0]].index) {
+                case LDW:
+                case LDB:
+                case STW:
+                case STB:
+                case LDXW:
+                case LDXB:
+                case STXW:
+                case STXB: {
+                    return 2;
+                }
+                case MOV: {
+                    std::string immParamToken = lineTokens[2];
+
+                    if (immParamToken[0] == '0' && immParamToken[1] == 'x') {
+                        return 4;
+                    }
+                    else if (immParamToken[0] == '0' && immParamToken[1] == 'b') {
+                        return 4;
+                    }
+                    else if (!IsStrAlphaA(immParamToken)) {
+                        auto it = instrParamConv.find(immParamToken);
+
+                        if (it == instrParamConv.end()) { // Does Not Contain Key
+                            return 4;
+                        }
+                    }
+
+                    break;
+                }
+                default: {
+                    std::cout << "Error: Less Tokens than Required for Instruction: " << lineTokens[0] << ", " << line << "\n";
+                    return 0;
+                }
+            }
+        }
+
         return instructions[lineTokens[0]].byteSize;
     }
     else {
@@ -344,30 +383,53 @@ int ConvertLineInstruction(std::string line) {
     uint16_t extraParam = 0;
     bool extraParamOn = false;
 
-    if (lineTokens.size() - 1 != instructions[instrToken].parameters.size()) {
+    if (lineTokens.size() - 1 != instructions[instrToken].parameters.size() || instr == MOV) { // For Non Imm Versions or Imm Versions like LDWR or MOVI
         switch (instr) {
-        case LDW:
-        case LDB:
-        case STW:
-        case STB:
-        case LDXW:
-        case LDXB:
-        case STXW:
-        case STXB:
-        case MOV:
-            instr++;
-
-            if (instr == MOVI) {
-                instrToken = "movi";
-            }
-            else {
+            case LDW:
+            case LDB:
+            case STW:
+            case STB:
+            case LDXW:
+            case LDXB:
+            case STXW:
+            case STXB: {
+                instr++;
                 instrToken = "ldw+";
-            }
-            break;
 
-        default:
-            std::cout << "Error: Less Tokens than Required for Instruction: " << lineTokens[0] << ", " << line << "\n";
-            return 0;
+                break;
+            }
+            case MOV: {
+                std::string immParamToken = lineTokens[2];
+
+                if (immParamToken[0] == '0' && immParamToken[1] == 'x') {
+                    instr++;
+                    instrToken = "movi";
+
+                    std::cout << "s\n";
+                }
+                else if (immParamToken[0] == '0' && immParamToken[1] == 'b') {
+                    instr++;
+                    instrToken = "movi";
+
+                    std::cout << "s\n";
+                }
+                else if (!IsStrAlphaA(immParamToken)) {
+                    auto it = instrParamConv.find(immParamToken);
+
+                    if (it == instrParamConv.end()) { // Does Not Contain Key
+                        instr++;
+                        instrToken = "movi";
+
+                        std::cout << "s\n";
+                    }
+                }
+
+                break;
+            }
+            default: {
+                std::cout << "Error: Less Tokens than Required for Instruction: " << lineTokens[0] << ", " << line << "\n";
+                return 0;
+            }
         }
     }
 

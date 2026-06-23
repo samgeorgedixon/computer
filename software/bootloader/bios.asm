@@ -1,20 +1,18 @@
 %segment code
 
-li r1 0x0100
-li r2 0x0200
+mov r1 0x0100
+mov r2 0x0200
 
 :loop
-    lde r3 exp1 [r1 0]
-    stw c r3 [r1 0]
-
-    inc2 r1 r1
+    ldxw r3 xu2 [r1]
+    stw+ c r3 [r1]
 
     cmp r1 r2
     bnz [z loop]
 
 :start
-    li ds 1
-    li ss 1
+    mov ds 1
+    mov ss 1
 
-    li r1 1
+    mov r1 1
     jmpf r1 [z 0]
