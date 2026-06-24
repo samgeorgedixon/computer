@@ -14,9 +14,9 @@ module InstructionPointerUnit(
 
     logic [15:0] data;
 
-    assign bus = controlSignals.bus_src[`R_IP] ? data : 16'bz;
-    assign bus_alu_a = controlSignals.alu_a_sel[`R_IP] ? data : 16'bz;
-    assign bus_alu_b = controlSignals.alu_b_sel[`R_IP] ? data : 16'bz;
+    assign bus = controlSignals.bus_src[`R_IP] ? data : 16'b0;
+    assign bus_alu_a = controlSignals.alu_a_sel[`R_IP] ? data : 16'd0;
+    assign bus_alu_b = controlSignals.alu_b_sel[`R_IP] ? data : 16'd0;
 
     always @(posedge clk) begin
         

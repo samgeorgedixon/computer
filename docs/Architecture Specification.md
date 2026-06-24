@@ -47,7 +47,7 @@ Making up this CPU are a variety of units doing specific tasks and all connected
 
 <div style="page-break-before: always;"></div>
 
-## Registers / Expansion Units
+## Registers
 ---
 
 Registers are indexed from 0-15 with a separate flags register used by the CPU and ALU but not indexable. Then expansion units take up the rest of the registers indexes from 16-31 allowing a total of 16 expansion units to be used.
@@ -74,6 +74,49 @@ However expansion units do not act like registers (with mov or movi...) and inst
 | 15      |            |                   |                                                  |
 |         | f          | 8b                | Flags (Not Indexable)                            |
 | 16 - 31 | xu(1...16) | 16b bus, 24b addr | Expansion Unit Indexes (lde / ste)               |
+
+---
+
+<div style="page-break-before: always;"></div>
+
+## Expansion Units
+---
+
+ All 16 possible expansion units are memory mapped into the segmented memory via the ES (Extra Segment) and used via LDX, STX (load/store expansion unit). Then expansion units can communicate to the CPU via an interrupt which is either cancelled, acknowledged or queued (if multiple sent simultaneously) via a STX instruction.
+
+- CPU: Communication Protocol
+	1. ldx xu1...16 - es
+	2. stx xu1...16 - es
+- Expansion Unit: Communication Protocol
+	1. Send Interrupt Out & Wait (Assume Queued at first)
+	2. CPU responds via "stx"
+		1. Cancelled: Interrupt set low... & Resend / Continue
+		2. Acknowledged: Interrupt set low... & Continue
+		3. Queued: Interrupt stays high & Wait
+
+#### Reserved Addresses
+
+| Segment Address (LDX/STX with ES) | Address       | Bus Data | Role                     |
+| --------------------------------- | ------------- | -------- | ------------------------ |
+| 0x0000                            | 0x0000        |          | Interrupt Response       |
+|                                   | -             | 0        | Cancelled                |
+|                                   | -             | 1        | Acknowledged             |
+|                                   | -             | 2        | Queued                   |
+| 0x0000-0xffff                     | 0x0001-0xffff |          | Expansion Unit's Own Use |
+
+#### Expansion Unit Signal Access
+
+| Access      | Width | Direction |
+| ----------- | ----- | --------- |
+| clk         | 1b    | in        |
+| r           | 1b    | in        |
+| bus         | 16b   | inout     |
+| address     | 24b   | in        |
+| we          | 1b    | in        |
+| oe          | 1b    | in        |
+| interrupt   | 1b    | out       |
+| interrupt_e | 1b    | in        |
+
 
 ---
 

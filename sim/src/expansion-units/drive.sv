@@ -2,12 +2,10 @@
 
 module Drive_8bx24b(
 
-    input logic clk, r, byte_low,
-
     inout wire [15:0] bus,
-    input logic [23:0] addr,
 
-    ExpansionSignals_if.unit driveUnitSignals,
+    ExpansionUnitCommon_if.unit xuCommon,
+    ExpansionUnitSignals_if.unit xuSignals,
 
     input string driveFilePath
 
@@ -15,16 +13,16 @@ module Drive_8bx24b(
 
     logic [7:0] drive [0:(2**24) - 1];
 
-    assign bus = driveUnitSignals.oe ? byte_low ? { 8'd0, drive[addr] } : { drive[addr], drive[addr + 1] } : 16'bz;
+    assign bus = xuSignals.oe ? xuCommon.byte_low ? { 8'd0, drive[xuCommon.addr] } : { drive[xuCommon.addr], drive[xuCommon.addr + 1] } : 16'd0;
 
-    always @(posedge clk) begin
+    always @(posedge xuCommon.clk) begin
 
-        if (driveUnitSignals.we) begin
-            if (byte_low) begin
-                drive[addr] <= bus[7:0];
+        if (xuSignals.we) begin
+            if (xuCommon.byte_low) begin
+                drive[xuCommon.addr] <= bus[7:0];
             end else begin
-                drive[addr] <= bus[15:8];
-                drive[addr + 1] <= bus[7:0];
+                drive[xuCommon.addr] <= bus[15:8];
+                drive[xuCommon.addr + 1] <= bus[7:0];
             end
         end
 
@@ -47,10 +45,10 @@ module Drive_8bx24b(
         end
         CloseMemoryFile();
 
-        $display("Memory Array:");
-        for (int i = 256; i < 512; i = i + 1) begin
-            $display("memory_array[%0d] = %b", i, drive[i]);
-        end
+        //$display("Memory Array:");
+        //for (int i = 256; i < 512; i = i + 1) begin
+        //    $display("memory_array[%0d] = %b", i, drive[i]);
+        //end
         
     end
 

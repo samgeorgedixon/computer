@@ -106,7 +106,25 @@ endinterface
 
 // Expansion Units
 
-interface ExpansionSignals_if;
+interface ExpansionUnitCommon_if(
+
+    input logic clk, r,
+    //inout wire [15:0] bus,
+    input logic [23:0] addr,
+    input logic byte_low
+
+);
+
+    modport unit (
+        input clk, r,
+        //inout bus,
+        input addr,
+        input byte_low
+    );
+
+endinterface
+
+interface ExpansionUnitSignals_if;
     logic we, oe;
 
     modport unit (
@@ -119,11 +137,17 @@ interface ExpansionSignals_if;
 
 endinterface
 
-// Registers
+interface AddressRegisters_if;
+    logic [15:0] ar, cs, ds, ss, es;
 
-`define REG16_FILL(i) \
-    .clk(clk), .r(r), \
-    .bus_we(controlSignals.bus_dest[(i)]), .bus_oe(controlSignals.bus_src[(i)]), .alu_a_oe(controlSignals.alu_a_sel[(i)]), .alu_b_oe(controlSignals.alu_b_sel[(i)]), \
-    .bus(bus), .bus_alu_a(bus_alu_a), .bus_alu_b(bus_alu_b)
+    modport registers (
+        output ar, cs, ds, ss, es
+    );
+
+    modport manager (
+        input ar, cs, ds, ss, es
+    );
+
+endinterface
 
 `endif

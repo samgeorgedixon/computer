@@ -253,7 +253,7 @@ module ControlUnit(
                         else if (microCodeIndex == 4'd4) begin
                             `SET_CS_RAW(alu_e_raw, 1'd1);
 
-                            unique case (`OPCODE) 
+                            unique case (`OPCODE)
                                 `INSTR_LDBP, `INSTR_STBP, `INSTR_LDXBP, `INSTR_STXBP: begin `SET_CS_RAW(seg_sel_or_alu_op_sel, `ALU_INC); end
                                 `INSTR_LDWP, `INSTR_STWP, `INSTR_LDXWP, `INSTR_STXWP: begin `SET_CS_RAW(seg_sel_or_alu_op_sel, `ALU_INC2); end
                             endcase

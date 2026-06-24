@@ -17,7 +17,7 @@ module ALU(
     logic [15:0] res;
     logic [16:0] res_ext;
 
-    assign bus = controlSignals.alu_op_sel != 4'd0 ? res[15:0] : 16'bz;
+    assign bus = controlSignals.alu_op_sel != 4'd0 ? res[15:0] : 16'b0;
 
     always_comb begin
 

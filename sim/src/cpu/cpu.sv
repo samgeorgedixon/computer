@@ -20,10 +20,11 @@ module CPU(
     input logic clk, r,
 
     inout wire [15:0] bus,
-    inout logic [23:0] addr,
+    output logic [23:0] addr,
 
-    input string romFilePath,
-    input string driveFilePath
+    output logic byte_low,
+
+    ExpansionUnitSignals_if xu[16]
 
     );
 
@@ -46,33 +47,24 @@ module CPU(
     ControlSignals_if controlSignalsRaw();    // ControlUnit -> Decoder ->
     ControlSignals_if controlSignals();       // Decoder -> Units...
 
+    assign byte_low = controlSignals.byte_low;
+
     // Units
 
     ControlUnit controlUnit(clk, r, ir_direct, flags_direct, controlSignalsRaw);
 
-    RegisterUnit registerUnit(clk, r, bus, bus_alu_a, bus_alu_b, ir_direct, ar_direct, cs_direct, ds_direct, ss_direct, es_direct, controlSignals);
+    AddressRegisters_if addrRegisters();
+    RegisterUnit registerUnit(clk, r, bus, bus_alu_a, bus_alu_b, ir_direct, addrRegisters, controlSignals);
 
     ALU alu(r, bus, bus_alu_a, bus_alu_b, bus_flags, controlSignals);
 
     InstructionPointerUnit programCounter(clk, r, bus, bus_alu_a, bus_alu_b, controlSignals);
     
-    AddrManager addrManager(addr, ar_direct, cs_direct, ds_direct, ss_direct, es_direct, controlSignals);
-    Decoder decoder(ir_direct, controlSignalsRaw, controlSignals);
+    AddrManager addrManager(addr, addrRegisters, controlSignals);
+    ExpansionUnitManager xuManager(controlSignals, xu);
 
+    Decoder decoder(ir_direct, controlSignalsRaw, controlSignals);
     Flags flags(clk, r, bus_flags, flags_direct, controlSignals);
 
-    // Expansion Units
-
-    ExpansionSignals_if memoryExpansionSignals();
-    Memory          rom(clk, r, controlSignals.byte_low, bus, addr, memoryExpansionSignals, romFilePath);
-
-    ExpansionSignals_if driveExpansionSignals();
-    Drive_8bx24b    drive(clk, r, controlSignals.byte_low, bus, addr, driveExpansionSignals, driveFilePath);
-
-    ExpansionSignals_if gpuExpansionSignals();
-    GPU             gpu(clk, r, controlSignals.byte_low, bus, addr, gpuExpansionSignals);
-
-    ExpansionUnitManager expUnitManger(.controlSignals(controlSignals),
-        .xu1(memoryExpansionSignals), .xu2(driveExpansionSignals), .xu3(gpuExpansionSignals));
 
 endmodule
