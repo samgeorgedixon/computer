@@ -89,6 +89,8 @@
 `define ALU_NEG     14
 
 // Registers (1 - 15), Expansion Units (16 - 31), 0 (Nothing)
+`define R_ZERO  0
+
 `define R_R1    1
 `define R_R2    2
 `define R_R3    3
@@ -102,11 +104,9 @@
 `define R_SS    9
 `define R_ES    10
 
-`define R_ZERO  11
-
-`define R_IP    12
-`define R_IR    13
-`define R_AR    14
+`define R_IP    11
+`define R_IR    12
+`define R_AR    13
 
 `define R_XU1   16 // Memory
 `define R_XU2   17 // Drive

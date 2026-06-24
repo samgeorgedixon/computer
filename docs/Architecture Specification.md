@@ -56,7 +56,7 @@ However expansion units do not act like registers (with mov or movi...) and inst
 
 | Index   | ID         | Width             | Role                                             |
 | ------- | ---------- | ----------------- | ------------------------------------------------ |
-| 0       | N/A        | 16b               | Nothing                                          |
+| 0       | z          | 16b               | Zero Constant                                    |
 | 1       | r1         | 16b               | 1st General Purpose                              |
 | 2       | r2         | 16b               | 2nd General Purpose                              |
 | 3       | r3         | 16b               | 3rd General Purpose                              |
@@ -67,10 +67,10 @@ However expansion units do not act like registers (with mov or movi...) and inst
 | 8       | ds         | 16b               | Data Segment Address                             |
 | 9       | ss         | 16b               | Stack Segment Address                            |
 | 10      | es         | 16b               | Extra Segment Address (+ Expansion Unit Address) |
-| 11      | z          | 16b               | Zero                                             |
-| 12      | ip         | 16b               | Instruction Pointer                              |
-| 13      | ir         | 16b               | Current Instruction                              |
-| 14      | ar         | 16b               | Current Address                                  |
+| 11      | ip         | 16b               | Instruction Pointer                              |
+| 12      | ir         | 16b               | Current Instruction                              |
+| 13      | ar         | 16b               | Current Address                                  |
+| 14      |            |                   |                                                  |
 | 15      |            |                   |                                                  |
 |         | f          | 8b                | Flags (Not Indexable)                            |
 | 16 - 31 | xu(1...16) | 16b bus, 24b addr | Expansion Unit Indexes (lde / ste)               |
@@ -106,16 +106,16 @@ However expansion units do not act like registers (with mov or movi...) and inst
 
 #### Expansion Unit Signal Access
 
-| Access      | Width | Direction |
-| ----------- | ----- | --------- |
-| clk         | 1b    | in        |
-| r           | 1b    | in        |
-| bus         | 16b   | inout     |
-| address     | 24b   | in        |
-| we          | 1b    | in        |
-| oe          | 1b    | in        |
-| interrupt   | 1b    | out       |
-| interrupt_e | 1b    | in        |
+| Access | Width | Direction | Role                       |
+| ------ | ----- | --------- | -------------------------- |
+| clk    | 1b    | in        | Clock                      |
+| r      | 1b    | in        | Reset                      |
+| bus    | 16b   | inout     | Bus                        |
+| addr   | 24b   | in        | Address                    |
+| we     | 1b    | in        | Write Enable (Per XU)      |
+| oe     | 1b    | in        | Output Enable (Per XU)     |
+| irq    | 1b    | out       | Interrupt Request (Per XU) |
+| int_e  | 1b    | in        | Interrupt Enable           |
 
 
 ---

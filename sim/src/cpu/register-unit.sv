@@ -21,6 +21,11 @@ module RegisterUnit(
 
     );
 
+    // Zero `Register
+    assign bus = 16'd0; //controlSignals.bus_src[`R_ZERO] ? 16'd0 : 16'd0;
+    assign bus_alu_a = 16'd0; //controlSignals.alu_a_sel[`R_ZERO] ? 16'b0 : 16'd0;
+    assign bus_alu_b = 16'd0; //controlSignals.alu_b_sel[`R_ZERO] ? 16'b0 : 16'd0;
+
     Register16b r1(`REG16_FILL(`R_R1), .data());
     Register16b r2(`REG16_FILL(`R_R2), .data());
     Register16b r3(`REG16_FILL(`R_R3), .data());
@@ -37,10 +42,5 @@ module RegisterUnit(
     // R_IP
     Register16b ir(`REG16_FILL(`R_IR), .data(ir_direct));
     Register16b ar(`REG16_FILL(`R_AR), .data(addrRegisters.ar));
-
-    // Zero `Register
-    assign bus = 16'd0; //controlSignals.bus_src[`R_ZERO] ? 16'd0 : 16'd0;
-    assign bus_alu_a = 16'd0; //controlSignals.alu_a_sel[`R_ZERO] ? 16'b0 : 16'd0;
-    assign bus_alu_b = 16'd0; //controlSignals.alu_b_sel[`R_ZERO] ? 16'b0 : 16'd0;
 
 endmodule

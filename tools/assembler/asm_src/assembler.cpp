@@ -31,7 +31,7 @@ struct Instruction {
 };
 
 enum Register {
-    R1 = 1, R2, R3, R4, SP, BP, CS, DS, SS, ES, ZERO, IP, IR, AR
+    ZERO = 0, R1, R2, R3, R4, SP, BP, CS, DS, SS, ES, IP, IR, AR
 };
 enum ExpansionUnit { // XU1: Memory, XU2: Drive
 	XU1 = 0, XU2, XU3, XU4, XU5, XU6, XU7, XU8, XU9, XU10, XU11, XU12, XU13, XU14, XU15, XU16
@@ -102,6 +102,8 @@ std::unordered_map<std::string, Instruction> instructions {
 };
 
 std::unordered_map<std::string, int> instrParamConv {
+	{"z", ZERO},
+
     {"r1", R1},
     {"r2", R2},
     {"r3", R3},
@@ -114,8 +116,6 @@ std::unordered_map<std::string, int> instrParamConv {
     {"ds", DS},
     {"ss", SS},
     {"es", ES},
-
-	{"z", ZERO},
 
     {"ip", IP},
     {"ir", IR},
