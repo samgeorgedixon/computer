@@ -14,8 +14,10 @@ module RegisterUnit(
     output wire [15:0] bus_alu_a,
     output wire [15:0] bus_alu_b,
 
-    output logic [15:0] ir_direct, 
+    output logic [15:0] ir_direct,
     AddressRegisters_if.registers addrRegisters,
+
+    input logic [15:0] xu_irq,
 
     ControlSignals_if.unit controlSignals
 
@@ -42,5 +44,9 @@ module RegisterUnit(
     // R_IP
     Register16b ir(`REG16_FILL(`R_IR), .data(ir_direct));
     Register16b ar(`REG16_FILL(`R_AR), .data(addrRegisters.ar));
+
+    assign bus = controlSignals.bus_src[`R_IRQ] ?  xu_irq: 16'd0;
+    assign bus_alu_a = controlSignals.alu_a_sel[`R_IRQ] ? xu_irq : 16'd0;
+    assign bus_alu_b = controlSignals.alu_b_sel[`R_IRQ] ? xu_irq : 16'd0;
 
 endmodule

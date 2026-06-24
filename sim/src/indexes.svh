@@ -108,6 +108,8 @@
 `define R_IR    12
 `define R_AR    13
 
+`define R_IRQ   14
+
 `define R_XU1   16 // Memory
 `define R_XU2   17 // Drive
 `define R_XU3   18

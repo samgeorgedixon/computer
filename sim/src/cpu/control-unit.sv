@@ -27,6 +27,8 @@ module ControlUnit(
     input logic [15:0] instr,
     input logic [7:0] flags,
 
+    input logic irq_state,
+
     ControlSignals_if.control controlSignalsRaw
 
 );

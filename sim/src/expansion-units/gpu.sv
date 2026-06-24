@@ -12,6 +12,8 @@ module GPU(
     import "DPI-C" function void WriteDisplayPixel_256x256px_5bxRGB(input int pixelAddress, input int colour, input int reset);
 
     always @(posedge xuCommon.clk) begin
+
+        xuSignals.irq = ~xuSignals.irq;
         
         if (xuCommon.r) begin
             WriteDisplayPixel_256x256px_5bxRGB(0, 0, 1);

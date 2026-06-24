@@ -22,7 +22,7 @@ module CPU(
     inout wire [15:0] bus,
     output logic [23:0] addr,
 
-    output logic byte_low,
+    output logic int_e, byte_low, 
 
     ExpansionUnitSignals_if xu[16]
 
@@ -47,21 +47,25 @@ module CPU(
     ControlSignals_if controlSignalsRaw();    // ControlUnit -> Decoder ->
     ControlSignals_if controlSignals();       // Decoder -> Units...
 
+    assign int_e = controlSignals.int_e;
     assign byte_low = controlSignals.byte_low;
+    
+    logic [15:0] xu_irq;
+    logic irq_state;
 
     // Units
 
-    ControlUnit controlUnit(clk, r, ir_direct, flags_direct, controlSignalsRaw);
+    ControlUnit controlUnit(clk, r, ir_direct, flags_direct, irq_state, controlSignalsRaw);
 
     AddressRegisters_if addrRegisters();
-    RegisterUnit registerUnit(clk, r, bus, bus_alu_a, bus_alu_b, ir_direct, addrRegisters, controlSignals);
+    RegisterUnit registerUnit(clk, r, bus, bus_alu_a, bus_alu_b, ir_direct, addrRegisters, xu_irq, controlSignals);
 
     ALU alu(r, bus, bus_alu_a, bus_alu_b, bus_flags, controlSignals);
 
     InstructionPointerUnit programCounter(clk, r, bus, bus_alu_a, bus_alu_b, controlSignals);
     
     AddrManager addrManager(addr, addrRegisters, controlSignals);
-    ExpansionUnitManager xuManager(controlSignals, xu);
+    ExpansionUnitManager xuManager(controlSignals, xu, xu_irq, irq_state);
 
     Decoder decoder(ir_direct, controlSignalsRaw, controlSignals);
     Flags flags(clk, r, bus_flags, flags_direct, controlSignals);

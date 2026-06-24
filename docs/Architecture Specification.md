@@ -102,6 +102,14 @@ However expansion units do not act like registers (with mov or movi...) and inst
 |                                   | -             | 0        | Cancelled                |
 |                                   | -             | 1        | Acknowledged             |
 |                                   | -             | 2        | Queued                   |
+|                                   | 0x0001        | int ID   | XU ID (<- CPU)           |
+|                                   | 0x0002        | int ID   | XU Type ID (-> CPU)      |
+|                                   | -             | 0        | No Type                  |
+|                                   | -             | 1 - 3    | Extra Memory             |
+|                                   | -             | 4 - 7    | Drive                    |
+|                                   | -             | 8 - 11   | GPU                      |
+|                                   |               | 12 -     | USB                      |
+|                                   |               |          | Ethernet                 |
 | 0x0000-0xffff                     | 0x0001-0xffff |          | Expansion Unit's Own Use |
 
 #### Expansion Unit Signal Access

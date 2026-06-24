@@ -26,6 +26,7 @@ interface ControlSignals_if;
 
     logic           ip_e;
     logic           flags_e;
+    logic           int_e;
     logic           byte_low;
 
     logic [1:0]     operand_0;
@@ -45,6 +46,7 @@ interface ControlSignals_if;
 
         output ip_e,
         output flags_e,
+        output int_e,
         output byte_low,
 
         output operand_0,
@@ -65,6 +67,7 @@ interface ControlSignals_if;
 
         input ip_e,
         input flags_e,
+        input int_e,
         input byte_low,
 
         input operand_0,
@@ -84,6 +87,7 @@ interface ControlSignals_if;
 
         output ip_e,
         output flags_e,
+        output int_e,
         output byte_low
     );
 
@@ -99,7 +103,8 @@ interface ControlSignals_if;
 
         input ip_e,
         input flags_e,
-        output byte_low
+        input int_e,
+        input byte_low
     );
 
 endinterface
@@ -109,30 +114,31 @@ endinterface
 interface ExpansionUnitCommon_if(
 
     input logic clk, r,
-    //inout wire [15:0] bus,
     input logic [23:0] addr,
-    input logic byte_low
+    input logic int_e, byte_low
 
 );
 
     modport unit (
         input clk, r,
-        //inout bus,
         input addr,
-        input byte_low
+        input int_e, byte_low
     );
 
 endinterface
 
 interface ExpansionUnitSignals_if;
     logic we, oe;
+    logic irq;
 
     modport unit (
-        input we, oe
+        input we, oe,
+        output irq
     );
 
     modport manager (
-        output we, oe
+        output we, oe,
+        input irq
     );
 
 endinterface
