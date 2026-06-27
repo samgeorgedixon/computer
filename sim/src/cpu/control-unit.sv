@@ -120,18 +120,19 @@ module ControlUnit(
         // Interrupt Handler
         // push r4
 
+        /* verilator lint_off CASEINCOMPLETE */
         if (irq_state_delayed == 1'd1 && !inInterrupt) begin
             unique case (microCodeIndex)
                 4'd0: begin
-
+                    //instrEnd = 1'd1;
                 end
-            encase
+            endcase
         end
 
         // Fetch
             // 0: mov ip -> ar
             // 1: ld cs (exp1) -> instr / ip_e
-        else if     (microCodeIndex == 4'd0) begin
+        if     (microCodeIndex == 4'd0) begin
             `SET_CS_RAW(bus_src_raw  , `R_IP);
             `SET_CS_RAW(bus_dest_raw , `R_AR);
         end else if (microCodeIndex == 4'd1) begin
@@ -142,7 +143,6 @@ module ControlUnit(
         end
 
         else begin
-        /* verilator lint_off CASEINCOMPLETE */
         unique case (`OPCODE)
             `INSTR_NOP: begin
                 unique case (microCodeIndex)

@@ -30,10 +30,13 @@ std::vector<std::string> Split(std::string str, char delim) {
 
 bool IsStrAlpha(std::string str) {
     bool strAlpha = false;
+
     for (int i = 0; i < str.length(); i++) {
         strAlpha = isalpha(str[i]);
-        if (strAlpha)
+
+        if (strAlpha) {
             return strAlpha;
+        }
     }
     return strAlpha;
 }

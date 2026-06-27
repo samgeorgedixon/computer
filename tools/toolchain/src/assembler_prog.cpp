@@ -4,31 +4,22 @@
 #include <vector>
 #include <iostream>
 
+#include "core.h"
+
 std::string srcPath;
 std::string outPath;
 
 void GetPaths(int argc, char* argv[]) {
     for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '-' && argv[i][1] == 'o') {
+		std::string arg = Trim(argv[i]);
+        
+        if (arg[0] == '-' && arg[1] == 'o') {
             i++;
-            outPath = argv[i];
+            outPath = arg;
         } else {
-            srcPath = argv[i];
+            srcPath = arg;
         }
     }
-}
-
-std::string Trim(std::string str, std::string whitespace = " \t\r") {
-    int strBegin = str.find_first_not_of(whitespace);
-
-    if (strBegin == std::string::npos) {
-        return "";
-    }
-
-    int strEnd = str.find_last_not_of(whitespace);
-    int strRange = strEnd - strBegin + 1;
-
-    return str.substr(strBegin, strRange);
 }
 
 int main(int argc, char* argv[]) {

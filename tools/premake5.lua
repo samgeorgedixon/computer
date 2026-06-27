@@ -3,7 +3,7 @@ workspace "computer-tools"
     language "C++"
     cppdialect "C++17"
 
-    startproject "compiler"
+    startproject "toolchain"
     
     configurations { "debug", "release" }
 
@@ -22,12 +22,12 @@ build = "%{cfg.buildcfg}-%{cfg.system}"
 bin = "%{wks.location}/../bin/tools/"
 bin_int = "%{wks.location}/../bin/bin-int/tools/"
 
-project "compiler"
-    location "compiler"
+project "toolchain"
+    location "toolchain"
     kind "ConsoleApp"
 
     targetdir (bin .. "%{prj.name}/" .. build)
-    objdir (bin_int .. "/%{prj.name}/" .. build)
+    objdir (bin_int .. "%{prj.name}/" .. build)
 
     files {
         "%{prj.name}/src/**.cpp",
@@ -35,46 +35,7 @@ project "compiler"
     }
     includedirs {
         "%{prj.name}/src",
-        "%{wks.location}/assembler/asm_src",
-        "%{wks.location}/core/src"
     }
-
-    links { "core", "assembler" }
-
-project "assembler"
-    location "assembler/asm_src"
-    kind "StaticLib"
-
-    targetdir (bin .. "%{prj.name}/" .. build)
-    objdir (bin_int .. "/%{prj.name}/" .. build)
-
-    files {
-        "%{wks.location}/assembler/asm_src/**.cpp",
-        "%{wks.location}/assembler/asm_src/**.h"
-    }
-    includedirs {
-        "%{wks.location}/assembler/asm_src",
-        "%{wks.location}/core/src"
-    }
-
-project "assembler-app"
-    location "assembler/app_src"
-    kind "ConsoleApp"
-
-    targetdir (bin .. "%{prj.name}/" .. build)
-    objdir (bin_int .. "/%{prj.name}/" .. build)
-
-    files {
-        "%{wks.location}/assembler/app_src/**.cpp",
-        "%{wks.location}/assembler/app_src/**.h"
-    }
-    includedirs {
-        "%{wks.location}/assembler/app_src",
-        "%{wks.location}/assembler/asm_src",
-        "%{wks.location}/core/src"
-    }
-
-    links { "assembler", "core" }
 
 project "cpu-instr-gen"
     location "cpu-instr-gen"
@@ -106,19 +67,3 @@ project "file-system-manager"
     includedirs {
         "%{prj.name}/src"
     }
-
-project "core"
-    location "core"
-    kind "StaticLib"
-
-    targetdir (bin .. "%{prj.name}/" .. build)
-    objdir (bin_int .. "/%{prj.name}/" .. build)
-
-    files {
-        "%{prj.name}/src/**.cpp",
-        "%{prj.name}/src/**.h"
-    }
-    includedirs {
-        "%{prj.name}/src"
-    }
-    

@@ -1,3 +1,5 @@
+#include "compiler.h"
+
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -9,9 +11,8 @@
 #include <algorithm>
 #include <iterator>
 
-#include "compiler.h"
-#include "core.h"
-#include "entry.h"
+#include "core/core.h"
+#include "core/entry.h"
 
 std::vector<std::vector<std::string>> ParseFileLines(std::ifstream& srcFile) {
     std::vector<std::vector<std::string>> lines;
