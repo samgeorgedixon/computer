@@ -6,14 +6,16 @@ This is a proof of concept 16b CPU with an experimental architecture. This docum
 
 ### Key Characteristics
 
-| Property          | Value  | Description                                                        |
-| ----------------- | ------ | ------------------------------------------------------------------ |
-| Word Size (Bus)   | 16b    |                                                                    |
-| Address Size      | 24b    | Segmented: (Segment of 16b: 0xffff00) + (Address of 16b: 0x00ffff) |
-| Endianness        | Big    |                                                                    |
-| General Registers | 4      |                                                                    |
-| Expansion Units   | 16     | Interrupt Based with lde/ste to Communicate                        |
-| Instruction Count | 6b: 64 |                                                                    |
+| Property          | Value   | Description                                                        |
+| ----------------- | ------- | ------------------------------------------------------------------ |
+| Word Size (Bus)   | 16b     |                                                                    |
+| Address Size      | 24b     | Segmented: (Segment of 16b: 0xffff00) + (Address of 16b: 0x00ffff) |
+| Endianness        | Big     |                                                                    |
+| General Registers | 4       |                                                                    |
+| Expansion Units   | 16      | Interrupt Based with lde/ste to Communicate                        |
+| Instruction Count | 6b: 64  |                                                                    |
+| Stack Growth      | Down    |                                                                    |
+| Stack Points      | Current |                                                                    |
 
 ---
 

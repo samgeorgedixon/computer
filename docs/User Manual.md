@@ -98,6 +98,9 @@ This is a proof of concept 16b CPU with an experimental architecture. This docum
 |  58   | callf      |          | src-seg   | [src-addr, | offset]   | Push Code Segment then Program Counter to Stack & Jump to Address & Set Code Segment | 10                       |
 |  59   | ret        |          |           |            |           | Pop Program Counter                                                                  | 5                        |
 |  60   | retf       |          |           |            |           | Pop Code Segment then Program Counter                                                | 8                        |
+|  61   | sstk       |          |           |            |           |                                                                                      |                          |
+|  62   | rstk       |          |           |            |           |                                                                                      |                          |
+|  63   |            |          |           |            |           |                                                                                      |                          |
 
 ---
 

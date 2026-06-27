@@ -36,6 +36,9 @@ module ControlUnit(
     logic [3:0] microCodeIndex; // Max 16
     logic       instrEnd;
 
+    logic       irq_state_delayed;
+    logic       inInterrupt;
+
     always_comb begin
 
         // Defaults
@@ -61,10 +64,74 @@ module ControlUnit(
 
         // Instruction Logic
 
+        // Interupts
+
+        // push r1
+        // push r2
+        // push r3
+        
+        //   push r4
+        //   push ds
+        //   push es
+
+        // callf (push cs, ip)
+
+        // mov r1 sp
+        // mov r2 bp
+        // mov r3 ss
+
+        // Interrupt Stack
+        // li ss 10
+        // li bp 0xff
+        // mov sp bp
+
+        // push r1
+        // push r2
+        // push r3
+
+        // Interrupt Program
+
+        // pop ss
+        // pop bp
+        // pop sp
+
+
+
+        // callf int_handler
+
+        // 0: dec2 sp -> sp, ar
+        // 1: st ss (exp1) <- cs
+        // 2: dec2 sp -> sp, ar
+        // 3: st ss (exp1) <- ip
+        // 4: mov cs <- z
+        // 5: mov ip <- 0x80 ?? constant?
+
+
+        // 6: dec2 sp -> sp, ar
+        // 7: st ss (exp1) <- r1
+        // 8: dec2 sp -> sp, ar
+        // 9: st ss (exp1) <- r2
+        // 10: dec2 sp -> sp, ar
+        // 11: st ss (exp1) <- r3
+        // 12: mov r1 <- sp
+        // 13: mov r2 <- bp
+        // 14: mov r3 <- ss
+
+        // Interrupt Handler
+        // push r4
+
+        if (irq_state_delayed == 1'd1 && !inInterrupt) begin
+            unique case (microCodeIndex)
+                4'd0: begin
+
+                end
+            encase
+        end
+
         // Fetch
             // 0: mov ip -> ar
             // 1: ld cs (exp1) -> instr / ip_e
-        if          (microCodeIndex == 4'd0) begin
+        else if     (microCodeIndex == 4'd0) begin
             `SET_CS_RAW(bus_src_raw  , `R_IP);
             `SET_CS_RAW(bus_dest_raw , `R_AR);
         end else if (microCodeIndex == 4'd1) begin
@@ -74,6 +141,7 @@ module ControlUnit(
             `SET_CS_RAW(ip_e         , 1'd1);
         end
 
+        else begin
         /* verilator lint_off CASEINCOMPLETE */
         unique case (`OPCODE)
             `INSTR_NOP: begin
@@ -494,9 +562,11 @@ module ControlUnit(
                 end
             end
         endcase
+        /* verilator lint_on CASEINCOMPLETE */
+
+        end
 
     end
-    /* verilator lint_on CASEINCOMPLETE */
 
     always_ff @(posedge clk or posedge r) begin
         if (r) begin
@@ -504,6 +574,8 @@ module ControlUnit(
         end
         else if (instrEnd) begin
             microCodeIndex <= 4'd0;
+
+            irq_state_delayed <= irq_state;
         end
         else begin
             microCodeIndex <= microCodeIndex + 4'd1;
