@@ -17,7 +17,7 @@ struct Args {
     ToolchainType toolchainType;
 
     std::string src;
-    
+
     std::string binFile;
     std::string asmFile;
 
@@ -28,8 +28,11 @@ struct Args {
     int dataSegOffset;
 };
 
+
+void PrintASMProgram(const std::vector<std::vector<std::string>> asmProgram);
+void PrintBINProgram(const std::vector<char> binProgram);
+
+void WriteASMFile(const std::vector<std::vector<std::string>>& asmProgram, std::string asmFileName);
+void WriteBINFile(const std::vector<char>& binProgram, const std::string binFileName);
+
 Args GetPaths(int argc, char* argv[]);
-
-void WriteASMFile(std::vector<std::string>& asmProgram, std::string asmFileName);
-
-void WriteBINFile(std::vector<char>& binProgram, std::string binFileName);
