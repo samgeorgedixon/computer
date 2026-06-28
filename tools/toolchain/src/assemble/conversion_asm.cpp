@@ -1,4 +1,4 @@
-#include "conversion.h"
+#include "conversion_asm.h"
 
 #include <unordered_map>
 #include <iostream>
@@ -6,7 +6,7 @@
 #include "core/core.h"
 #include "assemble.h"
 
-uint16_t ConvertInstrParam(const AssembleData& assembleData, std::string instrParamStr) {
+uint16_t ConvertInstrParam(AssembleState& assembleState, std::string instrParamStr) {
     uint16_t instrParam = 0;
 
     if (instrParamStr[0] == '0' && instrParamStr[1] == 'x') {
@@ -22,7 +22,7 @@ uint16_t ConvertInstrParam(const AssembleData& assembleData, std::string instrPa
             instrParam = instrParamConv[instrParamStr];
         }
         else {
-            instrParam = assembleData.labels[instrParamStr];
+            instrParam = assembleState.labels[instrParamStr];
         }
     }
     else {
@@ -31,38 +31,38 @@ uint16_t ConvertInstrParam(const AssembleData& assembleData, std::string instrPa
     return instrParam;
 }
 
-int ConvertLineInstruction(AssembleData& assembleData, const std::vector<std::string>& line) {
+int ConvertLineInstruction(AssembleState& assembleState, const std::vector<std::string>& line) {
     if (line[0] == "%") {
         if (line[1] == "org") {
             if (line.size() > 1) {
-                assembleData.currentAddress = ConvertInstrParam(assembleData, line[2]);
+                assembleState.currentAddress = ConvertInstrParam(assembleState, line[2]);
             }
         }
         else if (line[1] == "dw") {
-            while (assembleData.binProgram.size() <= assembleData.currentAddress) {
-                assembleData.binProgram.push_back(0);
+            while (assembleState.binProgram.size() <= assembleState.currentAddress) {
+                assembleState.binProgram.push_back(0);
             }
             if (line.size() > 1) {
-                uint16_t instrParam = ConvertInstrParam(assembleData, line[2]);
+                uint16_t instrParam = ConvertInstrParam(assembleState, line[2]);
 
-                assembleData.binProgram[assembleData.currentAddress] = (instrParam & 0xff00) >> 8;
-                assembleData.binProgram.push_back(instrParam & 0x00ff);
+                assembleState.binProgram[assembleState.currentAddress] = (instrParam & 0xff00) >> 8;
+                assembleState.binProgram.push_back(instrParam & 0x00ff);
             }
             else {
-                assembleData.binProgram[assembleData.currentAddress] = 0;
-                assembleData.binProgram.push_back(0);
+                assembleState.binProgram[assembleState.currentAddress] = 0;
+                assembleState.binProgram.push_back(0);
             }
             return 2;
         }
         else if (line[1] == "db") {
-            while (assembleData.binProgram.size() <= assembleData.currentAddress) {
-                assembleData.binProgram.push_back(0);
+            while (assembleState.binProgram.size() <= assembleState.currentAddress) {
+                assembleState.binProgram.push_back(0);
             }
             if (line.size() > 1) {
-                assembleData.binProgram[assembleData.currentAddress] = ConvertInstrParam(assembleData, line[2]);
+                assembleState.binProgram[assembleState.currentAddress] = ConvertInstrParam(assembleState, line[2]);
             }
             else {
-                assembleData.binProgram[assembleData.currentAddress] = 0;
+                assembleState.binProgram[assembleState.currentAddress] = 0;
             }
             return 1;
         }
@@ -132,31 +132,31 @@ int ConvertLineInstruction(AssembleData& assembleData, const std::vector<std::st
 
     for (int i = 0; i < instructions[instrToken].parameters.size(); i++) {
         if (instructions[instrToken].parameters[i] == ParameterIndex::OP0) {
-            instrParam |= ((ConvertInstrParam(assembleData, line[i + 1]) & 0b11) - 1 << 8);
+            instrParam |= ((ConvertInstrParam(assembleState, line[i + 1]) & 0b11) - 1 << 8);
         }
         else if (instructions[instrToken].parameters[i] == ParameterIndex::OP1) {
-            instrParam |= ((ConvertInstrParam(assembleData, line[i + 1]) & 0b1111) << 4);
+            instrParam |= ((ConvertInstrParam(assembleState, line[i + 1]) & 0b1111) << 4);
         }
         else if (instructions[instrToken].parameters[i] == ParameterIndex::OP2) {
-            instrParam |= (ConvertInstrParam(assembleData, line[i + 1]) & 0b1111);
+            instrParam |= (ConvertInstrParam(assembleState, line[i + 1]) & 0b1111);
         }
         else if (instructions[instrToken].parameters[i] == ParameterIndex::IMM) {
-            extraParam = ConvertInstrParam(assembleData, line[i + 1]);
+            extraParam = ConvertInstrParam(assembleState, line[i + 1]);
             extraParamOn = true;
         }
     }
 
-    while (assembleData.binProgram.size() <= assembleData.currentAddress) {
-        assembleData.binProgram.push_back(0);
+    while (assembleState.binProgram.size() <= assembleState.currentAddress) {
+        assembleState.binProgram.push_back(0);
     }
 
     uint16_t instrWord = 0xFC00 & (instr << 10) | 0x03FF & (instrParam);
-    assembleData.binProgram[assembleData.currentAddress] = (instrWord & 0xff00) >> 8;
-    assembleData.binProgram.push_back(instrWord & 0x00ff);
+    assembleState.binProgram[assembleState.currentAddress] = (instrWord & 0xff00) >> 8;
+    assembleState.binProgram.push_back(instrWord & 0x00ff);
 
     if (extraParamOn) {
-        assembleData.binProgram.push_back((extraParam & 0xff00) >> 8);
-        assembleData.binProgram.push_back(extraParam & 0x00ff);
+        assembleState.binProgram.push_back((extraParam & 0xff00) >> 8);
+        assembleState.binProgram.push_back(extraParam & 0x00ff);
         return 4;
     }
     return 2;

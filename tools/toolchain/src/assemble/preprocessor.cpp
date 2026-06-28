@@ -3,15 +3,15 @@
 #include <unordered_map>
 
 #include "core/core.h"
-#include "core/parser.h"
+#include "core/parse.h"
 #include "assemble.h"
-#include "conversion.h"
+#include "conversion_asm.h"
 
-int CheckLineSize(AssembleData& assembleData, std::vector<std::string> line) {
+int CheckLineSize(AssembleState& assembleState, std::vector<std::string> line) {
     if (line[0] == "%") {
         if (line[1] == "org") {
             if (line.size() > 2) {
-                assembleData.currentAddress = ConvertInstrParam(assembleData, line[2]);
+                assembleState.currentAddress = ConvertInstrParam(assembleState, line[2]);
             }
         }
         else if (line[1] == "dw") {
@@ -21,12 +21,12 @@ int CheckLineSize(AssembleData& assembleData, std::vector<std::string> line) {
             return 1;
         }
         else if (line[1] == "segment") {
-            assembleData.currentAddress = 0;
+            assembleState.currentAddress = 0;
         }
         return 0;
     }
     else if (line[0] == ":") {
-        assembleData.labels[line[1]] = assembleData.currentAddress;
+        assembleState.labels[line[1]] = assembleState.currentAddress;
         return 0;
     }
 
@@ -79,13 +79,13 @@ int CheckLineSize(AssembleData& assembleData, std::vector<std::string> line) {
     }
 }
 
-void SetLabels(AssembleData& assembleData, const std::vector<std::vector<std::string>>& lines) {
+void SetLabels(AssembleState& assembleState, const std::vector<std::vector<std::string>>& lines) {
     for (int i = 0; i < lines.size(); i++) {
-        assembleData.currentAddress += CheckLineSize(assembleData, lines[i]);
+        assembleState.currentAddress += CheckLineSize(assembleState, lines[i]);
     }
 }
 
-void RunPreprocessor(AssembleData& assembleData, std::vector<std::vector<std::string>>& lines) {
+void RunPreprocessor(AssembleState& assembleState, std::vector<std::vector<std::string>>& lines) {
     std::unordered_map<std::string, std::vector<std::string>> defines;
 
     for (int i = 0; i < lines.size(); i++) {
@@ -116,5 +116,5 @@ void RunPreprocessor(AssembleData& assembleData, std::vector<std::vector<std::st
             }
         }
     }
-    SetLabels(assembleData, lines);
+    SetLabels(assembleState, lines);
 }

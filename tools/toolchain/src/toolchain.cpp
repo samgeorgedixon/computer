@@ -1,7 +1,7 @@
 #include "toolchain.h"
 
 #include "core/inout.h"
-#include "core/parser.h"
+#include "core/parse.h"
 
 #include "assemble/assemble.h"
 #include "compile/compile.h"
@@ -20,7 +20,7 @@ ToolchainResult Assemble(const Args& args) {
 }
 
 ToolchainResult CompileC(const Args& args) {
-    std::vector<std::vector<std::string>> lines = ParseASMFile(args.src);
+    std::vector<std::vector<std::string>> lines = ParseCFile(args.src);
 
     if (lines.size() == 0) {
         printf("Error: No lines in src.c\n");

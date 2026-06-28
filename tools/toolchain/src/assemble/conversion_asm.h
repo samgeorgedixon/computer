@@ -22,7 +22,7 @@ struct Instruction {
     std::vector<ParameterIndex> parameters;
 };
 
-std::unordered_map<std::string, Instruction> instructions{
+inline std::unordered_map<std::string, Instruction> instructions {
     { "nop",   { NOP,   2, {} } },
     { "mov",   { MOV,   2, { OP1, OP2 } } },
     { "movi",  { MOVI,  4, { OP1, IMM } } },
@@ -94,7 +94,7 @@ enum SegmentIndex {
     CSS = 1, DSS, SSS, ESS
 };
 
-std::unordered_map<const std::string, int> instrParamConv{
+static std::unordered_map<std::string, int> instrParamConv {
     {"z", ZERO},
 
     {"r1", R1},
@@ -137,6 +137,6 @@ std::unordered_map<const std::string, int> instrParamConv{
     {"e", ESS}
 };
 
-uint16_t ConvertInstrParam(const AssembleData& assembleData, std::string instrParamStr);
+uint16_t ConvertInstrParam(AssembleState& assembleState, std::string instrParamStr);
 
-int ConvertLineInstruction(AssembleData& assembleData, const std::vector<std::string>& line);
+int ConvertLineInstruction(AssembleState& assembleState, const std::vector<std::string>& line);

@@ -3,7 +3,7 @@
 #include <string>
 #include <unordered_map>
 
-struct AssembleData {
+struct AssembleState {
     std::vector<char> binProgram;
         
     std::unordered_map<std::string, unsigned int> labels;

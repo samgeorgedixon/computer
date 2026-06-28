@@ -2,7 +2,7 @@
 #include <vector>
 
 #include "core/inout.h"
-#include "core/parser.h"
+#include "core/parse.h"
 
 #include "assemble/assemble.h"
 #include "compile/compile.h"

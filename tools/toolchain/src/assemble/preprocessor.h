@@ -4,4 +4,4 @@
 
 #include "assemble.h"
 
-void RunPreprocessor(AssembleData& assembleData, std::vector<std::vector<std::string>>& lines);
+void RunPreprocessor(AssembleState& assembleState, std::vector<std::vector<std::string>>& lines);

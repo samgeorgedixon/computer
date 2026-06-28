@@ -1,11 +1,9 @@
-#include "../myc.h"
-
-#include "src/tests/blah.c"
+#include "tests/blah.c"
 
 int16_t h = 2;
 int8_t hdj[4];
 
-void hello(int16_t i, int8_t j, charR arr[5]) {
+void hello(int16_t i, int8_t j) {
     return;
 }
 

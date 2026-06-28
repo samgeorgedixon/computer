@@ -4,30 +4,28 @@
 #include <string>
 
 #include "core/core.h"
-#include "core/parser.h"
+#include "core/parse.h"
 #include "core/inout.h"
 
 #include "preprocessor.h"
-#include "conversion.h"
+#include "conversion_asm.h"
 
-void CreateBINProgram(AssembleData& assembleData, const std::vector<std::vector<std::string>>& lines) {
-    assembleData.currentAddress = 0;
+void CreateBINProgram(AssembleState& assembleState, const std::vector<std::vector<std::string>>& lines) {
+    assembleState.currentAddress = 0;
 
     for (int i = 0; i < lines.size(); i++) {
         if (lines[i][0] == ":") {
             continue;
         }
-        assembleData.currentAddress += ConvertLineInstruction(assembleData, lines[i]);
+        assembleState.currentAddress += ConvertLineInstruction(assembleState, lines[i]);
     }
 }
 
 std::vector<char> AssembleLines(std::vector<std::vector<std::string>>& lines) {
-	AssembleData assembleData;
+	AssembleState assembleState;
 
-    RunPreprocessor(assembleData, lines);
-    CreateBINProgram(assembleData, lines);
+    RunPreprocessor(assembleState, lines);
+    CreateBINProgram(assembleState, lines);
 
-    PrintBINProgram(assembleData.binProgram);
-
-    return assembleData.binProgram;
+    return assembleState.binProgram;
 }

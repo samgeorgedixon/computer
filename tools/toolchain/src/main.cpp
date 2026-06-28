@@ -4,11 +4,11 @@ int main(int argc, char* argv[]) {
     Args args = GetPaths(argc, argv);
 
 #ifdef DEBUG
-	args.toolchainType = ToolchainType::ASSEMBLE;
+	args.toolchainType = ToolchainType::COMPILE_C;
 
-    args.src = "../../software/tests/gpu_test.asm";
-    args.binFile = "../../bin/software/gpu_test.bin";
-	args.binFileSet = true;
+    args.src = "../../software/tests/test.c";
+    args.asmFile = "../../software/tests/test.asm";
+	args.asmFileSet = true;
 #endif
     
     ToolchainResult result = RunToolchain(args);

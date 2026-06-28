@@ -26,7 +26,7 @@ void PrintBINProgram(const std::vector<char> binProgram) {
 
     for (int i = 0; i < binProgram.size(); i += 2) {
         if (i >= 2) {
-            if (binProgram[i - 2] == 0 && binProgram[i - 1] == 0 && binProgram[i] == 0 && binProgram[i + 1] == 0) {
+            if (binProgram[i - 2] == 0 && binProgram[i - 1] == 0 && binProgram[i] == 0) {
                 skipped++;
                 continue;
             }

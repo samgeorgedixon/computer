@@ -1,4 +1,4 @@
-#include "parser.h"
+#include "parse.h"
 
 #include <string>
 #include <vector>
@@ -43,7 +43,7 @@ std::vector<std::vector<std::string>> ParseASMFile(std::string srcPath) {
                     lineTokens.push_back(str);
                     str = "";
                 }
-                lineTokens.push_back({ line[i] });
+                lineTokens.push_back(std::string() + line[i]);
             }
             else if (line[i] == '/' && line[i + 1] == '/') {
                 if (!str.empty()) {
@@ -61,17 +61,17 @@ std::vector<std::vector<std::string>> ParseASMFile(std::string srcPath) {
                     lineTokens.push_back(str);
                     str = "";
                 }
-                lineTokens.push_back({ line[i] });
+                lineTokens.push_back(std::string() + line[i]);
                 i++;
 
-                while ((line[i] != '"' && line[i] != '\'') || line[i - 1] != '\\') {
+                while (((line[i] != '"' && line[i] != '\'') || line[i - 1] == '\\') && i < line.size() - 1) {
                     str.push_back(line[i]);
                     i++;
                 }
                 lineTokens.push_back(str);
                 str = "";
 
-                lineTokens.push_back({ line[i] });
+                lineTokens.push_back(std::string() + line[i]);
             }
             else {
                 str.push_back(line[i]);
@@ -97,6 +97,13 @@ std::vector<std::vector<std::string>> ParseCFile(std::string srcPath) {
 
     std::ifstream srcFile(srcPath, std::ios::binary);
 
+    if (!srcFile.is_open()) {
+        printf("Unable to open src.c file: %s\n", srcPath.c_str());
+
+        srcFile.close();
+        return {};
+    }
+
     srcFile.seekg(0, std::ios::end);
     size_t size = srcFile.tellg();
     srcFile.seekg(0, std::ios::beg);
@@ -107,12 +114,6 @@ std::vector<std::vector<std::string>> ParseCFile(std::string srcPath) {
 
     src = Trim(src);
 
-    if (!srcFile.is_open()) {
-        printf("Unable to open src.c file: %s\n", srcPath.c_str());
-
-        srcFile.close();
-        return {};
-    }
 
     std::string str;
     std::vector<std::string> tokens;
@@ -120,7 +121,7 @@ std::vector<std::vector<std::string>> ParseCFile(std::string srcPath) {
     bool preDirectiveLine = false;
 
     for (int i = 0; i < src.size(); i++) {
-        if (src[i] == ' ' || src[i] == ',' || src[i] == '\t') {
+        if (src[i] == ' ' || src[i] == '\t') {
             if (str.empty()) {
                 continue;
             }
@@ -148,6 +149,7 @@ std::vector<std::vector<std::string>> ParseCFile(std::string srcPath) {
                 tokens.clear();
             }
             preDirectiveLine = true;
+            tokens.push_back(std::string() + src[i]);
         }
         else if (src[i] == '\n') {
             if (preDirectiveLine) {
@@ -179,31 +181,42 @@ std::vector<std::vector<std::string>> ParseCFile(std::string srcPath) {
                 lines.push_back(tokens);
                 tokens.clear();
             }
-            lines.push_back({ std::to_string(src[i]) });
+            lines.push_back({ std::string() + src[i] });
         }
-        else if (src[i] == '(' || src[i] == ')' || src[i] == '[' || src[i] == ']') {
+        else if (src[i] == '(' || src[i] == ')' || src[i] == '[' || src[i] == ']' || src[i] == ','
+            ||  src[i] == '=' || src[i] == '+' || src[i] == '-' || src[i] == '*' || src[i] == '/'
+            ||  src[i] == '<' || src[i] == '>' || src[i] == '!') {
             if (!str.empty()) {
                 tokens.push_back(str);
                 str = "";
             }
-            tokens.push_back(std::to_string(src[i]));
+            tokens.push_back({ std::string() + src[i] + src[i + 1] });
+            i++;
+        }
+        else if ((src[i] == '=' && src[i+1] == '=') || (src[i] == '!' && src[i+1] == '=')
+            ||  (src[i] == '<' && src[i+1] == '=') || (src[i] == '>' && src[i+1] == '=')) {
+            if (!str.empty()) {
+                tokens.push_back(str);
+                str = "";
+            }
+            tokens.push_back(std::string() + src[i]);
         }
         else if (src[i] == '"' || src[i] == '\'') {
             if (!str.empty()) {
                 tokens.push_back(str);
                 str = "";
             }
-            tokens.push_back(std::to_string(src[i]));
+            tokens.push_back(std::string() + src[i]);
             i++;
 
-            while ((src[i] != '"' && src[i] != '\'') || src[i - 1] != '\\') {
+            while (((src[i] != '"' && src[i] != '\'') || src[i - 1] == '\\') && i < src.size() - 1) {
                 str.push_back(src[i]);
                 i++;
             }
             tokens.push_back(str);
             str = "";
 
-            tokens.push_back(std::to_string(src[i]));
+            tokens.push_back(std::string() + src[i]);
         }
         else {
             str.push_back(src[i]);
