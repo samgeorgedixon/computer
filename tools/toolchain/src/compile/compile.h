@@ -24,7 +24,7 @@ inline std::unordered_map<std::string, BaseLineIdentifier> baseLineIdentifiers =
     { "asm",        ASM },
 };
 
-enum Type {
+enum Type { // TODO: Check About Unsigned
     NONE_TYPE = 0, VOID, INT16, INT8
 };
 

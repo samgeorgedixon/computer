@@ -30,21 +30,21 @@ inline std::unordered_map<std::string, Instruction> instructions {
 
     { "ldw",   { LDW,   4, { OP0, OP1, OP2, IMM } } },
     { "ldw+",  { LDWP,  2, { OP0, OP1, OP2 } } },
-    { "ldwb",  { LDW,   4, { OP0, OP1, OP2, IMM } } },
-    { "ldwb+", { LDWP,  2, { OP0, OP1, OP2 } } },
+    { "ldb",   { LDB,   4, { OP0, OP1, OP2, IMM } } },
+    { "ldb+",  { LDBP,  2, { OP0, OP1, OP2 } } },
     { "stw",   { STW,   4, { OP0, OP1, OP2, IMM } } },
     { "stw+",  { STWP,  2, { OP0, OP1, OP2 } } },
-    { "stwb",  { STW,   4, { OP0, OP1, OP2, IMM } } },
-    { "stwb+", { STWP,  2, { OP0, OP1, OP2 } } },
+    { "stb",   { STB,   4, { OP0, OP1, OP2, IMM } } },
+    { "stb+",  { STBP,  2, { OP0, OP1, OP2 } } },
 
     { "ldxw",  { LDXW,  4, { OP0, OP1, OP2, IMM } } },
     { "ldxw+", { LDXWP, 2, { OP0, OP1, OP2 } } },
-    { "ldxb",  { LDXW,  4, { OP0, OP1, OP2, IMM } } },
-    { "ldxb+", { LDXWP, 2, { OP0, OP1, OP2 } } },
+    { "ldxb",  { LDXB,  4, { OP0, OP1, OP2, IMM } } },
+    { "ldxb+", { LDXBP, 2, { OP0, OP1, OP2 } } },
     { "stxw",  { STXW,  4, { OP0, OP1, OP2, IMM } } },
     { "stxw+", { STXWP, 2, { OP0, OP1, OP2 } } },
-    { "stxb",  { STXW,  4, { OP0, OP1, OP2, IMM } } },
-    { "stxb+", { STXWP, 2, { OP0, OP1, OP2 } } },
+    { "stxb",  { STXB,  4, { OP0, OP1, OP2, IMM } } },
+    { "stxb+", { STXBP, 2, { OP0, OP1, OP2 } } },
 
     { "jmp",   { JMP,   4, { OP2, IMM } } },
     { "jmpf",  { JMPF,  4, { OP1, OP2, IMM } } },
@@ -94,7 +94,7 @@ enum SegmentIndex {
     CSS = 1, DSS, SSS, ESS
 };
 
-static std::unordered_map<std::string, int> instrParamConv {
+inline std::unordered_map<std::string, int> instrParamConv {
     {"z", ZERO},
 
     {"r1", R1},

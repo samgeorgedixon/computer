@@ -78,7 +78,7 @@ int ConvertLineInstruction(AssembleState& assembleState, const std::vector<std::
         instr = instructions[instrToken].index;
     }
     else {
-        printf("Error: Invalid Instruction Opcode: %s\n", instrToken.c_str());
+        printf("ASM Error: Invalid Instruction Opcode: %s\n", instrToken.c_str());
         return 0;
     }
     uint16_t instrParam = 0;
@@ -124,7 +124,7 @@ int ConvertLineInstruction(AssembleState& assembleState, const std::vector<std::
             break;
         }
         default: {
-            printf("Error: Less Tokens than Required for Instruction: %s\n", line[0].c_str());
+            printf("ASM Error: Less Tokens than Required for Instruction: %s\n", line[0].c_str());
             return 0;
         }
         }

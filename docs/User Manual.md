@@ -88,7 +88,7 @@ This is a proof of concept 16b CPU with an experimental architecture. This docum
 |  49   | srl        | res      | src-alu-a | src-alu-b  |           | Logical Shift Right by src-alu-b & Set Flags                                         | 3                        |
 |  50   | sra        | res      | src-alu-a | src-alu-b  |           | Arithmetic Shift Right by src-alu-b & Set Flags                                      | 3                        |
 |  51   | neg        | res      | src-alu-a |            |           | Negate & Set Flags                                                                   | 3                        |
-|  52   | cmp        | res      | src-alu-a | src-alu-b  |           | Compare by Subtraction & Set Flags                                                   | 3                        |
+|  52   | cmp        |          | src-alu-a | src-alu-b  |           | Compare by Subtraction & Set Flags                                                   | 3                        |
 |  ---  |            |          |           |            |           |                                                                                      |                          |
 |  53   | push       |          | src       |            |           | Push to Stack                                                                        | 4                        |
 |  54   | pushb      |          | src       |            |           | Push Byte to Stack                                                                   | 4                        |

@@ -3,44 +3,19 @@
 #include <string>
 #include <unordered_map>
 
-enum ConditionOperator {
-    NONE_CONDITION = 0, EQUAL, NOT_EQUAL, LESS, GREATER, LESS_EQUAL, GREATER_EQUAL
-};
-
-std::unordered_map<std::string, ConditionOperator> conditionOperators = {
-    // none
-    { "==",          EQUAL },
-    { "!=",          NOT_EQUAL },
-    { "<",           LESS },
-    { ">",           GREATER },
-    { "<=",          LESS_EQUAL },
-    { ">=",          GREATER_EQUAL }
-};
-
-enum MathsOperator {
-    NONE_MATHS_OP = 0, SET_EQUAL, ADD, MINUS, MULTIPLY, DIVIDE
-};
-
-std::unordered_map<std::string, MathsOperator> mathsOperators = {
-    // none
-    { "=",          SET_EQUAL },
-    { "+",          ADD },
-    { "-",          MINUS },
-    { "*",          MULTIPLY },
-    { "/",          DIVIDE },
-};
+#include "conversion_c.h"
 
 Condition GetCondition(const std::vector<std::string>& bracketedList) {
 	Condition condition;
 
 	for (int i = 0; i < bracketedList.size(); i++) {
-        auto it = conditionOperators.find(bracketedList[i]);
+        auto it = expressionOperators.find(bracketedList[i]);
 
 		bool isLeft = true;
         
-        ConditionOperator conditionOperator = NONE_CONDITION;
-        if (it != conditionOperators.end()) { // Contains Key
-            conditionOperator = conditionOperators[bracketedList[i]];
+        ExpressionOperator expressionOperator = NONE_OP;
+        if (it != expressionOperators.end()) { // Contains Key
+            expressionOperator = expressionOperators[bracketedList[i]];
         }
         else {
             if (isLeft) {
@@ -71,17 +46,31 @@ std::vector<std::vector<std::string>> GetParameters(const std::vector<std::strin
     return parameters;
 }
 
-std::vector<std::vector<std::string>> GetExpression(const std::vector<std::string>& list) { // TODO: Brackets / BIDMAS
-    std::vector<std::vector<std::string>> expression;
+std::vector<std::vector<std::string>> GetExpression(const std::vector<std::string>& list) { // TODO: BIDMAS
+    std::vector<std::vector<std::string>> expression = {};
+
+    expression.push_back({});
 
     int expressionIndex = 0;
+    int insideExpressionPart = 0;
+    bool insideQuotes = false;
 
     for (int i = 0; i < list.size(); i++) {
-        auto it = conditionOperators.find(list[i]);
+        if      (list[i] == "(" || list[i] == "[" || list[i] == "{") {
+            insideExpressionPart++;
+        }
+        else if (list[i] == ")" || list[i] == "]" || list[i] == "}") {
+            insideExpressionPart--;
+        }
+        else if (list[i] == "\"" || list[i] == "\'") {
+            insideQuotes = !insideQuotes;
+        }
 
-        //MathsOperator mathsOperator = NONE;
-        if (it != conditionOperators.end()) { // Contains Key
-            //mathsOperator = mathsOperators[list[i]];
+        auto it = expressionOperators.find(list[i]);
+
+        //operator expressionOperators = NONE_OP;
+        if (it != expressionOperators.end() && !insideExpressionPart && !insideQuotes) { // Contains Key
+            //operator = expressionOperators[list[i]];
             
             expressionIndex += 2;
             expression.push_back({ list[i]});
@@ -94,6 +83,19 @@ std::vector<std::vector<std::string>> GetExpression(const std::vector<std::strin
     return expression;
 }
 
-std::string GetParamaeterValueORImmediate(const std::vector<std::string>& parameter) {
-    return "";
+std::vector<std::string> GetArrayCentre(const std::vector<std::string>& line, int arrayStartIndex) {
+    std::vector<std::string> arrayCentre;
+
+    for (int i = arrayStartIndex; i < line.size(); i++) {
+        if (line[i] == "]") {
+            break;
+
+        }
+        else {
+            arrayCentre.push_back(line[i]);
+        }
+    }
+
+    return arrayCentre;
 }
+

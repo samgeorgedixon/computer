@@ -7,6 +7,8 @@
 
 #include "compile.h"
 #include "get.h"
+#include "conversion_c.h"
+#include "variable.h"
 
 void HandlePreprocessorDirective(CompileState_C& compileState, const std::vector<std::string>& line, int lineIndex) {
     if (line.size() <= 2) {
@@ -31,7 +33,7 @@ void HandleWhile(CompileState_C& compileState, const std::vector<std::string>& l
         lineIndex++;
 	}
     else {
-        printf("Error: Missing Opening Scope on While Loop");
+        printf("C Error: Missing Opening Scope on While Loop");
         return;
     }
     
@@ -143,13 +145,13 @@ void HandleReturn(CompileState_C& compileState, const std::vector<std::string>& 
 
 void HandleAssemblyDirective(CompileState_C& compileState, const std::vector<std::string>& line) {
     if (line[1] != "(" || line[line.size() - 1] == ")") {
-        printf("Error: Invalid Brackets Usage on Assembly Directive");
+        printf("C Error: Invalid Brackets Usage on Assembly Directive");
         return;
     }
     std::vector<std::vector<std::string>> parameters = GetParameters(line);
 
 	if (parameters.size() != 1 || parameters[0][0] != "\"" || parameters[0][parameters[0].size() - 1] != "\"") {
-		printf("Error: Invalid Parameter Usage on Assembly Directive");
+		printf("C Error: Invalid Parameter Usage on Assembly Directive");
 		return;
     }
 	std::vector<std::string> asmLine(parameters[0].begin() + 1, parameters[0].end() - 1);
@@ -165,64 +167,50 @@ void HandleFunctionDeclaration(CompileState_C& compileState, const std::vector<s
 
 }
 
-void DeclareStackVariable(CompileState_C& compileState, std::string name, Type type, int arrayCount) {
-
-}
-void DeclareDataVariable(CompileState_C& compileState, std::string name, Type type, int arrayCount) {
-	compileState.variables[name] = { compileState.dataSegmentPointer, type, false };
-
-    compileState.dataSegment.push_back({ ":", name });
-
-	if (type == INT16) {
-		for (int i = 0; i < arrayCount; i++) {
-		    compileState.dataSegment.push_back({ "%", "dw", "0" });
-		    compileState.dataSegmentPointer += 2;
-		}
-	}
-	else if (type == INT8) {
-        for (int i = 0; i < arrayCount; i++) {
-            compileState.dataSegment.push_back({ "%", "db", "0" });
-            compileState.dataSegmentPointer += 1;
-        }
-	}
-	else {
-		printf("Error: Invalid Type on Variable Declaration");
-	}
-}
-
 void HandleVariableAssignment(CompileState_C& compileState, const std::vector<std::string>& line) {
-    auto it = types.find(line[0]);
+    Type type = NONE_TYPE;
 
     bool declaration = false;
     bool isStack = true;
 
+    bool isArray = false;
+    int operatorIndex = 1; // Default: [0 = var, 1 = operator]
+    
     std::string variableName = "";
-    int arrayCount = 1;
+    int arrayCount = 0;
 
-    Type type = NONE_TYPE;
-    if (it != types.end()) { // Contains Key
+    auto itType = types.find(line[0]);
+    if (itType != types.end()) { // Contains Key
         type = types[line[0]];
-
         declaration = true;
-        variableName = line[1];
+    }
+    variableName = line[0 + declaration];
 
-        // Get Array Count
-        if (line.size() > 2) {
-            if (line[2] == "[") {
-                std::vector<std::string> arrayCentre;
+    // Get Array Count
+    if (line.size() > 1 + declaration) {
+        if (line[1 + declaration] == "[") {
+            isArray = true;
 
-                for (int i = 3; i < line.size(); i++) {
-                    if (line[i] == "]") {
-                        break;
-                    }
-                    else {
-                        arrayCentre.push_back(line[i]);
-                    }
-                }
+            std::vector<std::string> arrayCentre = GetArrayCentre(line, 2 + declaration);
+            operatorIndex += arrayCentre.size() + 2;
 
-                std::vector<std::vector<std::string>> arrayExpresion = GetExpression(arrayCentre);
-                // Get IMM / Var Count
-            }
+            std::vector<std::vector<std::string>> arrayExpression = GetExpression(arrayCentre);
+            PotentialImmediate arrayPotentialImmediate = ConvertExpression(compileState, arrayExpression, true, "r3");
+
+            if (arrayPotentialImmediate.isImmediate == true) {
+                arrayCount = arrayPotentialImmediate.immediate;
+			}
+			else { // Not Immediate
+				// arrayCount = notImmediateValue...; // TODO: What about notImmediate though... Variable
+			}
+        }
+    }
+
+    if (declaration) {
+        operatorIndex++;
+
+        if (arrayCount == 0) {
+            arrayCount = 1;
         }
         
         if (compileState.scopes.size() == 0) {
@@ -232,20 +220,96 @@ void HandleVariableAssignment(CompileState_C& compileState, const std::vector<st
         else {
             DeclareStackVariable(compileState, variableName, type, arrayCount);
         }
-
-        if (line.size() <= 2) {
-            return;
-        }
-    }
-    else {
-        variableName = line[0];
-
-        if (line.size() <= 1) {
-            return;
-        }
     }
 
-    // Assign variable to Right Side ( + Check Data Declaration as can Set IMM Straight Away)
+	if (line.size() <= 1 + declaration || (isArray && line.size() <= operatorIndex - 1)) { // No Assignment
+        printf("C Warning: No Assignment for Variable: %s\n", variableName.c_str());
+        return;
+    }
 
+	// Get Operator
+    auto itOp = expressionOperators.find(line[operatorIndex]);
 
+    ExpressionOperator expressionOperator = NONE_OP;
+    if (itOp != expressionOperators.end()) { // Contains Key
+        expressionOperator = expressionOperators[line[operatorIndex]];
+    }
+    else { // No Operator
+        printf("C Error: Invalid Operator for Variable Assignment: %s, %s\n", line[operatorIndex].c_str(), variableName.c_str());
+        return;
+    }
+
+    //
+	// Variable Assignment
+    //
+
+    if (declaration) {
+        arrayCount = 0; // Now an Array Index
+    }
+
+    std::vector<std::string> lineExpression(line.begin() + operatorIndex + 1, line.end());
+
+    std::vector<std::vector<std::string>> expression = GetExpression(lineExpression);
+
+    if (expression.size() == 0) {
+        return;
+    }
+    else if (expression.size() > 1) {
+        ConvertExpression(compileState, expression, false, "r1");
+
+        LoadFromORStoreToVariable(compileState, false, variableName, arrayCount, "r1");
+
+        return;
+    }
+
+	// 1: Expression Part
+    std::vector<std::string> expressionPart = expression[0];
+
+    int expressionArrayIndex = 0;
+    if (expressionPart.size() > 1) {
+        if (expressionPart[1] == "(" && expressionPart[expressionPart.size() - 1] == ")") { // Function Expression
+            std::vector<std::string> functionLine = { "r1", "=" };
+
+            functionLine.insert(functionLine.end(), expressionPart.begin(), expressionPart.end());
+
+            HandleFunctionCall(compileState, functionLine); // TODO: Ensure Function Returns to "r1"
+
+            return;
+        }
+        else if (expressionPart[1] == "[" && expressionPart[expressionPart.size() - 1] == "]") { // Variable Array Index Expression
+            std::vector<std::string> arrayCentre = GetArrayCentre(line, operatorIndex + 3);
+
+            std::vector<std::vector<std::string>> arrayExpression = GetExpression(arrayCentre);
+            PotentialImmediate arrayPotentialImmediate = ConvertExpression(compileState, arrayExpression, true, "r3");
+
+            if (arrayPotentialImmediate.isImmediate == true) {
+                expressionArrayIndex = arrayPotentialImmediate.immediate;
+            }
+            else { // Not Immediate
+                // arrayCount = notImmediateValue...; // TODO: What about notImmediate though... Expression
+            }
+        }
+    }
+
+    LoadFromORStoreToVariable(compileState, true, expressionPart[0], expressionArrayIndex, "r2");
+
+    switch (expressionOperator) {
+        default: break;
+        case SET_ADD: {
+            LoadFromORStoreToVariable(compileState, true, variableName, arrayCount, "r1");
+            
+            WRITE_LINE_ASM_PROGRAM("add", "r1", "r1", "r2");
+            break;
+        }
+        case SET_MINUS: {
+            LoadFromORStoreToVariable(compileState, true, variableName, arrayCount, "r1");
+
+            WRITE_LINE_ASM_PROGRAM("sub", "r1", "r1", "r2");
+            break;
+        }
+    }
+
+    LoadFromORStoreToVariable(compileState, false, variableName, arrayCount, "r1");
+
+    return;
 }

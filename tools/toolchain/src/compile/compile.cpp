@@ -171,7 +171,7 @@ struct LexedLine {
 //
 //int CallFunction(CompileState_C& compileState, std::string name, std::vector<std::string>& params, bool cleanStack);
 //
-//void SetVariable(CompileState_C& compileState, std::string name, std::string nameArray, std::string assignment, std::string assignmentArray, std::string assignmentOperator, std::vector<std::string>& params, std::pair<VarData, bool> nameVarOveride, std::pair<VarData, bool> assignmentVarOveride) {
+//void SetVariable(CompileState_C& compileState, std::string name, std::string nameArray, std::string assignment, std::string assignmentArray, std::string assignmentExpressionOperator, std::vector<std::string>& params, std::pair<VarData, bool> nameVarOveride, std::pair<VarData, bool> assignmentVarOveride) {
 //    int addrOffset = 0;
 //    bool setVar = false;
 //    
@@ -269,7 +269,7 @@ struct LexedLine {
 //        }
 //    }
 //
-//    if (assignmentOperator != "=") {
+//    if (assignmentExpressionOperator != "=") {
 //        if (arrayVarIndex) {
 //            LdStVarOffsetReg(nameVar, compileState.asmProgram, "r2", "ld", "r3");
 //        } else {
@@ -277,22 +277,22 @@ struct LexedLine {
 //        }
 //    }
 //    
-//    if (assignmentOperator == "+=") {
+//    if (assignmentExpressionOperator == "+=") {
 //        WRITE_LINE_ASM_PROGRAM("add r1 r2 r1");
 //    }
-//    else if (assignmentOperator == "-=") {
+//    else if (assignmentExpressionOperator == "-=") {
 //        WRITE_LINE_ASM_PROGRAM("sub r1 r2 r1");
 //    }
-//    else if (assignmentOperator == "*=") {
+//    else if (assignmentExpressionOperator == "*=") {
 //        WRITE_LINE_ASM_PROGRAM("mul r1 r2 r1");
 //    }
-//    else if (assignmentOperator == "/=") {
+//    else if (assignmentExpressionOperator == "/=") {
 //        WRITE_LINE_ASM_PROGRAM("div r1 r2 r1");
 //    }
-//    else if (assignmentOperator == "&=") {
+//    else if (assignmentExpressionOperator == "&=") {
 //        WRITE_LINE_ASM_PROGRAM("and r1 r2 r1");
 //    }
-//    else if (assignmentOperator == "|=") {
+//    else if (assignmentExpressionOperator == "|=") {
 //        WRITE_LINE_ASM_PROGRAM("or r1 r2 r1");
 //    }
 //
@@ -303,7 +303,7 @@ struct LexedLine {
 //    }
 //}
 //
-//VarData CreateStackVar(CompileState_C& compileState, std::string name, Type type, std::string nameArray, std::string assignment, std::string assignmentArray, std::string assignmentOperator, std::vector<std::string>& params) {
+//VarData CreateStackVar(CompileState_C& compileState, std::string name, Type type, std::string nameArray, std::string assignment, std::string assignmentArray, std::string assignmentExpressionOperator, std::vector<std::string>& params) {
 //    int count = 1;
 //    bool array = false;
 //    
@@ -341,7 +341,7 @@ struct LexedLine {
 //    }
 //    
 //    if (assignment != "") {
-//        SetVariable(compileState, name, "", assignment, assignmentArray, assignmentOperator, params, {{varAddr, true, type, count}, true}, {});
+//        SetVariable(compileState, name, "", assignment, assignmentArray, assignmentExpressionOperator, params, {{varAddr, true, type, count}, true}, {});
 //    }
 //    
 //    return { varAddr, true, type, count };
@@ -406,14 +406,14 @@ struct LexedLine {
 //        std::string nameArray = GetArrayCountString(compileState.functions[name], i + 1);
 //        std::string assignment = "";
 //        std::string assignmentArray = "";
-//        std::string assignmentOperator = "";
+//        std::string assignmentExpressionOperator = "";
 //        
 //        bool paramRef = (compileState.functions[name][i][compileState.functions[name][i].size() - 1] == 'R') ? true : false;
 //        
 //        if (j < params.size()) {
 //            assignment = params[j];
 //            assignmentArray = GetArrayCountString(params, j);
-//            assignmentOperator = "=";
+//            assignmentExpressionOperator = "=";
 //        
 //            if (assignmentArray != "") {
 //                j += 3;
@@ -424,7 +424,7 @@ struct LexedLine {
 //            i += 3;
 //        }
 //
-//        VarData paramVar = CreateStackVar(compileState, "", paramType, nameArray, assignment, assignmentArray, assignmentOperator, dumbyParams);
+//        VarData paramVar = CreateStackVar(compileState, "", paramType, nameArray, assignment, assignmentArray, assignmentExpressionOperator, dumbyParams);
 //        
 //        if (paramRef) {
 //            refSetsCompileState_C.relitiveStackPointer = compileState.relitiveStackPointer;
@@ -521,7 +521,7 @@ struct LexedLine {
 //
 //    std::string assignment = GetAssignment(line, assignmentIndex + 0);
 //    std::string assignmentArray = GetArrayCountString(line, assignmentIndex + 1);
-//    std::string assignmentOperator = GetAssignment(line, assignmentIndex - 1);
+//    std::string assignmentExpressionOperator = GetAssignment(line, assignmentIndex - 1);
 //
 //    if (type > 0) {
 //        name = line[assignmentIndex];
@@ -542,13 +542,13 @@ struct LexedLine {
 //
 //            assignment = GetAssignment(line, assignmentIndex + 0);
 //            assignmentArray = GetArrayCountString(line, assignmentIndex + 1);
-//            assignmentOperator = GetAssignment(line, assignmentIndex - 1);
+//            assignmentExpressionOperator = GetAssignment(line, assignmentIndex - 1);
 //
 //            if (compileState.scopes.size() == 0) {
 //                CreateDataVar(compileState, name, type, nameArray, StringToImm(assignment).second);
 //            }
 //            else {
-//                CreateStackVar(compileState, name, type, nameArray, assignment, assignmentArray, assignmentOperator, params);
+//                CreateStackVar(compileState, name, type, nameArray, assignment, assignmentArray, assignmentExpressionOperator, params);
 //            }
 //        }
 //    }
@@ -696,11 +696,11 @@ struct LexedLine {
 //            CallFunction(compileState, name, params, true);
 //        }
 //        else {
-//            SetVariable(compileState, name, nameArray, assignment, assignmentArray, assignmentOperator, params, {}, {});
+//            SetVariable(compileState, name, nameArray, assignment, assignmentArray, assignmentExpressionOperator, params, {}, {});
 //        }
 //    }
 //
-//    std::cout << type << ":" << name << ":" << nameArray << ":" << assignment << ":" << assignmentArray << ":" << assignmentOperator << "\n";
+//    std::cout << type << ":" << name << ":" << nameArray << ":" << assignment << ":" << assignmentArray << ":" << assignmentExpressionOperator << "\n";
 //}
 //
 //LexedLine LexLine(CompileState_C& compileState, int lineIndex) {
@@ -720,7 +720,7 @@ struct LexedLine {
 //
 //    std::string assignment = GetAssignment(line, assignmentIndex + 0);
 //    std::string assignmentArray = GetArrayCountString(line, assignmentIndex + 1);
-//    std::string assignmentOperator = GetAssignment(line, assignmentIndex - 1);
+//    std::string assignmentExpressionOperator = GetAssignment(line, assignmentIndex - 1);
 //
 //	return lexedLine;
 //}

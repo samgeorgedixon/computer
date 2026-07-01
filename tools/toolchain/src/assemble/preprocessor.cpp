@@ -65,7 +65,7 @@ int CheckLineSize(AssembleState& assembleState, std::vector<std::string> line) {
                 break;
             }
             default: {
-                printf("Error: Less Tokens than Required for Instruction: %s, %s\n", line[0], line);
+                printf("ASM Error: Less Tokens than Required for Instruction: %s, %s\n", line[0], line);
                 return 0;
             }
             }
@@ -74,7 +74,7 @@ int CheckLineSize(AssembleState& assembleState, std::vector<std::string> line) {
         return instructions[line[0]].byteSize;
     }
     else {
-        printf("Error: Invalid Instruction Opcode: %s, %s\n", line[0], line);
+        printf("ASM Error: Invalid Instruction Opcode: %s, %s\n", line[0], line);
         return 0;
     }
 }

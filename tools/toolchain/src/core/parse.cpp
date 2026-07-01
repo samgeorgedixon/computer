@@ -190,16 +190,18 @@ std::vector<std::vector<std::string>> ParseCFile(std::string srcPath) {
                 tokens.push_back(str);
                 str = "";
             }
-            tokens.push_back({ std::string() + src[i] + src[i + 1] });
-            i++;
+            tokens.push_back(std::string() + src[i]);
         }
         else if ((src[i] == '=' && src[i+1] == '=') || (src[i] == '!' && src[i+1] == '=')
-            ||  (src[i] == '<' && src[i+1] == '=') || (src[i] == '>' && src[i+1] == '=')) {
+            ||  (src[i] == '<' && src[i+1] == '=') || (src[i] == '>' && src[i+1] == '='
+            || src[i] == '+' && src[i + 1] == '=') || (src[i] == '-' && src[i + 1] == '=')
+            || (src[i] == '*' && src[i + 1] == '=') || (src[i] == '/' && src[i + 1] == '=')) {
             if (!str.empty()) {
                 tokens.push_back(str);
                 str = "";
             }
-            tokens.push_back(std::string() + src[i]);
+            tokens.push_back({ std::string() + src[i] + src[i + 1] });
+            i++;
         }
         else if (src[i] == '"' || src[i] == '\'') {
             if (!str.empty()) {

@@ -10,7 +10,7 @@ ToolchainResult Assemble(const Args& args) {
     std::vector<std::vector<std::string>> lines = ParseASMFile(args.src);
 
     if (lines.size() == 0) {
-        printf("Error: No lines in src.asm\n");
+        printf("ASM Error: No lines in src.asm\n");
         return {};
     }
 
@@ -23,7 +23,7 @@ ToolchainResult CompileC(const Args& args) {
     std::vector<std::vector<std::string>> lines = ParseCFile(args.src);
 
     if (lines.size() == 0) {
-        printf("Error: No lines in src.c\n");
+        printf("C Error: No lines in src.c\n");
         return {};
     }
 
