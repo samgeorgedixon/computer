@@ -195,7 +195,7 @@ void HandleVariableAssignment(CompileState_C& compileState, const std::vector<st
             operatorIndex += arrayCentre.size() + 2;
 
             std::vector<std::vector<std::string>> arrayExpression = GetExpression(arrayCentre);
-            PotentialImmediate arrayPotentialImmediate = ConvertExpression(compileState, arrayExpression, true, "r3");
+			PotentialImmediate arrayPotentialImmediate = ConvertExpression(compileState, arrayExpression, true, "r3", false); // TODO: Not sure if last argument is correct
 
             if (arrayPotentialImmediate.isImmediate == true) {
                 arrayCount = arrayPotentialImmediate.immediate;
@@ -255,7 +255,7 @@ void HandleVariableAssignment(CompileState_C& compileState, const std::vector<st
         return;
     }
     else if (expression.size() > 1) {
-        ConvertExpression(compileState, expression, false, "r1");
+        ConvertExpression(compileState, expression, false, "r1", false);
 
         LoadFromORStoreToVariable(compileState, false, variableName, arrayCount, "r1");
 
@@ -280,7 +280,7 @@ void HandleVariableAssignment(CompileState_C& compileState, const std::vector<st
             std::vector<std::string> arrayCentre = GetArrayCentre(line, operatorIndex + 3);
 
             std::vector<std::vector<std::string>> arrayExpression = GetExpression(arrayCentre);
-            PotentialImmediate arrayPotentialImmediate = ConvertExpression(compileState, arrayExpression, true, "r3");
+            PotentialImmediate arrayPotentialImmediate = ConvertExpression(compileState, arrayExpression, true, "r3", false);
 
             if (arrayPotentialImmediate.isImmediate == true) {
                 expressionArrayIndex = arrayPotentialImmediate.immediate;

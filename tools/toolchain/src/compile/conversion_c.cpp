@@ -137,7 +137,7 @@ PotentialImmediate SolveExpressionPart(CompileState_C& compileState, const std::
         line.insert(line.end(), expressionPart.begin() + 1, expressionPart.end() - 1);
 
         std::vector<std::vector<std::string>> subExpression = GetExpression(expressionPart);
-        return ConvertExpression(compileState, subExpression, true, desiredRegister);
+        return ConvertExpression(compileState, subExpression, true, desiredRegister, true); // // TODO: Not sure if last argument is correct
     }
     
     line.push_back(desiredRegister);

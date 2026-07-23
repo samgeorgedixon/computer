@@ -35,39 +35,43 @@
 
 `define INSTR_JMP   28
 `define INSTR_JMPF  29
-`define INSTR_BZ    30
-`define INSTR_BNZ   31
-`define INSTR_BC    32
-`define INSTR_BNC   33
-`define INSTR_BS    34
-`define INSTR_BNS   35
-`define INSTR_BO    36
-`define INSTR_BNO   37
+`define INSTR_B     30
+`define INSTR_BN    31
 
-`define INSTR_ADD   38
-`define INSTR_SUB   39
-`define INSTR_INC   40
-`define INSTR_INC2  41
-`define INSTR_DEC   42
-`define INSTR_DEC2  43
-`define INSTR_NOT   44
-`define INSTR_AND   45
-`define INSTR_OR    46
-`define INSTR_XOR   47
-`define INSTR_SLL   48
-`define INSTR_SRL   49
-`define INSTR_SRA   50
-`define INSTR_NEG   51
-`define INSTR_CMP   52
+`define INSTR_ADD   32
+`define INSTR_SUB   33
+`define INSTR_INC   34
+`define INSTR_INC2  35
+`define INSTR_DEC   36
+`define INSTR_DEC2  37
+`define INSTR_NOT   38
+`define INSTR_AND   39
+`define INSTR_OR    40
+`define INSTR_XOR   41
+`define INSTR_SLL   42
+`define INSTR_SRL   43
+`define INSTR_SRA   44
+`define INSTR_NEG   45
+`define INSTR_CMP   46
 
-`define INSTR_PUSH  53
-`define INSTR_PUSHB 54
-`define INSTR_POP   55
-`define INSTR_POPB  56
-`define INSTR_CALL  57
-`define INSTR_CALLF 58
-`define INSTR_RET   59
-`define INSTR_RETF  60
+`define INSTR_PUSH  47
+`define INSTR_PUSHB 48
+`define INSTR_POP   49
+`define INSTR_POPB  50
+`define INSTR_CALL  51
+`define INSTR_CALLF 52
+`define INSTR_RET   53
+`define INSTR_RETF  54
+
+//`define             55
+//`define             56
+//`define             57
+//`define             58
+//`define             59
+//`define             60
+//`define             61
+//`define             62
+//`define             63
 
 // ALU Opcodes
 `define ALU_ADD     1
@@ -139,5 +143,10 @@
 `define OP2_BUS_DEST                2'd1
 `define OP2_BUS_SRC_OR_ALU_B_SEL    2'd2
 `define OP2_ALU_A_SEL               2'd3
+
+`define opcode      instr[15:10]
+`define operand_0   instr[9:8]
+`define operand_1   instr[7:4]
+`define operand_2   instr[3:0]
 
 `endif

@@ -67,6 +67,7 @@ Args GetPaths(int argc, char* argv[]) {
 
     for (int i = 1; i < argc; i++) {
         std::string arg = Trim(argv[i]);
+        std::string nextArg = (i + 1 < argc) ? Trim(argv[i + 1]) : "";
 
         if (arg == "" || arg == "help") {
             printf("Usage: toolchain [type] [options] src\n");
@@ -86,12 +87,12 @@ Args GetPaths(int argc, char* argv[]) {
             args.toolchainType = ToolchainType::COMPILE_C;
         }
         else if (arg[0] == '-' && arg[1] == 'o') {
-            args.binFile = arg;
+            args.binFile = nextArg;
             args.binFileSet = true;
             i++;
         }
         else if ((arg[0] == '-' && arg[1] == 'a')) {
-            args.asmFile = arg;
+            args.asmFile = nextArg;
             args.asmFileSet = true;
             i++;
         }

@@ -9,14 +9,6 @@ module Decoder(
 
     );
 
-    logic [1:0] operand_0;
-    logic [3:0] operand_1;
-    logic [3:0] operand_2;
-
-    assign operand_0 = instr[9:8];
-    assign operand_1 = instr[7:4];
-    assign operand_2 = instr[3:0];
-
     always_comb begin
         controlSignals.bus_src = 32'b1 << controlSignalsRaw.bus_src_raw;
         controlSignals.bus_dest = 32'b1 << controlSignalsRaw.bus_dest_raw;
@@ -27,35 +19,34 @@ module Decoder(
         controlSignals.alu_a_sel = 16'b1 << controlSignalsRaw.alu_a_sel_raw;
         controlSignals.alu_b_sel = 16'b1 << controlSignalsRaw.alu_b_sel_raw;
 
-
         /* verilator lint_off CASEINCOMPLETE */
         unique case (controlSignalsRaw.operand_0)
-            `OP0_BUS_DEST: controlSignals.bus_dest[`R_R4:`R_R1] |= 4'b1 << operand_0;
-            `OP0_BUS_SRC: controlSignals.bus_src[`R_R4:`R_R1] |= 4'b1 << operand_0;
-            `OP0_SEG_SEL: controlSignals.seg_sel |= 4'b1 << operand_0;
+            `OP0_BUS_DEST: controlSignals.bus_dest[`R_R4:`R_R1] |= 4'b1 << `operand_0;
+            `OP0_BUS_SRC: controlSignals.bus_src[`R_R4:`R_R1] |= 4'b1 << `operand_0;
+            `OP0_SEG_SEL: controlSignals.seg_sel |= 4'b1 << `operand_0;
         endcase
         unique case (controlSignalsRaw.operand_1)
             `OP1_BUS_DEST: begin
-                if (controlSignalsRaw.seg_sel_or_alu_op_sel == `SEL_ES && !controlSignalsRaw.alu_e_raw)   controlSignals.bus_dest[31:16] |= 16'b1 << operand_1;
-                else                                                        controlSignals.bus_dest[15:0] |= 16'b1 << operand_1;
+                if (controlSignalsRaw.seg_sel_or_alu_op_sel == `SEL_ES && !controlSignalsRaw.alu_e_raw)   controlSignals.bus_dest[31:16] |= 16'b1 << `operand_1;
+                else                                                        controlSignals.bus_dest[15:0] |= 16'b1 << `operand_1;
             end
             `OP1_BUS_SRC_OR_ALU_A_SEL: begin
-                if (controlSignalsRaw.alu_e_raw)                       controlSignals.alu_a_sel |= 16'b1 << operand_1;
-                else if (controlSignalsRaw.seg_sel_or_alu_op_sel == `SEL_ES)   controlSignals.bus_src[31:16] |= 16'b1 << operand_1;
-                else                                                        controlSignals.bus_src[15:0] |= 16'b1 << operand_1;
+                if (controlSignalsRaw.alu_e_raw)                       controlSignals.alu_a_sel |= 16'b1 << `operand_1;
+                else if (controlSignalsRaw.seg_sel_or_alu_op_sel == `SEL_ES)   controlSignals.bus_src[31:16] |= 16'b1 << `operand_1;
+                else                                                        controlSignals.bus_src[15:0] |= 16'b1 << `operand_1;
             end
             `OP1_BUS_DEST_AND_ALU_A_SEL: begin
-                controlSignals.bus_dest[15:0] |= 16'b1 << operand_1;
-                controlSignals.alu_a_sel |= 16'b1 << operand_1;
+                controlSignals.bus_dest[15:0] |= 16'b1 << `operand_1;
+                controlSignals.alu_a_sel |= 16'b1 << `operand_1;
             end
         endcase
         unique case (controlSignalsRaw.operand_2)
-            `OP2_BUS_DEST: controlSignals.bus_dest[15:0] |= 16'b1 << operand_2;
+            `OP2_BUS_DEST: controlSignals.bus_dest[15:0] |= 16'b1 << `operand_2;
             `OP2_BUS_SRC_OR_ALU_B_SEL: begin
-                if (controlSignalsRaw.alu_e_raw)    controlSignals.alu_b_sel |= 16'b1 << operand_2;
-                else                                controlSignals.bus_src[15:0] |= 16'b1 << operand_2;
+                if (controlSignalsRaw.alu_e_raw)    controlSignals.alu_b_sel |= 16'b1 << `operand_2;
+                else                                controlSignals.bus_src[15:0] |= 16'b1 << `operand_2;
             end
-            `OP2_ALU_A_SEL: controlSignals.alu_a_sel |= 16'b1 << operand_2;
+            `OP2_ALU_A_SEL: controlSignals.alu_a_sel |= 16'b1 << `operand_2;
         endcase
         /* verilator lint_on CASEINCOMPLETE */
         

@@ -11,7 +11,7 @@ mov r2 0x0200
     stw+ c r3 [r1]
 
     cmp r1 r2
-    bnz [z loop]
+    bn zf [z loop]
 
 :start
     mov ds 1

@@ -3,8 +3,8 @@ BIN_DRIVES = ${BIN}\drives
 BIN_SOFTWARE = ${BIN}\software
 BIN_TOOLS = ${BIN}\tools
 
-CC = ${BIN_TOOLS}\compiler\release-windows\compiler.exe
-ASM = ${BIN_TOOLS}\assembler-app\release-windows\assembler-app.exe
+CC = ${BIN_TOOLS}\toolchain\release-windows\toolchain.exe compile-c
+ASM = ${BIN_TOOLS}\toolchain\release-windows\toolchain.exe assemble
 
 ## C
 bootloader: bootloader\bootloader.c

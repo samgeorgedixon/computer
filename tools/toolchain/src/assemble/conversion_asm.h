@@ -8,7 +8,7 @@
 enum OpCode {
     NOP = 0, MOV, MOVI, LEA,
     LDW, LDWR, LDWP, LDB, LDBR, LDBP, STW, STWR, STWP, STB, STBR, STBP, LDXW, LDXWR, LDXWP, LDXB, LDXBR, LDXBP, STXW, STXWR, STXWP, STXB, STXBR, STXBP,
-    JMP, JMPF, BZ, BNZ, BC, BNC, BS, BNS, BO, BNO,
+    JMP, JMPF, B, BN,
     ADD, SUB, INC, INC2, DEC, DEC2, NOT, AND, OR, XOR, SLL, SRL, SRA, NEG, CMP,
     PUSH, PUSHB, POP, POPB, CALL, CALLF, RET, RETF
 };
@@ -48,14 +48,8 @@ inline std::unordered_map<std::string, Instruction> instructions {
 
     { "jmp",   { JMP,   4, { OP2, IMM } } },
     { "jmpf",  { JMPF,  4, { OP1, OP2, IMM } } },
-    { "bz",    { BZ,    4, { OP2, IMM } } },
-    { "bnz",   { BNZ,   4, { OP2, IMM } } },
-    { "bc",    { BC,    4, { OP2, IMM } } },
-    { "bnc",   { BNC,   4, { OP2, IMM } } },
-    { "bs",    { BS,    4, { OP2, IMM } } },
-    { "bns",   { BNS,   4, { OP2, IMM } } },
-    { "bo",    { BO,    4, { OP2, IMM } } },
-    { "bno",   { BNO,   4, { OP2, IMM } } },
+    { "b",     { B,     4, { OP1, OP2, IMM } } },
+    { "bn",    { BN,    4, { OP1, OP2, IMM } } },
 
     { "add",   { ADD,   2, { OP0, OP1, OP2 } } },
     { "sub",   { SUB,   2, { OP0, OP1, OP2 } } },
@@ -92,6 +86,9 @@ enum ExpansionUnit { // XU1: Memory, XU2: Drive
 };
 enum SegmentIndex {
     CSS = 1, DSS, SSS, ESS
+};
+enum FlagIndex { // zero zf, carry cf, sign sf, overflow of
+    ZF = 0, CF, SF, OF
 };
 
 inline std::unordered_map<std::string, int> instrParamConv {
@@ -134,7 +131,12 @@ inline std::unordered_map<std::string, int> instrParamConv {
     {"c", CSS},
     {"d", DSS},
     {"s", SSS},
-    {"e", ESS}
+	{"e", ESS},
+
+	{"zf", ZF},
+	{"cf", CF},
+	{"sf", SF},
+	{"of", OF}
 };
 
 uint16_t ConvertInstrParam(AssembleState& assembleState, std::string instrParamStr);
